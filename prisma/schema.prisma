@@ -1,0 +1,253 @@
+// Prisma schema for FlowVision
+// AI-powered efficiency intelligence platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  role          Role           @default(LEADER)
+  name          String?
+  image         String?
+  emailVerified DateTime?
+  preferences   Json?
+  businessProfile BusinessProfile?
+  initiatives   Initiative[]   @relation("UserInitiatives")
+  comments      Comment[]
+  ideas         Idea[]
+  votes         Vote[]
+  auditLogs     AuditLog[]
+  attachments   Attachment[]
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+enum Role {
+  ADMIN
+  LEADER
+}
+
+model BusinessProfile {
+  id       String   @id @default(cuid())
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String   @unique
+  industry String
+  size     Int
+  metrics  Json
+}
+
+model Initiative {
+  id             String       @id @default(cuid())
+  title          String
+  problem        String
+  goal           String
+  kpis           String[]
+  owner          User         @relation("UserInitiatives", fields: [ownerId], references: [id])
+  ownerId        String
+  timelineStart  DateTime?
+  timelineEnd    DateTime?
+  status         String
+  progress       Int          @default(0)
+  difficulty     Int?
+  roi            Int?
+  priorityScore  Int?
+  orderIndex     Int          @default(0)
+  budget         Int?
+  estimatedHours Int?
+  actualHours    Int?
+  phase          String?      @default("planning")
+  dependencies   Initiative[] @relation("InitiativeDependencies")
+  dependents     Initiative[] @relation("InitiativeDependencies")
+  milestones     Milestone[]
+  assignments    ResourceAssignment[]
+  comments       Comment[]
+  ideas          Idea[]
+  votes          Vote[]
+  attachments    Attachment[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Team {
+  id          String              @id @default(cuid())
+  name        String
+  department  String?
+  capacity    Int                 @default(40) // hours per week
+  skills      String[]
+  assignments ResourceAssignment[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model Milestone {
+  id           String     @id @default(cuid())
+  title        String
+  description  String?
+  dueDate      DateTime
+  status       String     @default("pending") // pending, in_progress, completed, delayed
+  initiative   Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiativeId String
+  progress     Int        @default(0)
+  comments     Comment[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model ResourceAssignment {
+  id           String     @id @default(cuid())
+  initiative   Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiativeId String
+  team         Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId       String
+  hoursAllocated Int      @default(0)
+  startDate    DateTime?
+  endDate      DateTime?
+  role         String?    // "lead", "contributor", "reviewer"
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([initiativeId, teamId])
+}
+
+model Issue {
+  id            String   @id @default(cuid())
+  description   String
+  votes         Int      @default(0)
+  heatmapScore  Int      @default(0)
+  comments      Comment[]
+  userVotes     Vote[]
+  createdAt     DateTime @default(now())
+}
+
+model Comment {
+  id           String      @id @default(cuid())
+  content      String
+  author       User        @relation(fields: [authorId], references: [id])
+  authorId     String
+  initiative   Initiative? @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiativeId String?
+  issue        Issue?      @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  issueId      String?
+  idea         Idea?       @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  ideaId       String?
+  milestone    Milestone?  @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  milestoneId  String?
+  parentComment Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId     String?
+  replies      Comment[]   @relation("CommentReplies")
+  mentions     String[]    // User IDs mentioned in comment
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Idea {
+  id          String     @id @default(cuid())
+  title       String
+  description String
+  author      User       @relation(fields: [authorId], references: [id])
+  authorId    String
+  category    String     @default("general") // general, process, technology, strategy
+  priority    String     @default("medium") // low, medium, high
+  status      String     @default("idea") // idea, reviewing, approved, rejected, implemented
+  votes       Int        @default(0)
+  tags        String[]
+  assignedTo  String?    // User ID for assignment
+  dueDate     DateTime?
+  initiative  Initiative? @relation(fields: [initiativeId], references: [id])
+  initiativeId String?
+  userVotes   Vote[]
+  comments    Comment[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Vote {
+  id           String      @id @default(cuid())
+  user         User        @relation(fields: [userId], references: [id])
+  userId       String
+  initiative   Initiative? @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiativeId String?
+  idea         Idea?       @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  ideaId       String?
+  issue        Issue?      @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  issueId      String?
+  type         String      // up, down, priority
+  value        Int         @default(1)
+  createdAt    DateTime    @default(now())
+
+  @@unique([userId, initiativeId])
+  @@unique([userId, ideaId])
+  @@unique([userId, issueId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  action    String
+  details   Json
+  timestamp DateTime @default(now())
+}
+
+model Attachment {
+  id           String     @id @default(cuid())
+  filename     String
+  filepath     String
+  mimetype     String
+  size         Int
+  initiative   Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiativeId String
+  uploadedBy   User       @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+// NextAuth models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  oauth_token_secret String?
+  oauth_token       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

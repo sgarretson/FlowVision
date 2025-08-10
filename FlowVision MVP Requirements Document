@@ -1,0 +1,145 @@
+FlowVision MVP Requirements Document
+1. Overview
+1.1 Project Description
+FlowVision is a web-based AI-powered efficiency intelligence platform for SMB leadership to detect operational friction, categorize improvement ideas, and create strategic roadmaps to transform organizational flow. It helps identify issues, prioritize via matrices/charts, track progress on Kanban/roadmap views, with AI-powered suggestions for friction detection and categorization.
+1.2 Purpose
+
+Enable quick issue identification and initiative alignment.
+Provide visual prioritization and tracking.
+Scale for internal use, potential commercial SaaS.
+MVP: Functional core with best practices for development, testing, and maintenance.
+
+1.3 Scope
+
+MVP: User auth, dashboard, initiative cards, prioritization matrix, Kanban tracking, roadmap view, business profile for AI assumptions, audit logs.
+Out-of-Scope: Advanced AI ML models, full integrations (e.g., Jira API—phased), mobile app.
+Assumptions: Users have basic web access; SMB size <50 users.
+Constraints: No hardcoding (use env vars, seed DB); budget-friendly stack; Cursor-compatible for AI-assisted build.
+
+1.4 Tech Stack
+
+Frontend: React.js with Next.js for SSR/SEO scalability.
+Backend: Node.js/Express for APIs.
+Database: PostgreSQL for relational integrity (scalable with indexes).
+AI: Rule-based heuristics + optional OpenAI API for NLP (e.g., suggestions).
+Testing: Jest (unit), Cypress (E2E), 80% coverage min.
+Other: Git for version control, Docker for containerization, Winston for logging.
+
+2. Functional Requirements
+2.1 User Authentication
+
+FR1.1: Register/login with email/password (JWT tokens).
+FR1.2: Role-based access (Admin/Leader—seed initial admin).
+Acceptance: Secure hashing (bcrypt), session expiry.
+
+2.2 Business Profile Setup
+
+FR2.1: Onboarding wizard for industry, size, metrics (stored in DB).
+FR2.2: Editable profile used for AI assumptions.
+Acceptance: Form validation, seed sample profiles.
+
+2.3 Issue Identification
+
+FR3.1: Input form with voting/polling for issues.
+FR3.2: Visual heatmap of hotspots.
+FR3.3: AI option: Suggest issues from uploaded notes (NLP parse).
+Acceptance: Real-time updates (WebSockets or polling).
+
+2.4 Initiative Definition and Cards
+
+FR4.1: Create/edit cards with fields: Title, Problem, Goal, KPIs, Owner, Timeline, Status, Progress, Dependencies.
+FR4.2: Optional AI: Generate difficulty/cost/ROI badges based on profile + heuristics (e.g., keyword scoring).
+Acceptance: Drag-drop for fields, attachments support.
+
+2.5 Prioritization
+
+FR5.1: Matrix/bubble chart view; drag-reorder with voting.
+FR5.2: AI boost: Score suggestions (rule-based, editable).
+Acceptance: Export to PDF.
+
+2.6 Tracking
+
+FR6.1: Kanban board with columns (Define/Prioritize/In Progress/Done).
+FR6.2: Progress bars, notifications.
+Acceptance: Dependency mapping.
+
+2.7 Roadmap View
+
+FR7.1: Timeline bars with milestones, dependencies.
+FR7.2: Interactive drag/zoom, filters.
+FR7.3: Future hook: Epic/story status sync (manual tags in MVP).
+Acceptance: Auto-sync from cards.
+
+2.8 Task Logging and Auditing
+
+FR8.1: DB entity for logs (user actions, timestamps, changes).
+FR8.2: Viewable audit trail per initiative.
+Acceptance: Immutable logs, exportable.
+
+2.9 AI Integration
+
+FR9.1: Toggleable; use for suggestions (e.g., ROI calc: (Gain - Cost)/Cost from inputs).
+FR9.2: Benchmarks from seed DB (e.g., industry avgs).
+Acceptance: Mock mode for offline/testing.
+
+3. Non-Functional Requirements
+
+NFR1: Performance: <2s load times, handle 100 concurrent users.
+NFR2: Scalability: Cloud-ready (e.g., AWS/Heroku), modular code.
+NFR3: Security: HTTPS, input sanitization, GDPR-compliant.
+NFR4: Usability: WCAG 2.1 AA, responsive (mobile-first).
+NFR5: Reliability: 99% uptime, error handling.
+NFR6: Maintainability: Clean code (ESLint), docs (JSDoc).
+
+4. User Stories
+
+As a leader, I want to create an initiative card so I can define problems/goals (Priority: High; Acceptance: Fields saved to DB).
+As a team, I want to prioritize via matrix so we align on top initiatives (High; Drag-drop persists).
+As an admin, I want audit logs so I can track changes (Medium; Queryable).
+(Additional stories for each FR.)
+
+5. Data Model
+
+Entities:
+
+User: id, email, password_hash, role.
+BusinessProfile: id, user_id, industry, size, metrics (JSON).
+Initiative: id, title, problem, goal, kpis (array), owner_id, timeline_start/end, status, progress, dependencies (array of ids).
+Issue: id, description, votes, heatmap_score.
+AuditLog: id, user_id, action, timestamp, details.
+
+
+Seeds: Script to insert sample users, profiles, initiatives (e.g., "Sample Growth Initiative" with defaults).
+Relationships: One-to-Many (User to Initiatives), Many-to-Many (Initiatives dependencies).
+
+6. IA and UX Flows
+
+Navigation: Sidebar (Dashboard, Initiatives, Prioritize, Track, Roadmap, Profile, Logs).
+Flows: Login > Dashboard (overview) > New Initiative (wizard) > Prioritize (matrix) > Track (Kanban) > Roadmap (timeline).
+Wireframes: Simple sketches (e.g., card as div with badges, roadmap as horizontal scroll).
+
+7. Design System
+
+Colors: Primary #007BFF, Success #28A745, Warning #FFC107.
+Typography: Roboto font, headings 24px/18px.
+Components: Reusable Card, Button, Chart (via Recharts).
+Consistency: Design tokens in CSS vars.
+
+8. Development Best Practices
+
+Code: Modular (components/services), no hardcoding (use constants from DB/env).
+Versioning: Semantic, branches (feature/main).
+CI/CD: GitHub Actions for tests/deploy.
+Logging: Winston for tasks/errors.
+
+9. QA Measures
+
+Unit Tests: Cover 80% (functions, components via Jest).
+Integration Tests: API endpoints (Supertest).
+E2E: User flows (Cypress).
+Other: Linting (ESLint), Security scans (npm audit), Usability testing (scenarios).
+
+10. Deployment and Scaling
+
+MVP: Local dev, deploy to Vercel/Netlify.
+Scale: Add caching (Redis), load balancing.
