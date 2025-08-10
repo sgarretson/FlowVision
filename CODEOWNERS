@@ -1,0 +1,52 @@
+# FlowVision Code Owners
+# This file defines individuals or teams that are responsible for code in this repository.
+# Code owners are automatically requested for review when someone opens a pull request that modifies code that they own.
+
+# Global owners - responsible for overall architecture and major changes
+* @sgarretson
+
+# Frontend components and UI
+/app/ @sgarretson
+/components/ @sgarretson
+/styles/ @sgarretson
+app/globals.css @sgarretson
+
+# Backend API and business logic
+/app/api/ @sgarretson
+/lib/ @sgarretson
+/utils/ @sgarretson
+
+# Database schema and migrations
+/prisma/ @sgarretson
+prisma/schema.prisma @sgarretson
+
+# Infrastructure and deployment
+/.github/ @sgarretson
+/docker-compose.yml @sgarretson
+/Dockerfile @sgarretson
+/vercel.json @sgarretson
+
+# Testing and quality assurance
+/tests/ @sgarretson
+/cypress/ @sgarretson
+jest.config.ts @sgarretson
+cypress.config.ts @sgarretson
+
+# Documentation and guides
+/README.md @sgarretson
+/CONTRIBUTING.md @sgarretson
+/DEPLOYMENT.md @sgarretson
+/.github/SECURITY.md @sgarretson
+
+# Configuration files requiring special attention
+package.json @sgarretson
+package-lock.json @sgarretson
+tsconfig.json @sgarretson
+tailwind.config.js @sgarretson
+next.config.mjs @sgarretson
+
+# Security-sensitive files
+/.env.example @sgarretson
+/lib/auth.ts @sgarretson
+/lib/security.ts @sgarretson
+/lib/rbac.ts @sgarretson

@@ -12,6 +12,9 @@ export default function InitiativesPage() {
   const [problem, setProblem] = useState('');
   const [goal, setGoal] = useState('');
   const [message, setMessage] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiRecommendations, setAiRecommendations] = useState<string | null>(null);
+  const [showAiPanel, setShowAiPanel] = useState(false);
 
   async function load() {
     const res = await fetch('/api/initiatives');
@@ -42,7 +45,82 @@ export default function InitiativesPage() {
       body: JSON.stringify({ title, problem, goal, kpis: [] }),
     });
     setTitle(''); setProblem(''); setGoal(''); setMessage(null);
+    setAiRecommendations(null); setShowAiPanel(false);
     await load();
+  }
+
+  async function generateAIRecommendations() {
+    if (!title.trim() || !problem.trim()) {
+      setMessage('Please fill in title and problem first to get AI recommendations');
+      return;
+    }
+
+    setAiLoading(true);
+    setAiRecommendations(null);
+    
+    try {
+      const response = await fetch('/api/ai/generate-initiative', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          problem: problem.trim(),
+          mode: 'recommendations'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok && data.result) {
+        setAiRecommendations(data.result.recommendations || 'No specific recommendations generated');
+        setShowAiPanel(true);
+        
+        // Auto-populate fields if AI provides them
+        if (data.result.suggestedKPIs?.length > 0) {
+          // We'll implement KPI suggestions in the detail page
+        }
+      } else {
+        setMessage(data.fallback || data.error || 'AI recommendations not available');
+      }
+    } catch (error) {
+      setMessage('Failed to generate AI recommendations');
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  async function generateFromDescription() {
+    if (!problem.trim()) {
+      setMessage('Please provide a description to generate requirements');
+      return;
+    }
+
+    setAiLoading(true);
+    
+    try {
+      const response = await fetch('/api/ai/generate-initiative', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          problem: problem.trim(),
+          mode: 'requirements'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok && data.result) {
+        if (data.result.title) setTitle(data.result.title);
+        if (data.result.goal) setGoal(data.result.goal);
+        setMessage('Initiative fields generated from description!');
+      } else {
+        setMessage(data.fallback || data.error || 'AI generation not available');
+      }
+    } catch (error) {
+      setMessage('Failed to generate initiative requirements');
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   function onDragEnd(result: DropResult) {
@@ -78,6 +156,33 @@ export default function InitiativesPage() {
       {/* Create Initiative Form */}
       <div className="card-primary p-6 max-w-4xl mx-auto">
         <h2 className="text-h2 mb-6 text-center">Create New Initiative</h2>
+        
+        {/* AI Tools */}
+        <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+          <h3 className="text-h3 mb-3 text-purple-800">AI-Powered Tools</h3>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={generateFromDescription}
+              disabled={aiLoading || !problem.trim()}
+              className="btn-secondary text-sm"
+            >
+              {aiLoading ? 'Generating...' : '✨ Generate from Description'}
+            </button>
+            <button
+              type="button"
+              onClick={generateAIRecommendations}
+              disabled={aiLoading || !title.trim() || !problem.trim()}
+              className="btn-secondary text-sm"
+            >
+              {aiLoading ? 'Loading...' : '🤖 Get AI Recommendations'}
+            </button>
+          </div>
+          <p className="text-sm text-purple-600 mt-2">
+            Fill in the problem statement to generate requirements, or add title + problem for AI recommendations
+          </p>
+        </div>
+
         <form onSubmit={onCreate} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input 
@@ -108,6 +213,24 @@ export default function InitiativesPage() {
             </button>
           </div>
         </form>
+
+        {/* AI Recommendations Panel */}
+        {showAiPanel && aiRecommendations && (
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-h3 text-blue-800">AI Recommendations</h3>
+              <button
+                onClick={() => setShowAiPanel(false)}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="text-sm text-blue-700 whitespace-pre-wrap">
+              {aiRecommendations}
+            </div>
+          </div>
+        )}
       </div>
       {/* Initiatives List */}
       <div className="max-w-4xl mx-auto">

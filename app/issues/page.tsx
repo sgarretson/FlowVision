@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import AIAnalysis from './ai-analysis';
 
 type Issue = {
   id: string;
@@ -320,7 +321,7 @@ export default function IssuesPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-4">
                       <div className="text-caption">
                         Created {new Date(issue.createdAt).toLocaleDateString('en-US', {
                           year: 'numeric',
@@ -330,12 +331,21 @@ export default function IssuesPage() {
                       </div>
                       
                       {/* Action Buttons */}
-                      <button
-                        onClick={() => handleConvertToInitiative(issue)}
-                        className="btn-success text-sm"
-                      >
-                        Convert to Initiative
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleConvertToInitiative(issue)}
+                          className="btn-success text-sm"
+                        >
+                          Convert to Initiative
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* AI Analysis Section */}
+                    <div className="border-t pt-4">
+                      <AIAnalysis 
+                        issueDescription={issue.description}
+                      />
                     </div>
                   </div>
                 </div>
