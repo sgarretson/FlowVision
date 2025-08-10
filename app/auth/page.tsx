@@ -107,7 +107,7 @@ export default function AuthPage() {
 
             <div className="mt-6">
               <Link
-                href="/auth/register"
+                href={"/auth/register" as any}
                 className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
               >
                 Create New Account

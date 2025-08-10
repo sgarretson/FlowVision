@@ -181,7 +181,7 @@ export default function OpenAISettings() {
           </p>
         </div>
         <Link
-          href="/admin"
+          href={"/admin" as any}
           className="btn-secondary"
         >
           Back to Admin
