@@ -2,8 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import React from 'react';
 import { Providers } from '@/components/Providers';
-import { Header } from '@/components/Header';
-import { PlanNavigation } from '@/components/PlanNavigation';
+import { ConditionalLayout } from '@/components/ConditionalLayout';
 
 export const metadata: Metadata = {
   title: 'FlowVision - Efficiency Intelligence Platform',
@@ -15,13 +14,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen bg-gray-50 text-gray-900">
         <Providers>
-          <div className="min-h-screen">
-            <Header />
-            <PlanNavigation />
-            <div className="mx-auto max-w-7xl p-4">
-              {children}
-            </div>
-          </div>
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
         </Providers>
       </body>
     </html>

@@ -1,14 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import React, { useState, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function AuthPage() {
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('Admin123!');
+  const [email, setEmail] = useState('admin@flowvision.com');
+  const [password, setPassword] = useState('admin123');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (session) {
+      router.push('/');
+    }
+  }, [session, router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,12 +29,15 @@ export default function AuthPage() {
       const res = await signIn('credentials', {
         email,
         password,
-        redirect: true,
+        redirect: false,
         callbackUrl: '/'
       });
       
       if (res?.error) {
         setError('Invalid email or password');
+      } else if (res?.ok) {
+        // Successful login - redirect manually
+        router.push('/');
       }
     } catch (err) {
       setError('Sign in failed. Please try again.');
