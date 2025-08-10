@@ -47,35 +47,40 @@ model BusinessProfile {
 }
 
 model Initiative {
-  id             String       @id @default(cuid())
+  id             String        @id @default(cuid())
   title          String
   problem        String
   goal           String
   kpis           String[]
-  owner          User         @relation("UserInitiatives", fields: [ownerId], references: [id])
+  owner          User          @relation("UserInitiatives", fields: [ownerId], references: [id])
   ownerId        String
   timelineStart  DateTime?
   timelineEnd    DateTime?
   status         String
-  progress       Int          @default(0)
+  progress       Int           @default(0)
   difficulty     Int?
   roi            Int?
   priorityScore  Int?
-  orderIndex     Int          @default(0)
+  orderIndex     Int           @default(0)
   budget         Int?
   estimatedHours Int?
   actualHours    Int?
-  phase          String?      @default("planning")
-  dependencies   Initiative[] @relation("InitiativeDependencies")
-  dependents     Initiative[] @relation("InitiativeDependencies")
+  phase          String?       @default("planning")
+  cluster        IssueCluster? @relation("ClusterInitiatives", fields: [clusterId], references: [id])
+  clusterId      String?
+  addressedIssues Issue[]      @relation("IssueInitiatives") // Many-to-many with issues
+  crossImpact    Json?         // Multi-departmental impact analysis
+  clusterMetrics Json?         // Cluster-specific success metrics
+  dependencies   Initiative[]  @relation("InitiativeDependencies")
+  dependents     Initiative[]  @relation("InitiativeDependencies")
   milestones     Milestone[]
   assignments    ResourceAssignment[]
   comments       Comment[]
   ideas          Idea[]
   votes          Vote[]
   attachments    Attachment[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 model Team {
@@ -120,13 +125,41 @@ model ResourceAssignment {
 }
 
 model Issue {
-  id            String   @id @default(cuid())
+  id            String        @id @default(cuid())
   description   String
-  votes         Int      @default(0)
-  heatmapScore  Int      @default(0)
+  votes         Int           @default(0)
+  heatmapScore  Int           @default(0)
+  department    String?       // Added for clustering analysis
+  category      String?       // Added for clustering analysis
+  cluster       IssueCluster? @relation(fields: [clusterId], references: [id])
+  clusterId     String?
+  similarity    Json?         // Semantic similarity scores to other issues
+  keywords      String[]      @default([]) // Extracted keywords for clustering
+  crossImpact   Json?         // Cross-departmental impact analysis
   comments      Comment[]
   userVotes     Vote[]
-  createdAt     DateTime @default(now())
+  initiatives   Initiative[]  @relation("IssueInitiatives") // Many-to-many with initiatives
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt @default(now())
+}
+
+model IssueCluster {
+  id             String      @id @default(cuid())
+  name           String      // e.g., "Project Coordination & Communication"
+  description    String      // Detailed description of cluster theme
+  category       String      // e.g., "coordination", "technology", "process"
+  severity       String      @default("medium") // low, medium, high, critical
+  theme          String      // Brief theme description
+  keywords       String[]    @default([]) // Keywords used for clustering
+  issues         Issue[]     // Related issues in this cluster
+  initiatives    Initiative[] @relation("ClusterInitiatives") // Strategic initiatives addressing this cluster
+  rootCauses     Json?       // AI-identified root causes
+  impactAnalysis Json?       // Cross-departmental impact assessment
+  metrics        Json?       // Cluster performance metrics
+  color          String      @default("#3B82F6") // UI color for visualization
+  isActive       Boolean     @default(true) // Whether cluster is actively used
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
 
 model Comment {
