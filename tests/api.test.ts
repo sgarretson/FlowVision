@@ -1,6 +1,30 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { createMocks } from 'node-mocks-http';
-import { NextRequest } from 'next/server';
+
+// Mock NextRequest for Jest environment
+const mockNextRequest = class {
+  constructor(url: string, init?: any) {
+    this.url = url;
+    this.method = init?.method || 'GET';
+    this.headers = new Headers(init?.headers || {});
+  }
+  url: string;
+  method: string;
+  headers: Headers;
+  json() { return Promise.resolve({}); }
+  text() { return Promise.resolve(''); }
+};
+
+// Mock the NextRequest import
+jest.mock('next/server', () => ({
+  NextRequest: mockNextRequest,
+  NextResponse: {
+    json: jest.fn().mockImplementation((data, init) => ({
+      json: () => Promise.resolve(data),
+      status: init?.status || 200,
+    })),
+  },
+}));
 
 // Mock NextAuth
 jest.mock('next-auth', () => ({
