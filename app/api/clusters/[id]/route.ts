@@ -171,15 +171,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         details: {
           clusterId: params.id,
           clusterName: updatedCluster.name,
-          changes: {
-            ...(body.name ? { name: body.name } : {}),
-            ...(body.description ? { description: body.description } : {}),
-            ...(body.severity ? { severity: body.severity } : {}),
-            ...(body.isActive !== undefined ? { isActive: body.isActive } : {}),
-            ...(body.color ? { color: body.color } : {}),
-          },
+          changes: (body as any),
           timestamp: new Date().toISOString(),
-        },
+        } as any,
       },
     });
 
