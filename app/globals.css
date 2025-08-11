@@ -172,10 +172,16 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Prevent zoom issues on mobile */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
   }
 
   body {
     @apply font-sans text-gray-900 bg-gray-50;
+    /* Ensure proper scaling */
+    min-width: 320px;
+    overflow-x: hidden;
   }
 
   /* Focus Styles */
