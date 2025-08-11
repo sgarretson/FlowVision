@@ -35,8 +35,8 @@ function calculateSemanticSimilarity(issue1: any, issue2: any): number {
   const desc2 = issue2.description.toLowerCase();
   
   // Extract key terms
-  const terms1 = new Set(desc1.split(/\s+/).filter(word => word.length > 3));
-  const terms2 = new Set(desc2.split(/\s+/).filter(word => word.length > 3));
+  const terms1 = new Set(desc1.split(/\s+/).filter((word: string) => word.length > 3));
+  const terms2 = new Set(desc2.split(/\s+/).filter((word: string) => word.length > 3));
   
   // Calculate Jaccard similarity
   const intersection = new Set([...terms1].filter(x => terms2.has(x)));

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  TrendingUpIcon, 
+  ArrowTrendingUpIcon, 
   ExclamationTriangleIcon, 
   ClockIcon,
   ChartBarIcon,
@@ -240,7 +240,7 @@ export default function ExecutiveDashboard() {
             {[
               { id: 'overview', name: 'Overview', icon: ChartBarIcon },
               { id: 'insights', name: 'AI Insights', icon: LightBulbIcon },
-              { id: 'forecasting', name: 'ROI Forecasting', icon: TrendingUpIcon },
+              { id: 'forecasting', name: 'ROI Forecasting', icon: ArrowTrendingUpIcon },
               { id: 'alerts', name: 'Alerts', icon: ExclamationTriangleIcon }
             ].map((tab) => (
               <button
@@ -331,7 +331,7 @@ export default function ExecutiveDashboard() {
                       {roiForecast?.forecast.threeMonth.toFixed(1)}%
                     </p>
                   </div>
-                  <TrendingUpIcon className="w-8 h-8 text-green-500" />
+                  <ArrowTrendingUpIcon className="w-8 h-8 text-green-500" />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
                   {roiForecast?.forecast.confidence}% confidence
