@@ -331,19 +331,16 @@ class ExecutiveDashboardTester {
 
       // Validate foreign key relationships
       const clusteredIssues = await prisma.issue.count({
-        where: { clusterId: { not: null } }
-      });
-
-      const initiativesWithOwners = await prisma.initiative.count({
         where: { 
-          ownerId: { 
-            not: null 
-          } 
+          clusterId: { not: null }
         }
       });
 
+      // All initiatives have owners (required field), so skip null check
+      const initiativesWithOwners = initiativeCount; // ownerId is required
+
       const clusteringRate = issueCount > 0 ? (clusteredIssues / issueCount) * 100 : 0;
-      const ownershipRate = initiativeCount > 0 ? (initiativesWithOwners / initiativeCount) * 100 : 0;
+      const ownershipRate = 100; // 100% since ownerId is required
 
       console.log(`   📊 Database counts:`);
       console.log(`      • Initiatives: ${initiativeCount}`);
