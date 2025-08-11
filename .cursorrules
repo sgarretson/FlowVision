@@ -1,0 +1,144 @@
+# FlowVision Development Rules for GitHub Best Practices
+
+## Core Development Principles
+
+You are an expert development assistant for the FlowVision project. Always follow these rules to maintain clean, synchronized, and professional GitHub repository management.
+
+## GitHub Workflow Requirements
+
+### Branch Management
+- **NEVER commit directly to main branch**
+- **ALWAYS create feature branches** with descriptive names: `feature/description-of-work`
+- **ALWAYS verify branch protection** is enabled before making changes
+- **ALWAYS keep feature branches small and focused** (single feature/fix per branch)
+- **ALWAYS delete merged feature branches** both locally and remotely
+
+### Commit Standards
+- **ALWAYS use conventional commit format**: `type(scope): description`
+  - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+  - Examples: `feat(clusters): add view details modal`, `fix(auth): resolve login redirect issue`
+- **ALWAYS test locally before committing**
+- **ALWAYS run `npm test` and ensure it passes**
+- **ALWAYS clear build cache** (`rm -rf .next`) if encountering React/build errors
+
+### Pull Request Process
+- **ALWAYS create PR for any code changes**
+- **ALWAYS include descriptive PR title and description**
+- **ALWAYS request review before merging**
+- **ALWAYS ensure CI/CD checks pass before requesting review**
+- **ALWAYS resolve merge conflicts locally, never in GitHub UI**
+- **NEVER force push to shared branches**
+- **NEVER bypass branch protection without explicit approval**
+
+### Code Quality Gates
+- **ALWAYS run linting**: `npm run lint` (fix issues before committing)
+- **ALWAYS run tests**: `npm test` (must pass before pushing)
+- **ALWAYS verify build**: `npm run build` (for production readiness)
+- **ALWAYS check for TypeScript errors**: Address all `tsc` warnings
+- **ALWAYS validate database schema changes** with `npx prisma validate`
+
+## Pre-Commit Checklist
+
+Before every commit, verify:
+- [ ] Code changes are tested locally
+- [ ] No console.log statements in production code
+- [ ] No hardcoded values (use environment variables)
+- [ ] All imports are properly typed
+- [ ] No unused variables or imports
+- [ ] Database queries use proper error handling
+- [ ] API routes have proper authentication checks
+- [ ] React components use proper key props in lists
+
+## Sync Management
+
+### Daily Sync Protocol
+1. **Start of day**: `git pull origin main`
+2. **Before creating branch**: Ensure main is up-to-date
+3. **End of work**: Push feature branch and create PR
+4. **Never leave uncommitted changes** in working directory
+
+### Emergency Procedures
+If you encounter:
+- **React "Objects are not valid as React child"**: Clear build cache with `rm -rf .next`
+- **Module not found errors**: Clear cache and restart dev server
+- **GitHub sync issues**: Create new feature branch from latest main
+- **CI/CD failures**: Fix issues locally, never bypass checks
+- **Merge conflicts**: Resolve locally with `git rebase main`
+
+## Repository Hygiene
+
+### File Management
+- **ALWAYS add appropriate .gitignore entries** for build artifacts
+- **NEVER commit**: `.next/`, `node_modules/`, `.env.local`, IDE files
+- **ALWAYS commit**: Lock files (`package-lock.json`, `yarn.lock`)
+- **ALWAYS use absolute paths** in tool configurations when possible
+
+### Documentation
+- **ALWAYS update README.md** for significant feature additions
+- **ALWAYS document API changes** in relevant files
+- **ALWAYS add JSDoc comments** for complex functions
+- **ALWAYS update CHANGELOG.md** for releases
+
+## Error Prevention Rules
+
+### React/Next.js Specific
+- **ALWAYS use TypeScript strict mode**
+- **ALWAYS define interfaces** for component props and API responses
+- **ALWAYS handle loading and error states** in components
+- **ALWAYS use proper async/await patterns** in API routes
+- **NEVER render objects directly** in JSX (use specific properties)
+
+### Database/Prisma
+- **ALWAYS use transactions** for multi-table operations
+- **ALWAYS validate input** before database queries
+- **ALWAYS handle Prisma errors** with try/catch blocks
+- **ALWAYS test schema changes** with seed data
+
+### Security
+- **ALWAYS validate user permissions** in API routes
+- **ALWAYS sanitize user input** before database operations
+- **ALWAYS use environment variables** for secrets
+- **NEVER commit API keys or passwords**
+
+## Tool Integration
+
+### Required Commands
+Before any PR:
+```bash
+# Clean build
+rm -rf .next
+
+# Run full validation
+npm run lint
+npm test
+npm run build
+
+# Database validation
+npx prisma validate
+npx prisma generate
+```
+
+### GitHub CLI Usage
+- Use `gh pr create` for consistent PR creation
+- Use `gh pr status` to check PR state
+- Use `gh pr checks` to verify CI/CD status
+- Use `gh issue list` to track open issues
+
+## Memory Management
+
+Remember these key project facts:
+- Project uses Docker for development environment
+- Prefer no icons/emojis in user-facing content
+- Keep 'facebook-ad-campaign' and 'Google_PPC' folders local only
+- Main branch requires PR workflow with reviews
+- All major features need comprehensive testing
+
+## Enforcement
+
+If any of these rules are violated:
+1. **STOP current work**
+2. **FIX the violation** immediately
+3. **DOCUMENT the fix** in commit message
+4. **REVIEW process** to prevent recurrence
+
+These rules are mandatory for maintaining professional, scalable, and reliable development practices.
