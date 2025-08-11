@@ -4,17 +4,13 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 type AlertSettings = {
-  timelineBehindPct: number; // default 20
-  deadlineDaysCritical: number; // default 14
-  ownerMaxActive: number; // default 3
-  budgetOverrunWarnPct: number; // default 25
-  budgetOverrunCritPct: number; // default 50
-  lowRoiPct: number; // default 10
-  digest: {
-    enabled: boolean;
-    channel: 'email' | 'slack' | 'none';
-    timeUTC: string; // "09:00"
-  };
+  timelineBehindPct: number;
+  deadlineDaysCritical: number;
+  ownerMaxActive: number;
+  budgetOverrunWarnPct: number;
+  budgetOverrunCritPct: number;
+  lowRoiPct: number;
+  digest: { enabled: boolean; channel: 'email' | 'slack' | 'none'; timeUTC: string };
 };
 
 function defaults(): AlertSettings {

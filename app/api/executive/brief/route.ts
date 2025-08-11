@@ -13,31 +13,22 @@ export async function GET() {
       }),
     ]);
 
-    const statusGroups = await prisma.initiative.groupBy({
-      by: ['status'],
-      _count: { _all: true },
-    });
+    const statusGroups = await prisma.initiative.groupBy({ by: ['status'], _count: { _all: true } });
 
     const brief = {
       headline: 'Executive Weekly Brief',
       metrics: {
         initiatives: initiativeCount,
         issues: issueCount,
-        byStatus: statusGroups.reduce<Record<string, number>>((acc, s) => {
-          acc[s.status] = s._count._all;
-          return acc;
-        }, {}),
+        byStatus: Object.fromEntries(statusGroups.map((g) => [g.status, g._count._all])),
       },
-      recentInitiatives: latestInitiatives,
-      notes: [
-        'This is an auto-generated brief intended for executive review.',
-        'For full insights, see the Executive dashboard.',
-      ],
+      latestInitiatives,
+      generatedAt: new Date().toISOString(),
     };
 
-    return NextResponse.json({ brief, generatedAt: new Date().toISOString() });
+    return NextResponse.json(brief);
   } catch (e) {
-    console.error('Brief generation failed:', (e as Error)?.message ?? String(e));
+    console.warn('Brief generation failed:', e);
     return NextResponse.json({ error: 'Failed to generate brief' }, { status: 500 });
   }
 }

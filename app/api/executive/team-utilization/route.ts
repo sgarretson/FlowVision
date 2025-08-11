@@ -5,10 +5,9 @@ export async function GET() {
   try {
     const active = await prisma.initiative.findMany({
       where: { status: { in: ['APPROVED', 'ACTIVE'] } },
-      select: { id: true, ownerId: true, estimatedHours: true, actualHours: true },
+      select: { id: true, ownerId: true },
     });
 
-    // Simple utilization proxy: number of active initiatives per owner
     const ownerMap = new Map<string, number>();
     active.forEach((i) => ownerMap.set(i.ownerId, (ownerMap.get(i.ownerId) || 0) + 1));
 
