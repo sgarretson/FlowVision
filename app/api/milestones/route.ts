@@ -33,13 +33,9 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(milestones);
-
   } catch (error) {
     console.error('Milestones fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch milestones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch milestones' }, { status: 500 });
   }
 }
 
@@ -66,10 +62,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!initiative) {
-      return NextResponse.json(
-        { error: 'Initiative not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Initiative not found' }, { status: 404 });
     }
 
     const milestone = await prisma.milestone.create({
@@ -97,12 +90,8 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(milestone, { status: 201 });
-
   } catch (error) {
     console.error('Milestone creation error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create milestone' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create milestone' }, { status: 500 });
   }
 }

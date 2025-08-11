@@ -11,10 +11,7 @@ interface CreateClusterInitiativeRequest {
   useAI?: boolean;
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -28,7 +25,7 @@ export async function GET(
         initiatives: {
           include: {
             owner: {
-              select: { name: true, email: true, role: true }
+              select: { name: true, email: true, role: true },
             },
             addressedIssues: {
               select: {
@@ -36,26 +33,26 @@ export async function GET(
                 description: true,
                 heatmapScore: true,
                 department: true,
-                category: true
-              }
+                category: true,
+              },
             },
             milestones: {
               select: {
                 title: true,
                 status: true,
                 dueDate: true,
-                progress: true
-              }
+                progress: true,
+              },
             },
             comments: {
               take: 3,
               orderBy: { createdAt: 'desc' },
               include: {
-                author: { select: { name: true } }
-              }
-            }
+                author: { select: { name: true } },
+              },
+            },
           },
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: 'desc' },
         },
         issues: {
           select: {
@@ -64,10 +61,10 @@ export async function GET(
             heatmapScore: true,
             votes: true,
             department: true,
-            category: true
-          }
-        }
-      }
+            category: true,
+          },
+        },
+      },
     });
 
     if (!cluster) {
@@ -77,21 +74,36 @@ export async function GET(
     // Calculate cluster-initiative metrics
     const metrics = {
       totalInitiatives: cluster.initiatives.length,
-      activeInitiatives: cluster.initiatives.filter(i => i.status === 'ACTIVE').length,
-      completedInitiatives: cluster.initiatives.filter(i => i.status === 'COMPLETED').length,
+      activeInitiatives: cluster.initiatives.filter((i) => i.status === 'ACTIVE').length,
+      completedInitiatives: cluster.initiatives.filter((i) => i.status === 'COMPLETED').length,
       totalIssues: cluster.issues.length,
-      addressedIssues: new Set(cluster.initiatives.flatMap(i => i.addressedIssues.map(issue => issue.id))).size,
-      coveragePercentage: cluster.issues.length > 0 
-        ? Math.round((new Set(cluster.initiatives.flatMap(i => i.addressedIssues.map(issue => issue.id))).size / cluster.issues.length) * 100)
-        : 0,
-      averageProgress: cluster.initiatives.length > 0
-        ? Math.round(cluster.initiatives.reduce((sum, init) => sum + init.progress, 0) / cluster.initiatives.length)
-        : 0
+      addressedIssues: new Set(
+        cluster.initiatives.flatMap((i) => i.addressedIssues.map((issue) => issue.id))
+      ).size,
+      coveragePercentage:
+        cluster.issues.length > 0
+          ? Math.round(
+              (new Set(
+                cluster.initiatives.flatMap((i) => i.addressedIssues.map((issue) => issue.id))
+              ).size /
+                cluster.issues.length) *
+                100
+            )
+          : 0,
+      averageProgress:
+        cluster.initiatives.length > 0
+          ? Math.round(
+              cluster.initiatives.reduce((sum, init) => sum + init.progress, 0) /
+                cluster.initiatives.length
+            )
+          : 0,
     };
 
     // Identify unaddressed issues
-    const addressedIssueIds = new Set(cluster.initiatives.flatMap(i => i.addressedIssues.map(issue => issue.id)));
-    const unaddressedIssues = cluster.issues.filter(issue => !addressedIssueIds.has(issue.id));
+    const addressedIssueIds = new Set(
+      cluster.initiatives.flatMap((i) => i.addressedIssues.map((issue) => issue.id))
+    );
+    const unaddressedIssues = cluster.issues.filter((issue) => !addressedIssueIds.has(issue.id));
 
     return NextResponse.json({
       success: true,
@@ -100,27 +112,20 @@ export async function GET(
         name: cluster.name,
         description: cluster.description,
         category: cluster.category,
-        severity: cluster.severity
+        severity: cluster.severity,
       },
       initiatives: cluster.initiatives,
       metrics,
       unaddressedIssues,
-      recommendations: generateInitiativeRecommendations(cluster, metrics, unaddressedIssues)
+      recommendations: generateInitiativeRecommendations(cluster, metrics, unaddressedIssues),
     });
-
   } catch (error) {
     console.error('Failed to fetch cluster initiatives:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch cluster initiatives' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch cluster initiatives' }, { status: 500 });
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -134,8 +139,8 @@ export async function POST(
     const cluster = await prisma.issueCluster.findUnique({
       where: { id: params.id },
       include: {
-        issues: true
-      }
+        issues: true,
+      },
     });
 
     if (!cluster) {
@@ -143,9 +148,10 @@ export async function POST(
     }
 
     // Get selected issues or use all cluster issues
-    const targetIssues = selectedIssueIds && selectedIssueIds.length > 0
-      ? cluster.issues.filter(issue => selectedIssueIds.includes(issue.id))
-      : cluster.issues;
+    const targetIssues =
+      selectedIssueIds && selectedIssueIds.length > 0
+        ? cluster.issues.filter((issue) => selectedIssueIds.includes(issue.id))
+        : cluster.issues;
 
     let initiativeData: any = {
       title,
@@ -158,17 +164,27 @@ export async function POST(
       crossImpact: {
         clusterBased: true,
         issueCount: targetIssues.length,
-        departments: [...new Set(targetIssues.map(issue => issue.department).filter(Boolean))],
-        estimatedImpact: cluster.severity === 'high' ? 'High' : cluster.severity === 'medium' ? 'Medium' : 'Low'
+        departments: [...new Set(targetIssues.map((issue) => issue.department).filter(Boolean))],
+        estimatedImpact:
+          cluster.severity === 'high' ? 'High' : cluster.severity === 'medium' ? 'Medium' : 'Low',
       },
       clusterMetrics: {
         targetIssues: targetIssues.length,
-        averageScore: targetIssues.length > 0 
-          ? Math.round(targetIssues.reduce((sum, issue) => sum + issue.heatmapScore, 0) / targetIssues.length)
-          : 0,
+        averageScore:
+          targetIssues.length > 0
+            ? Math.round(
+                targetIssues.reduce((sum, issue) => sum + issue.heatmapScore, 0) /
+                  targetIssues.length
+              )
+            : 0,
         clusterCategory: cluster.category,
-        estimatedROI: cluster.metrics?.estimatedROI || 'TBD'
-      }
+        estimatedROI:
+          typeof cluster.metrics === 'object' &&
+          cluster.metrics !== null &&
+          (cluster.metrics as any).estimatedROI
+            ? (cluster.metrics as any).estimatedROI
+            : 'TBD',
+      },
     };
 
     // Use AI to enhance the initiative if requested
@@ -183,7 +199,7 @@ Severity: ${cluster.severity}
 Issues to Address: ${targetIssues.length}
 
 Issue Details:
-${targetIssues.map(issue => `- ${issue.description.substring(0, 200)}... (Score: ${issue.heatmapScore})`).join('\n')}
+${targetIssues.map((issue) => `- ${issue.description.substring(0, 200)}... (Score: ${issue.heatmapScore})`).join('\n')}
 
 Generate a detailed initiative in JSON format:
 {
@@ -206,7 +222,10 @@ Generate a detailed initiative in JSON format:
   "resourceRequirements": ["Required resources"]
 }`;
 
-        const aiResponse = await openAIService.generateIssueInsights(aiPrompt, { industry: 'business', size: 'SMB' });
+        const aiResponse = await openAIService.generateIssueInsights(aiPrompt, {
+          industry: 'business',
+          size: 'SMB',
+        });
 
         try {
           // If AI response is available, try to parse it, otherwise use fallback
@@ -224,8 +243,8 @@ Generate a detailed initiative in JSON format:
               phases: aiData.phases || [],
               successMetrics: aiData.successMetrics || [],
               riskFactors: aiData.riskFactors || [],
-              resourceRequirements: aiData.resourceRequirements || []
-            }
+              resourceRequirements: aiData.resourceRequirements || [],
+            },
           };
         } catch (parseError) {
           console.warn('AI response parsing failed, using manual data');
@@ -240,12 +259,12 @@ Generate a detailed initiative in JSON format:
       data: initiativeData,
       include: {
         owner: {
-          select: { name: true, email: true }
+          select: { name: true, email: true },
         },
         cluster: {
-          select: { name: true, category: true }
-        }
-      }
+          select: { name: true, category: true },
+        },
+      },
     });
 
     // Connect the initiative to the selected issues
@@ -254,9 +273,9 @@ Generate a detailed initiative in JSON format:
         where: { id: newInitiative.id },
         data: {
           addressedIssues: {
-            connect: targetIssues.map(issue => ({ id: issue.id }))
-          }
-        }
+            connect: targetIssues.map((issue) => ({ id: issue.id })),
+          },
+        },
       });
     }
 
@@ -272,23 +291,19 @@ Generate a detailed initiative in JSON format:
           clusterName: cluster.name,
           issueCount: targetIssues.length,
           aiEnhanced: useAI,
-          timestamp: new Date().toISOString()
-        }
-      }
+          timestamp: new Date().toISOString(),
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
       initiative: newInitiative,
-      message: `Cluster-based initiative created successfully${useAI ? ' with AI enhancement' : ''}`
+      message: `Cluster-based initiative created successfully${useAI ? ' with AI enhancement' : ''}`,
     });
-
   } catch (error) {
     console.error('Failed to create cluster initiative:', error);
-    return NextResponse.json(
-      { error: 'Failed to create cluster initiative' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create cluster initiative' }, { status: 500 });
   }
 }
 
@@ -297,19 +312,19 @@ function generateInitiativeRecommendations(cluster: any, metrics: any, unaddress
 
   // Coverage gap recommendation
   if (metrics.coveragePercentage < 70 && unaddressedIssues.length > 0) {
-    const highPriorityUnaddressed = unaddressedIssues.filter(issue => issue.heatmapScore > 80);
-    
+    const highPriorityUnaddressed = unaddressedIssues.filter((issue) => issue.heatmapScore > 80);
+
     recommendations.push({
       type: 'coverage',
       priority: highPriorityUnaddressed.length > 0 ? 'high' : 'medium',
       title: 'Address Coverage Gaps',
       description: `${unaddressedIssues.length} issues (${highPriorityUnaddressed.length} high-priority) not addressed by current initiatives`,
       action: 'create_comprehensive_initiative',
-      suggestedIssues: highPriorityUnaddressed.slice(0, 3).map(issue => ({
+      suggestedIssues: highPriorityUnaddressed.slice(0, 3).map((issue) => ({
         id: issue.id,
         description: issue.description.substring(0, 100) + '...',
-        score: issue.heatmapScore
-      }))
+        score: issue.heatmapScore,
+      })),
     });
   }
 
@@ -320,7 +335,7 @@ function generateInitiativeRecommendations(cluster: any, metrics: any, unaddress
       priority: 'medium',
       title: 'Accelerate Initiative Progress',
       description: `Current initiatives averaging ${metrics.averageProgress}% progress. Consider resource reallocation or process improvements.`,
-      action: 'review_initiative_resources'
+      action: 'review_initiative_resources',
     });
   }
 
@@ -331,7 +346,7 @@ function generateInitiativeRecommendations(cluster: any, metrics: any, unaddress
       priority: 'medium',
       title: 'Consider Initiative Consolidation',
       description: `${metrics.totalInitiatives} initiatives with slow progress. Consolidating into fewer, well-resourced initiatives may be more effective.`,
-      action: 'consolidate_initiatives'
+      action: 'consolidate_initiatives',
     });
   }
 
@@ -342,7 +357,7 @@ function generateInitiativeRecommendations(cluster: any, metrics: any, unaddress
       priority: 'low',
       title: 'Successful Cluster Management',
       description: `Strong performance with ${metrics.completedInitiatives} completed initiatives and ${metrics.coveragePercentage}% issue coverage. Consider sharing best practices.`,
-      action: 'document_success_patterns'
+      action: 'document_success_patterns',
     });
   }
 

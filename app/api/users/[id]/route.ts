@@ -14,18 +14,15 @@ const updateUserSchema = z.object({
 async function isAdmin(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return false;
-  
+
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email }
+    where: { email: session.user.email },
   });
-  
+
   return user?.role === 'ADMIN';
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -46,9 +43,9 @@ export async function GET(
             initiatives: true,
             comments: true,
             ideas: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -56,20 +53,13 @@ export async function GET(
     }
 
     return NextResponse.json(user);
-
   } catch (error) {
     console.error('User fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -78,7 +68,7 @@ export async function PUT(
 
     // Only admins can update other users, users can update themselves
     const currentUser = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (!currentUser) {
@@ -97,10 +87,7 @@ export async function PUT(
 
     // Only admins can change roles
     if (updateData.role && !isUserAdmin) {
-      return NextResponse.json(
-        { error: 'Only admins can change user roles' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Only admins can change user roles' }, { status: 403 });
     }
 
     const updatedUser = await prisma.user.update({
@@ -112,7 +99,7 @@ export async function PUT(
         email: true,
         role: true,
         updatedAt: true,
-      }
+      },
     });
 
     // Create audit log
@@ -120,37 +107,27 @@ export async function PUT(
       data: {
         userId: currentUser.id,
         action: 'USER_UPDATED',
-        details: { 
+        details: {
           targetUserId: params.id,
           changes: updateData,
-          isSelfUpdate 
-        }
-      }
+          isSelfUpdate,
+        },
+      },
     });
 
     return NextResponse.json(updatedUser);
-
   } catch (error) {
     console.error('User update error:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: error.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: error.errors }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const adminCheck = await isAdmin(req);
     if (!adminCheck) {
@@ -159,21 +136,18 @@ export async function DELETE(
 
     const session = await getServerSession(authOptions);
     const currentUser = await prisma.user.findUnique({
-      where: { email: session!.user!.email! }
+      where: { email: session!.user!.email! },
     });
 
     // Prevent self-deletion
     if (currentUser?.id === params.id) {
-      return NextResponse.json(
-        { error: 'Cannot delete your own account' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Cannot delete your own account' }, { status: 400 });
     }
 
     // Get user info before deletion for audit log
     const userToDelete = await prisma.user.findUnique({
       where: { id: params.id },
-      select: { id: true, email: true, name: true, role: true }
+      select: { id: true, email: true, name: true, role: true },
     });
 
     if (!userToDelete) {
@@ -182,7 +156,7 @@ export async function DELETE(
 
     // Delete user (cascade will handle related records)
     await prisma.user.delete({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     // Create audit log
@@ -190,19 +164,15 @@ export async function DELETE(
       data: {
         userId: currentUser!.id,
         action: 'USER_DELETED',
-        details: { 
-          deletedUser: userToDelete
-        }
-      }
+        details: {
+          deletedUser: userToDelete,
+        },
+      },
     });
 
     return NextResponse.json({ message: 'User deleted successfully' });
-
   } catch (error) {
     console.error('User deletion error:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
   }
 }

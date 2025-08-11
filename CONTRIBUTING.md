@@ -18,28 +18,33 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 ### Development Setup
 
 1. **Fork and clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/flowvision.git
    cd flowvision
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up your development environment**
+
    ```bash
    cp .env.example .env.local
    # Edit .env.local with your local configuration
    ```
 
 4. **Start the development database**
+
    ```bash
    docker-compose up -d
    ```
 
 5. **Run database migrations**
+
    ```bash
    npx prisma migrate dev
    npx prisma db seed
@@ -73,6 +78,7 @@ type(scope): description
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -82,6 +88,7 @@ type(scope): description
 - `chore`: Maintenance tasks
 
 **Examples:**
+
 ```
 feat(auth): add user registration with email verification
 fix(dashboard): resolve initiative loading performance issue
@@ -91,6 +98,7 @@ docs(readme): update installation instructions
 ### Pull Request Process
 
 1. **Create a feature branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -102,6 +110,7 @@ docs(readme): update installation instructions
    - Update documentation as needed
 
 3. **Test your changes**
+
    ```bash
    npm test
    npm run lint
@@ -109,12 +118,14 @@ docs(readme): update installation instructions
    ```
 
 4. **Commit your changes**
+
    ```bash
    git add .
    git commit -m "feat(component): add new feature"
    ```
 
 5. **Push to your fork**
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -283,6 +294,7 @@ For new features, please provide:
 ## 🎉 Recognition
 
 Contributors will be recognized in:
+
 - README contributors section
 - Release notes for their contributions
 - GitHub contributor graphs

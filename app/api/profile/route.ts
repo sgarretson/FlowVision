@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
     update: { industry, size, metrics },
     create: { userId: user.id, industry, size, metrics },
   });
-  await prisma.auditLog.create({ data: { userId: user.id, action: 'PROFILE_SAVE', details: { industry, size } } });
+  await prisma.auditLog.create({
+    data: { userId: user.id, action: 'PROFILE_SAVE', details: { industry, size } },
+  });
   return NextResponse.json(profile);
 }

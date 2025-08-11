@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
     data: {
       userId: user.id,
       action: 'INITIATIVE_CREATE',
-      details: { id: created.id, title }
-    }
+      details: { id: created.id, title },
+    },
   });
 
   return NextResponse.json(created, { status: 201 });

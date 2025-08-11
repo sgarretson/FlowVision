@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (!user) {
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     // Check if initiative exists
     const initiative = await prisma.initiative.findUnique({
-      where: { id: initiativeId }
+      where: { id: initiativeId },
     });
 
     if (!initiative) {
@@ -43,9 +43,9 @@ export async function POST(req: NextRequest) {
       where: {
         userId_initiativeId: {
           userId: user.id,
-          initiativeId: initiativeId
-        }
-      }
+          initiativeId: initiativeId,
+        },
+      },
     });
 
     let vote;
@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
         where: { id: existingVote.id },
         data: {
           type: 'priority',
-          value: priority || difficulty || roi || 1
-        }
+          value: priority || difficulty || roi || 1,
+        },
       });
     } else {
       vote = await prisma.vote.create({
@@ -63,24 +63,24 @@ export async function POST(req: NextRequest) {
           userId: user.id,
           initiativeId: initiativeId,
           type: 'priority',
-          value: priority || difficulty || roi || 1
-        }
+          value: priority || difficulty || roi || 1,
+        },
       });
     }
 
     // If difficulty or ROI provided, update initiative with averaged values
     if (difficulty !== undefined || roi !== undefined) {
       const allVotes = await prisma.vote.findMany({
-        where: { initiativeId: initiativeId }
+        where: { initiativeId: initiativeId },
       });
 
       // Calculate averages (simplified - in real app you'd want separate vote types)
       const updateData: any = {};
-      
+
       if (difficulty !== undefined) {
         updateData.difficulty = difficulty;
       }
-      
+
       if (roi !== undefined) {
         updateData.roi = roi;
       }
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
       if (Object.keys(updateData).length > 0) {
         await prisma.initiative.update({
           where: { id: initiativeId },
-          data: updateData
+          data: updateData,
         });
       }
     }
@@ -103,9 +103,9 @@ export async function POST(req: NextRequest) {
           difficulty,
           roi,
           priority,
-          voteType: existingVote ? 'update' : 'create'
-        }
-      }
+          voteType: existingVote ? 'update' : 'create',
+        },
+      },
     });
 
     return NextResponse.json({
@@ -113,24 +113,17 @@ export async function POST(req: NextRequest) {
       vote: {
         id: vote.id,
         value: vote.value,
-        type: vote.type
-      }
+        type: vote.type,
+      },
     });
-
   } catch (error) {
     console.error('Prioritization vote error:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: error.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: error.errors }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to record vote' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to record vote' }, { status: 500 });
   }
 }
 
@@ -153,30 +146,25 @@ export async function GET(req: NextRequest) {
       where: { initiativeId },
       include: {
         user: {
-          select: { name: true, email: true }
-        }
-      }
+          select: { name: true, email: true },
+        },
+      },
     });
 
     // Calculate summary statistics
     const totalVotes = votes.length;
-    const averageValue = totalVotes > 0 
-      ? votes.reduce((sum, vote) => sum + vote.value, 0) / totalVotes 
-      : 0;
+    const averageValue =
+      totalVotes > 0 ? votes.reduce((sum, vote) => sum + vote.value, 0) / totalVotes : 0;
 
     return NextResponse.json({
       votes,
       summary: {
         totalVotes,
-        averageValue: Math.round(averageValue * 100) / 100
-      }
+        averageValue: Math.round(averageValue * 100) / 100,
+      },
     });
-
   } catch (error) {
     console.error('Get prioritization votes error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch votes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch votes' }, { status: 500 });
   }
 }

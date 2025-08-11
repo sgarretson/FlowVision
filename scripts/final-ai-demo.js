@@ -14,7 +14,7 @@ class OpenAIService {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -32,7 +32,7 @@ class OpenAIService {
       const data = await response.json();
       return {
         content: data.choices[0].message.content,
-        usage: data.usage
+        usage: data.usage,
       };
     } catch (error) {
       throw error;
@@ -49,7 +49,7 @@ async function demonstrateIssueAnalysis() {
 
   // Get a real issue from the database
   const issue = await prisma.issue.findFirst({
-    orderBy: { heatmapScore: 'desc' }
+    orderBy: { heatmapScore: 'desc' },
   });
 
   if (!issue) {
@@ -86,14 +86,23 @@ Please respond with a JSON object containing:
 
   try {
     console.log('🤖 Calling OpenAI API for analysis...');
-    const result = await openaiService.getCompletion([
-      { role: 'system', content: 'You are a business efficiency expert who analyzes operational issues and provides structured insights.' },
-      { role: 'user', content: prompt }
-    ], 800);
+    const result = await openaiService.getCompletion(
+      [
+        {
+          role: 'system',
+          content:
+            'You are a business efficiency expert who analyzes operational issues and provides structured insights.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      800
+    );
 
     console.log('📊 AI ANALYSIS RESULT:');
     console.log(result.content);
-    console.log(`\n💰 API Usage: ${result.usage.total_tokens} tokens (~$${(result.usage.total_tokens * 0.0015 / 1000).toFixed(4)})`);
+    console.log(
+      `\n💰 API Usage: ${result.usage.total_tokens} tokens (~$${((result.usage.total_tokens * 0.0015) / 1000).toFixed(4)})`
+    );
 
     // Log the usage to audit log
     await prisma.auditLog.create({
@@ -104,10 +113,10 @@ Please respond with a JSON object containing:
           issueId: issue.id,
           tokens: result.usage.total_tokens,
           model: 'gpt-3.5-turbo',
-          cost: (result.usage.total_tokens * 0.0015 / 1000).toFixed(4),
-          success: true
-        }
-      }
+          cost: ((result.usage.total_tokens * 0.0015) / 1000).toFixed(4),
+          success: true,
+        },
+      },
     });
 
     return true;
@@ -123,7 +132,7 @@ async function demonstrateInitiativeGeneration() {
 
   // Get a real initiative from the database
   const initiative = await prisma.initiative.findFirst({
-    include: { owner: true }
+    include: { owner: true },
   });
 
   if (!initiative) {
@@ -168,14 +177,23 @@ Please provide a comprehensive enhancement in JSON format:
 
   try {
     console.log('🤖 Calling OpenAI API for initiative enhancement...');
-    const result = await openaiService.getCompletion([
-      { role: 'system', content: 'You are a business strategy consultant specializing in digital transformation initiatives.' },
-      { role: 'user', content: prompt }
-    ], 1000);
+    const result = await openaiService.getCompletion(
+      [
+        {
+          role: 'system',
+          content:
+            'You are a business strategy consultant specializing in digital transformation initiatives.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      1000
+    );
 
     console.log('🚀 AI ENHANCEMENT RESULT:');
     console.log(result.content);
-    console.log(`\n💰 API Usage: ${result.usage.total_tokens} tokens (~$${(result.usage.total_tokens * 0.0015 / 1000).toFixed(4)})`);
+    console.log(
+      `\n💰 API Usage: ${result.usage.total_tokens} tokens (~$${((result.usage.total_tokens * 0.0015) / 1000).toFixed(4)})`
+    );
 
     // Log the usage to audit log
     await prisma.auditLog.create({
@@ -186,10 +204,10 @@ Please provide a comprehensive enhancement in JSON format:
           initiativeId: initiative.id,
           tokens: result.usage.total_tokens,
           model: 'gpt-3.5-turbo',
-          cost: (result.usage.total_tokens * 0.0015 / 1000).toFixed(4),
-          success: true
-        }
-      }
+          cost: ((result.usage.total_tokens * 0.0015) / 1000).toFixed(4),
+          success: true,
+        },
+      },
     });
 
     return true;
@@ -208,8 +226,13 @@ async function demonstrateUsageMonitoring() {
     const aiLogs = await prisma.auditLog.findMany({
       where: {
         action: {
-          in: ['AI_ISSUE_ANALYSIS', 'AI_INITIATIVE_RECOMMENDATIONS', 'AI_INITIATIVE_REQUIREMENTS', 'OPENAI_CONNECTION_TEST']
-        }
+          in: [
+            'AI_ISSUE_ANALYSIS',
+            'AI_INITIATIVE_RECOMMENDATIONS',
+            'AI_INITIATIVE_REQUIREMENTS',
+            'OPENAI_CONNECTION_TEST',
+          ],
+        },
       },
       orderBy: { timestamp: 'desc' },
       take: 10,
@@ -217,10 +240,10 @@ async function demonstrateUsageMonitoring() {
         user: {
           select: {
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
 
     console.log(`📊 USAGE STATISTICS (Last 10 AI Operations):`);
@@ -233,20 +256,24 @@ async function demonstrateUsageMonitoring() {
       const details = log.details;
       const tokens = details.tokens || 0;
       const cost = parseFloat(details.cost || 0);
-      
+
       totalTokens += tokens;
       totalCost += cost;
 
       console.log(`${index + 1}. ${log.action}`);
       console.log(`   User: ${log.user?.name || 'System'}`);
-      console.log(`   Time: ${log.timestamp.toLocaleDateString()} ${log.timestamp.toLocaleTimeString()}`);
+      console.log(
+        `   Time: ${log.timestamp.toLocaleDateString()} ${log.timestamp.toLocaleTimeString()}`
+      );
       console.log(`   Tokens: ${tokens} | Cost: $${cost.toFixed(4)}`);
       console.log('');
     });
 
     console.log('─'.repeat(60));
     console.log(`💰 TOTAL USAGE: ${totalTokens} tokens | $${totalCost.toFixed(4)}`);
-    console.log(`📈 AVERAGE PER REQUEST: ${Math.round(totalTokens / aiLogs.length)} tokens | $${(totalCost / aiLogs.length).toFixed(4)}`);
+    console.log(
+      `📈 AVERAGE PER REQUEST: ${Math.round(totalTokens / aiLogs.length)} tokens | $${(totalCost / aiLogs.length).toFixed(4)}`
+    );
 
     // Usage by action type
     const usageByType = aiLogs.reduce((acc, log) => {
@@ -255,14 +282,16 @@ async function demonstrateUsageMonitoring() {
         acc[action] = { count: 0, tokens: 0, cost: 0 };
       }
       acc[action].count++;
-      acc[action].tokens += (log.details.tokens || 0);
+      acc[action].tokens += log.details.tokens || 0;
       acc[action].cost += parseFloat(log.details.cost || 0);
       return acc;
     }, {});
 
     console.log('\n📋 USAGE BY FEATURE:');
     Object.entries(usageByType).forEach(([action, stats]) => {
-      console.log(`   ${action}: ${stats.count} calls | ${stats.tokens} tokens | $${stats.cost.toFixed(4)}`);
+      console.log(
+        `   ${action}: ${stats.count} calls | ${stats.tokens} tokens | $${stats.cost.toFixed(4)}`
+      );
     });
 
     return true;
@@ -280,7 +309,7 @@ async function main() {
   const results = {
     issueAnalysis: false,
     initiativeGeneration: false,
-    usageMonitoring: false
+    usageMonitoring: false,
   };
 
   // Demo 1: AI Issue Analysis
@@ -296,7 +325,9 @@ async function main() {
   console.log('\n\n🏆 DEMONSTRATION RESULTS');
   console.log('========================');
   console.log(`🧠 Issue Analysis: ${results.issueAnalysis ? '✅ SUCCESS' : '❌ FAILED'}`);
-  console.log(`🎯 Initiative Generation: ${results.initiativeGeneration ? '✅ SUCCESS' : '❌ FAILED'}`);
+  console.log(
+    `🎯 Initiative Generation: ${results.initiativeGeneration ? '✅ SUCCESS' : '❌ FAILED'}`
+  );
   console.log(`📈 Usage Monitoring: ${results.usageMonitoring ? '✅ SUCCESS' : '❌ FAILED'}`);
 
   const successCount = Object.values(results).filter(Boolean).length;

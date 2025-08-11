@@ -22,14 +22,14 @@ export default function InitiativesPage() {
     setItems(data);
   }
 
-  useEffect(() => { 
-    load(); 
-    
+  useEffect(() => {
+    load();
+
     // Check for pre-filled data from issues
     const fromIssue = searchParams.get('fromIssue');
     const prefilledTitle = searchParams.get('title');
     const prefilledProblem = searchParams.get('problem');
-    
+
     if (fromIssue === 'true') {
       if (prefilledTitle) setTitle(prefilledTitle);
       if (prefilledProblem) setProblem(prefilledProblem);
@@ -44,8 +44,12 @@ export default function InitiativesPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, problem, goal, kpis: [] }),
     });
-    setTitle(''); setProblem(''); setGoal(''); setMessage(null);
-    setAiRecommendations(null); setShowAiPanel(false);
+    setTitle('');
+    setProblem('');
+    setGoal('');
+    setMessage(null);
+    setAiRecommendations(null);
+    setShowAiPanel(false);
     await load();
   }
 
@@ -57,7 +61,7 @@ export default function InitiativesPage() {
 
     setAiLoading(true);
     setAiRecommendations(null);
-    
+
     try {
       const response = await fetch('/api/ai/generate-initiative', {
         method: 'POST',
@@ -65,16 +69,18 @@ export default function InitiativesPage() {
         body: JSON.stringify({
           title: title.trim(),
           problem: problem.trim(),
-          mode: 'recommendations'
-        })
+          mode: 'recommendations',
+        }),
       });
 
       const data = await response.json();
-      
+
       if (response.ok && data.result) {
-        setAiRecommendations(data.result.recommendations || 'No specific recommendations generated');
+        setAiRecommendations(
+          data.result.recommendations || 'No specific recommendations generated'
+        );
         setShowAiPanel(true);
-        
+
         // Auto-populate fields if AI provides them
         if (data.result.suggestedKPIs?.length > 0) {
           // We'll implement KPI suggestions in the detail page
@@ -96,19 +102,19 @@ export default function InitiativesPage() {
     }
 
     setAiLoading(true);
-    
+
     try {
       const response = await fetch('/api/ai/generate-initiative', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           problem: problem.trim(),
-          mode: 'requirements'
-        })
+          mode: 'requirements',
+        }),
       });
 
       const data = await response.json();
-      
+
       if (response.ok && data.result) {
         if (data.result.title) setTitle(data.result.title);
         if (data.result.goal) setGoal(data.result.goal);
@@ -141,7 +147,8 @@ export default function InitiativesPage() {
       <div className="text-center">
         <h1 className="text-h1 mb-4">Initiatives</h1>
         <p className="text-body max-w-2xl mx-auto">
-          Create and manage strategic initiatives. Drag to reorder by priority, or click to view details.
+          Create and manage strategic initiatives. Drag to reorder by priority, or click to view
+          details.
         </p>
       </div>
 
@@ -156,7 +163,7 @@ export default function InitiativesPage() {
       {/* Create Initiative Form */}
       <div className="card-primary p-6 max-w-4xl mx-auto">
         <h2 className="text-h2 mb-6 text-center">Create New Initiative</h2>
-        
+
         {/* AI Tools */}
         <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
           <h3 className="text-h3 mb-3 text-purple-800">AI-Powered Tools</h3>
@@ -179,30 +186,31 @@ export default function InitiativesPage() {
             </button>
           </div>
           <p className="text-sm text-purple-600 mt-2">
-            Fill in the problem statement to generate requirements, or add title + problem for AI recommendations
+            Fill in the problem statement to generate requirements, or add title + problem for AI
+            recommendations
           </p>
         </div>
 
         <form onSubmit={onCreate} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input 
-              className="input-field" 
-              placeholder="Initiative Title" 
-              value={title} 
+            <input
+              className="input-field"
+              placeholder="Initiative Title"
+              value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
             />
-            <input 
-              className="input-field" 
-              placeholder="Problem Statement" 
-              value={problem} 
+            <input
+              className="input-field"
+              placeholder="Problem Statement"
+              value={problem}
               onChange={(e) => setProblem(e.target.value)}
               required
             />
-            <input 
-              className="input-field" 
-              placeholder="Goal/Outcome" 
-              value={goal} 
+            <input
+              className="input-field"
+              placeholder="Goal/Outcome"
+              value={goal}
               onChange={(e) => setGoal(e.target.value)}
               required
             />
@@ -226,9 +234,7 @@ export default function InitiativesPage() {
                 ✕
               </button>
             </div>
-            <div className="text-sm text-blue-700 whitespace-pre-wrap">
-              {aiRecommendations}
-            </div>
+            <div className="text-sm text-blue-700 whitespace-pre-wrap">{aiRecommendations}</div>
           </div>
         )}
       </div>
@@ -237,8 +243,18 @@ export default function InitiativesPage() {
         {items.length === 0 ? (
           <div className="card-tertiary p-8 text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <svg
+                className="w-8 h-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
               </svg>
             </div>
             <h3 className="text-h3 mb-2">No Initiatives Yet</h3>
@@ -248,11 +264,9 @@ export default function InitiativesPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-h2">Your Initiatives</h2>
-              <div className="text-caption">
-                Drag to reorder • {items.length} total
-              </div>
+              <div className="text-caption">Drag to reorder • {items.length} total</div>
             </div>
-            
+
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="initiatives">
                 {(provided) => (
@@ -260,21 +274,33 @@ export default function InitiativesPage() {
                     {items.map((item, index) => (
                       <Draggable key={item.id} draggableId={item.id} index={index}>
                         {(prov, snapshot) => (
-                          <div 
-                            ref={prov.innerRef} 
-                            {...prov.draggableProps} 
+                          <div
+                            ref={prov.innerRef}
+                            {...prov.draggableProps}
                             className={`card-secondary p-6 transition-all duration-200 ${
-                              snapshot.isDragging ? 'rotate-2 shadow-card-primary' : 'hover:shadow-card-secondary'
+                              snapshot.isDragging
+                                ? 'rotate-2 shadow-card-primary'
+                                : 'hover:shadow-card-secondary'
                             }`}
                           >
                             <div className="flex items-start gap-4">
                               {/* Drag Handle */}
-                              <div 
+                              <div
                                 {...prov.dragHandleProps}
                                 className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
                               >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 8h16M4 16h16"
+                                  />
                                 </svg>
                               </div>
 
@@ -284,19 +310,21 @@ export default function InitiativesPage() {
                                   <h3 className="text-h3 group-hover:text-primary transition-colors mb-2">
                                     {item.title}
                                   </h3>
-                                  <p className="text-body mb-3 line-clamp-2">
-                                    {item.problem}
-                                  </p>
-                                  
+                                  <p className="text-body mb-3 line-clamp-2">{item.problem}</p>
+
                                   {/* Scores */}
                                   <div className="flex items-center gap-4 text-caption">
                                     <span className="flex items-center gap-1">
                                       <span className="font-medium">Priority:</span>
-                                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                        (item.priorityScore ?? 0) >= 70 ? 'bg-green-100 text-green-800' :
-                                        (item.priorityScore ?? 0) >= 40 ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-red-100 text-red-800'
-                                      }`}>
+                                      <span
+                                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                          (item.priorityScore ?? 0) >= 70
+                                            ? 'bg-green-100 text-green-800'
+                                            : (item.priorityScore ?? 0) >= 40
+                                              ? 'bg-yellow-100 text-yellow-800'
+                                              : 'bg-red-100 text-red-800'
+                                        }`}
+                                      >
                                         {item.priorityScore ?? 0}
                                       </span>
                                     </span>
@@ -307,12 +335,17 @@ export default function InitiativesPage() {
                               </div>
 
                               {/* Status Badge */}
-                              <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                item.status === 'Done' ? 'bg-green-100 text-green-800' :
-                                item.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                                item.status === 'Prioritize' ? 'bg-orange-100 text-orange-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
+                              <div
+                                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                  item.status === 'Done'
+                                    ? 'bg-green-100 text-green-800'
+                                    : item.status === 'In Progress'
+                                      ? 'bg-blue-100 text-blue-800'
+                                      : item.status === 'Prioritize'
+                                        ? 'bg-orange-100 text-orange-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                }`}
+                              >
                                 {item.status}
                               </div>
                             </div>

@@ -14,7 +14,7 @@ type AlertSettings = {
     enabled: boolean;
     channel: 'email' | 'slack' | 'none';
     timeUTC: string; // "09:00"
-  }
+  };
 };
 
 function defaults(): AlertSettings {
@@ -25,7 +25,7 @@ function defaults(): AlertSettings {
     budgetOverrunWarnPct: 25,
     budgetOverrunCritPct: 50,
     lowRoiPct: 10,
-    digest: { enabled: false, channel: 'none', timeUTC: '09:00' }
+    digest: { enabled: false, channel: 'none', timeUTC: '09:00' },
   };
 }
 
@@ -57,4 +57,3 @@ export async function PUT(request: NextRequest) {
   await prisma.user.update({ where: { id: user.id }, data: { preferences: nextPrefs } });
   return NextResponse.json({ success: true, settings: nextPrefs.alerts });
 }
-

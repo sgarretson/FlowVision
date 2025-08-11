@@ -19,11 +19,11 @@ export async function GET(request: NextRequest) {
 
     // Build filter conditions
     const where: any = {};
-    
+
     if (phase) {
       where.phase = phase;
     }
-    
+
     if (startDate || endDate) {
       where.AND = [];
       if (startDate) {
@@ -81,21 +81,18 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: [
-        { priorityScore: 'desc' },
-        { timelineStart: 'asc' },
-      ],
+      orderBy: [{ priorityScore: 'desc' }, { timelineStart: 'asc' }],
     });
 
     // Calculate timeline metrics
     const now = new Date();
     const metrics = {
       totalInitiatives: initiatives.length,
-      activeInitiatives: initiatives.filter(i => i.status === 'In Progress').length,
-      completedInitiatives: initiatives.filter(i => i.status === 'Done').length,
+      activeInitiatives: initiatives.filter((i) => i.status === 'In Progress').length,
+      completedInitiatives: initiatives.filter((i) => i.status === 'Done').length,
       overdueMilestones: initiatives.reduce((acc, init) => {
-        const overdue = init.milestones.filter(m => 
-          m.status !== 'completed' && new Date(m.dueDate) < now
+        const overdue = init.milestones.filter(
+          (m) => m.status !== 'completed' && new Date(m.dueDate) < now
         ).length;
         return acc + overdue;
       }, 0),
@@ -131,23 +128,33 @@ export async function GET(request: NextRequest) {
           assignments: {
             include: {
               initiative: {
-                select: { id: true, title: true, status: true, timelineStart: true, timelineEnd: true },
+                select: {
+                  id: true,
+                  title: true,
+                  status: true,
+                  timelineStart: true,
+                  timelineEnd: true,
+                },
               },
             },
           },
         },
       });
 
-      const teamUtilization = teams.map(team => {
+      const teamUtilization = teams.map((team) => {
         const totalAllocated = team.assignments.reduce((acc, assignment) => {
           // Only count active initiatives
-          if (assignment.initiative.status === 'In Progress' || assignment.initiative.status === 'Prioritize') {
+          if (
+            assignment.initiative.status === 'In Progress' ||
+            assignment.initiative.status === 'Prioritize'
+          ) {
             return acc + assignment.hoursAllocated;
           }
           return acc;
         }, 0);
 
-        const utilizationPercent = team.capacity > 0 ? (totalAllocated / (team.capacity * 4)) * 100 : 0; // 4 weeks per month average
+        const utilizationPercent =
+          team.capacity > 0 ? (totalAllocated / (team.capacity * 4)) * 100 : 0; // 4 weeks per month average
 
         return {
           ...team,
@@ -170,12 +177,8 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(roadmapData);
-
   } catch (error) {
     console.error('Roadmap fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch roadmap data' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch roadmap data' }, { status: 500 });
   }
 }

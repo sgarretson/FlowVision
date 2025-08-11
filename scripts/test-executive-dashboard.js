@@ -3,7 +3,7 @@
 /**
  * EXECUTIVE DASHBOARD VALIDATION SCRIPT
  * =====================================
- * 
+ *
  * Tests all executive dashboard endpoints and features to ensure proper functionality
  * Validates AI-powered insights, health scores, ROI forecasting, and alert systems
  */
@@ -22,8 +22,8 @@ class ExecutiveDashboardTester {
       summary: {
         passed: 0,
         failed: 0,
-        total: 0
-      }
+        total: 0,
+      },
     };
   }
 
@@ -39,7 +39,6 @@ class ExecutiveDashboardTester {
       await this.testInsightsGeneration();
       await this.testDataConsistency();
       await this.generateTestReport();
-      
     } catch (error) {
       console.error('❌ Test execution failed:', error);
       this.testResults.errors.push(`Test execution: ${error.message}`);
@@ -56,20 +55,24 @@ class ExecutiveDashboardTester {
       // Get raw data for health score calculation
       const [initiatives, issues] = await Promise.all([
         prisma.initiative.findMany({
-          select: { progress: true, status: true, createdAt: true, updatedAt: true }
+          select: { progress: true, status: true, createdAt: true, updatedAt: true },
         }),
         prisma.issue.findMany({
-          select: { votes: true, heatmapScore: true, createdAt: true, clusterId: true }
-        })
+          select: { votes: true, heatmapScore: true, createdAt: true, clusterId: true },
+        }),
       ]);
 
       console.log(`   📈 Found ${initiatives.length} initiatives, ${issues.length} issues`);
 
       // Test health score components
-      const activeInitiatives = initiatives.filter(i => ['APPROVED', 'ACTIVE'].includes(i.status));
-      const averageProgress = activeInitiatives.length > 0 
-        ? activeInitiatives.reduce((sum, i) => sum + (i.progress || 0), 0) / activeInitiatives.length
-        : 0;
+      const activeInitiatives = initiatives.filter((i) =>
+        ['APPROVED', 'ACTIVE'].includes(i.status)
+      );
+      const averageProgress =
+        activeInitiatives.length > 0
+          ? activeInitiatives.reduce((sum, i) => sum + (i.progress || 0), 0) /
+            activeInitiatives.length
+          : 0;
 
       console.log(`   ✅ Active initiatives: ${activeInitiatives.length}`);
       console.log(`   ✅ Average progress: ${Math.round(averageProgress)}%`);
@@ -83,13 +86,12 @@ class ExecutiveDashboardTester {
           metrics: {
             activeInitiatives: activeInitiatives.length,
             averageProgress: Math.round(averageProgress),
-            totalIssues: issues.length
-          }
+            totalIssues: issues.length,
+          },
         };
       } else {
         throw new Error('Health score components out of valid range');
       }
-      
     } catch (error) {
       console.error('   ❌ Health score test failed:', error.message);
       this.testResults.summary.failed++;
@@ -106,17 +108,17 @@ class ExecutiveDashboardTester {
       // Test timeline risk detection
       const now = new Date();
       const activeInitiatives = await prisma.initiative.findMany({
-        where: { 
+        where: {
           status: { in: ['APPROVED', 'ACTIVE'] },
-          timelineEnd: { gte: now }
+          timelineEnd: { gte: now },
         },
         select: {
           id: true,
           title: true,
           progress: true,
           timelineStart: true,
-          timelineEnd: true
-        }
+          timelineEnd: true,
+        },
       });
 
       let timelineRisks = 0;
@@ -137,7 +139,7 @@ class ExecutiveDashboardTester {
 
       // Test resource allocation analysis
       const ownerCounts = new Map();
-      activeInitiatives.forEach(i => {
+      activeInitiatives.forEach((i) => {
         const count = ownerCounts.get(i.ownerId) || 0;
         ownerCounts.set(i.ownerId, count + 1);
       });
@@ -159,10 +161,9 @@ class ExecutiveDashboardTester {
         metrics: {
           timelineRisks,
           resourceConcerns,
-          totalAnalyzed: activeInitiatives.length
-        }
+          totalAnalyzed: activeInitiatives.length,
+        },
       };
-      
     } catch (error) {
       console.error('   ❌ Alert generation test failed:', error.message);
       this.testResults.summary.failed++;
@@ -186,24 +187,26 @@ class ExecutiveDashboardTester {
           roi: true,
           progress: true,
           createdAt: true,
-          updatedAt: true
-        }
+          updatedAt: true,
+        },
       });
 
-      const completedInitiatives = initiatives.filter(i => i.status === 'COMPLETED');
-      const activeInitiatives = initiatives.filter(i => ['APPROVED', 'ACTIVE'].includes(i.status));
+      const completedInitiatives = initiatives.filter((i) => i.status === 'COMPLETED');
+      const activeInitiatives = initiatives.filter((i) =>
+        ['APPROVED', 'ACTIVE'].includes(i.status)
+      );
 
       // Calculate current metrics
       const totalInvestment = initiatives
-        .filter(i => i.budget)
+        .filter((i) => i.budget)
         .reduce((sum, i) => sum + i.budget, 0);
 
       let realizedRoi = 0;
       if (completedInitiatives.length > 0) {
         const completedRois = completedInitiatives
-          .filter(i => i.roi !== null && i.roi !== undefined)
-          .map(i => i.roi);
-        
+          .filter((i) => i.roi !== null && i.roi !== undefined)
+          .map((i) => i.roi);
+
         if (completedRois.length > 0) {
           realizedRoi = completedRois.reduce((sum, roi) => sum + roi, 0) / completedRois.length;
         }
@@ -228,13 +231,12 @@ class ExecutiveDashboardTester {
             totalInvestment,
             realizedRoi: Math.round(realizedRoi * 100) / 100,
             completedCount: completedInitiatives.length,
-            activeCount: activeInitiatives.length
-          }
+            activeCount: activeInitiatives.length,
+          },
         };
       } else {
         throw new Error('Insufficient data for ROI forecasting');
       }
-      
     } catch (error) {
       console.error('   ❌ ROI forecasting test failed:', error.message);
       this.testResults.summary.failed++;
@@ -253,35 +255,37 @@ class ExecutiveDashboardTester {
         prisma.initiative.findMany(),
         prisma.issue.findMany({
           include: {
-            cluster: { select: { name: true, severity: true } }
-          }
+            cluster: { select: { name: true, severity: true } },
+          },
         }),
         prisma.issueCluster.findMany({
           include: {
             issues: true,
-            initiatives: true
-          }
-        })
+            initiatives: true,
+          },
+        }),
       ]);
 
       // Test strategic insights
-      const activeInitiatives = initiatives.filter(i => ['APPROVED', 'ACTIVE'].includes(i.status));
-      const completedInitiatives = initiatives.filter(i => i.status === 'COMPLETED');
+      const activeInitiatives = initiatives.filter((i) =>
+        ['APPROVED', 'ACTIVE'].includes(i.status)
+      );
+      const completedInitiatives = initiatives.filter((i) => i.status === 'COMPLETED');
       const portfolioBalance = activeInitiatives.length / Math.max(1, completedInitiatives.length);
 
       // Test operational insights
       const now = new Date();
-      const recentCompletions = initiatives.filter(i => {
-        return i.status === 'COMPLETED' && 
-               i.updatedAt && 
-               (now.getTime() - new Date(i.updatedAt).getTime()) < (30 * 24 * 60 * 60 * 1000);
+      const recentCompletions = initiatives.filter((i) => {
+        return (
+          i.status === 'COMPLETED' &&
+          i.updatedAt &&
+          now.getTime() - new Date(i.updatedAt).getTime() < 30 * 24 * 60 * 60 * 1000
+        );
       });
 
       // Test risk insights
-      const overdueInitiatives = initiatives.filter(i => 
-        i.timelineEnd && 
-        new Date(i.timelineEnd) < now && 
-        i.status !== 'COMPLETED'
+      const overdueInitiatives = initiatives.filter(
+        (i) => i.timelineEnd && new Date(i.timelineEnd) < now && i.status !== 'COMPLETED'
       );
 
       console.log(`   📋 Portfolio balance ratio: ${portfolioBalance.toFixed(2)}`);
@@ -291,7 +295,7 @@ class ExecutiveDashboardTester {
 
       // Validate insights can be generated
       const hasInsightData = initiatives.length > 0 && issues.length > 0;
-      
+
       if (hasInsightData) {
         console.log('   ✅ Insights generation: PASSED');
         this.testResults.summary.passed++;
@@ -301,13 +305,12 @@ class ExecutiveDashboardTester {
             portfolioBalance: Math.round(portfolioBalance * 100) / 100,
             recentCompletions: recentCompletions.length,
             overdueCount: overdueInitiatives.length,
-            clusterCount: clusters.length
-          }
+            clusterCount: clusters.length,
+          },
         };
       } else {
         throw new Error('Insufficient data for insights generation');
       }
-      
     } catch (error) {
       console.error('   ❌ Insights generation test failed:', error.message);
       this.testResults.summary.failed++;
@@ -326,14 +329,14 @@ class ExecutiveDashboardTester {
         prisma.initiative.count(),
         prisma.issue.count(),
         prisma.issueCluster.count(),
-        prisma.user.count()
+        prisma.user.count(),
       ]);
 
       // Validate foreign key relationships
       const clusteredIssues = await prisma.issue.count({
-        where: { 
-          clusterId: { not: null }
-        }
+        where: {
+          clusterId: { not: null },
+        },
       });
 
       // All initiatives have owners (required field), so skip null check
@@ -357,7 +360,6 @@ class ExecutiveDashboardTester {
       } else {
         throw new Error('Data consistency validation failed');
       }
-      
     } catch (error) {
       console.error('   ❌ Data consistency test failed:', error.message);
       this.testResults.summary.failed++;
@@ -368,10 +370,11 @@ class ExecutiveDashboardTester {
   async generateTestReport() {
     console.log('\n📋 EXECUTIVE DASHBOARD TEST REPORT');
     console.log('==================================');
-    
-    const passRate = this.testResults.summary.total > 0 
-      ? (this.testResults.summary.passed / this.testResults.summary.total) * 100 
-      : 0;
+
+    const passRate =
+      this.testResults.summary.total > 0
+        ? (this.testResults.summary.passed / this.testResults.summary.total) * 100
+        : 0;
 
     console.log(`\n📊 Test Summary:`);
     console.log(`   • Total Tests: ${this.testResults.summary.total}`);
@@ -382,7 +385,9 @@ class ExecutiveDashboardTester {
     console.log(`\n🎯 Feature Status:`);
     console.log(`   • Health Score: ${this.getStatusIcon(this.testResults.healthScore?.status)}`);
     console.log(`   • Alert System: ${this.getStatusIcon(this.testResults.alerts?.status)}`);
-    console.log(`   • ROI Forecasting: ${this.getStatusIcon(this.testResults.roiForecast?.status)}`);
+    console.log(
+      `   • ROI Forecasting: ${this.getStatusIcon(this.testResults.roiForecast?.status)}`
+    );
     console.log(`   • AI Insights: ${this.getStatusIcon(this.testResults.insights?.status)}`);
 
     if (this.testResults.errors.length > 0) {
@@ -426,9 +431,12 @@ class ExecutiveDashboardTester {
 
   getStatusIcon(status) {
     switch (status) {
-      case 'passed': return '✅ PASSED';
-      case 'failed': return '❌ FAILED';
-      default: return '⚪ NOT TESTED';
+      case 'passed':
+        return '✅ PASSED';
+      case 'failed':
+        return '❌ FAILED';
+      default:
+        return '⚪ NOT TESTED';
     }
   }
 }

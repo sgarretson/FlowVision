@@ -30,11 +30,11 @@ export default function UserProfilePage() {
       notifications: {
         email: true,
         browser: true,
-        digest: 'weekly'
+        digest: 'weekly',
       },
       theme: 'light',
-      timezone: 'America/New_York'
-    }
+      timezone: 'America/New_York',
+    },
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,7 +57,7 @@ export default function UserProfilePage() {
           name: data.name || '',
           email: data.email || '',
           role: data.role || 'LEADER',
-          preferences: data.preferences || profile.preferences
+          preferences: data.preferences || profile.preferences,
         });
       }
     } catch (error) {
@@ -76,7 +76,7 @@ export default function UserProfilePage() {
       const res = await fetch('/api/profile/user', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile)
+        body: JSON.stringify(profile),
       });
 
       if (res.ok) {
@@ -120,7 +120,7 @@ export default function UserProfilePage() {
         {/* Basic Information */}
         <div className="card-secondary p-6">
           <h2 className="text-h2 mb-4">Basic Information</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -130,7 +130,7 @@ export default function UserProfilePage() {
                 id="name"
                 type="text"
                 value={profile.name}
-                onChange={(e) => setProfile({...profile, name: e.target.value})}
+                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                 className="form-input"
                 placeholder="Enter your full name"
               />
@@ -171,10 +171,12 @@ export default function UserProfilePage() {
               <select
                 id="timezone"
                 value={profile.preferences.timezone}
-                onChange={(e) => setProfile({
-                  ...profile,
-                  preferences: {...profile.preferences, timezone: e.target.value}
-                })}
+                onChange={(e) =>
+                  setProfile({
+                    ...profile,
+                    preferences: { ...profile.preferences, timezone: e.target.value },
+                  })
+                }
                 className="form-select"
               >
                 <option value="America/New_York">Eastern Time</option>
@@ -192,7 +194,7 @@ export default function UserProfilePage() {
         {/* Notification Preferences */}
         <div className="card-secondary p-6">
           <h2 className="text-h2 mb-4">Notification Preferences</h2>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -203,16 +205,18 @@ export default function UserProfilePage() {
                 <input
                   type="checkbox"
                   checked={profile.preferences.notifications.email}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    preferences: {
-                      ...profile.preferences,
-                      notifications: {
-                        ...profile.preferences.notifications,
-                        email: e.target.checked
-                      }
-                    }
-                  })}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      preferences: {
+                        ...profile.preferences,
+                        notifications: {
+                          ...profile.preferences.notifications,
+                          email: e.target.checked,
+                        },
+                      },
+                    })
+                  }
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
@@ -228,16 +232,18 @@ export default function UserProfilePage() {
                 <input
                   type="checkbox"
                   checked={profile.preferences.notifications.browser}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    preferences: {
-                      ...profile.preferences,
-                      notifications: {
-                        ...profile.preferences.notifications,
-                        browser: e.target.checked
-                      }
-                    }
-                  })}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      preferences: {
+                        ...profile.preferences,
+                        notifications: {
+                          ...profile.preferences.notifications,
+                          browser: e.target.checked,
+                        },
+                      },
+                    })
+                  }
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
@@ -251,16 +257,18 @@ export default function UserProfilePage() {
               <select
                 id="digest"
                 value={profile.preferences.notifications.digest}
-                onChange={(e) => setProfile({
-                  ...profile,
-                  preferences: {
-                    ...profile.preferences,
-                    notifications: {
-                      ...profile.preferences.notifications,
-                      digest: e.target.value as 'daily' | 'weekly' | 'none'
-                    }
-                  }
-                })}
+                onChange={(e) =>
+                  setProfile({
+                    ...profile,
+                    preferences: {
+                      ...profile.preferences,
+                      notifications: {
+                        ...profile.preferences.notifications,
+                        digest: e.target.value as 'daily' | 'weekly' | 'none',
+                      },
+                    },
+                  })
+                }
                 className="form-select"
               >
                 <option value="daily">Daily</option>
@@ -274,7 +282,7 @@ export default function UserProfilePage() {
         {/* Appearance */}
         <div className="card-secondary p-6">
           <h2 className="text-h2 mb-4">Appearance</h2>
-          
+
           <div>
             <label htmlFor="theme" className="block text-sm font-medium text-gray-700 mb-2">
               Theme
@@ -282,19 +290,22 @@ export default function UserProfilePage() {
             <select
               id="theme"
               value={profile.preferences.theme}
-              onChange={(e) => setProfile({
-                ...profile,
-                preferences: {...profile.preferences, theme: e.target.value as 'light' | 'dark' | 'system'}
-              })}
+              onChange={(e) =>
+                setProfile({
+                  ...profile,
+                  preferences: {
+                    ...profile.preferences,
+                    theme: e.target.value as 'light' | 'dark' | 'system',
+                  },
+                })
+              }
               className="form-select"
             >
               <option value="light">Light</option>
               <option value="dark">Dark</option>
               <option value="system">System</option>
             </select>
-            <p className="mt-1 text-sm text-gray-500">
-              Choose your preferred theme appearance
-            </p>
+            <p className="mt-1 text-sm text-gray-500">Choose your preferred theme appearance</p>
           </div>
         </div>
 
@@ -302,25 +313,19 @@ export default function UserProfilePage() {
         <div className="flex items-center justify-between">
           <div>
             {message && (
-              <div className={`text-sm ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+              <div
+                className={`text-sm ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}
+              >
                 {message}
               </div>
             )}
           </div>
-          
+
           <div className="flex space-x-3">
-            <button
-              type="button"
-              onClick={() => loadUserProfile()}
-              className="btn-secondary"
-            >
+            <button type="button" onClick={() => loadUserProfile()} className="btn-secondary">
               Reset
             </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="btn-primary"
-            >
+            <button type="submit" disabled={saving} className="btn-primary">
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>

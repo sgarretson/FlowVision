@@ -14,13 +14,10 @@ const ALLOWED_TYPES = [
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain'
+  'text/plain',
 ];
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -30,7 +27,7 @@ export async function POST(
     // Verify initiative exists and user has access
     const initiative = await prisma.initiative.findUnique({
       where: { id: params.id },
-      include: { owner: true }
+      include: { owner: true },
     });
 
     if (!initiative) {
@@ -46,25 +43,19 @@ export async function POST(
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: 'File size exceeds 10MB limit' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File size exceeds 10MB limit' }, { status: 400 });
     }
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'File type not allowed' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File type not allowed' }, { status: 400 });
     }
 
     // Generate unique filename
     const timestamp = Date.now();
     const extension = file.name.split('.').pop();
     const filename = `${timestamp}-${Math.random().toString(36).substring(7)}.${extension}`;
-    
+
     // Create uploads directory if it doesn't exist
     const uploadsDir = join(process.cwd(), 'uploads', 'initiatives');
     await mkdir(uploadsDir, { recursive: true });
@@ -82,8 +73,8 @@ export async function POST(
         mimetype: file.type,
         size: file.size,
         initiativeId: params.id,
-        uploadedById: session.user.id
-      }
+        uploadedById: session.user.id,
+      },
     });
 
     // Create audit log
@@ -95,9 +86,9 @@ export async function POST(
           initiativeId: params.id,
           attachmentId: attachment.id,
           filename: file.name,
-          size: file.size
-        }
-      }
+          size: file.size,
+        },
+      },
     });
 
     return NextResponse.json({
@@ -105,22 +96,15 @@ export async function POST(
       filename: attachment.filename,
       size: attachment.size,
       mimetype: attachment.mimetype,
-      uploadedAt: attachment.createdAt
+      uploadedAt: attachment.createdAt,
     });
-
   } catch (error) {
     console.error('File upload error:', error);
-    return NextResponse.json(
-      { error: 'Failed to upload file' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
   }
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -132,19 +116,15 @@ export async function GET(
       where: { initiativeId: params.id },
       include: {
         uploadedBy: {
-          select: { name: true, email: true }
-        }
+          select: { name: true, email: true },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json(attachments);
-
   } catch (error) {
     console.error('Attachments fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch attachments' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch attachments' }, { status: 500 });
   }
 }

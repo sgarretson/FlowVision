@@ -48,7 +48,7 @@ export default function AdminDashboard() {
       setLoading(true);
       const [usersRes, statsRes] = await Promise.all([
         fetch('/api/users'),
-        fetch('/api/admin/stats')
+        fetch('/api/admin/stats'),
       ]);
 
       if (usersRes.ok) {
@@ -60,7 +60,6 @@ export default function AdminDashboard() {
         const statsData = await statsRes.json();
         setStats(statsData);
       }
-
     } catch (err) {
       console.error('Failed to load admin data:', err);
       setError('Failed to load admin data');
@@ -76,11 +75,11 @@ export default function AdminDashboard() {
 
     try {
       const res = await fetch(`/api/users/${userId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       if (res.ok) {
-        setUsers(users.filter(u => u.id !== userId));
+        setUsers(users.filter((u) => u.id !== userId));
       } else {
         const error = await res.json();
         alert(error.error || 'Failed to delete user');
@@ -93,17 +92,17 @@ export default function AdminDashboard() {
 
   async function toggleUserRole(userId: string, currentRole: string) {
     const newRole = currentRole === 'ADMIN' ? 'LEADER' : 'ADMIN';
-    
+
     try {
       const res = await fetch(`/api/users/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: newRole })
+        body: JSON.stringify({ role: newRole }),
       });
 
       if (res.ok) {
         const updatedUser = await res.json();
-        setUsers(users.map(u => u.id === userId ? { ...u, role: updatedUser.role } : u));
+        setUsers(users.map((u) => (u.id === userId ? { ...u, role: updatedUser.role } : u)));
       } else {
         const error = await res.json();
         alert(error.error || 'Failed to update user role');
@@ -115,7 +114,7 @@ export default function AdminDashboard() {
   }
 
   if (!session) return <div>Loading...</div>;
-  
+
   if ((session.user as any)?.role !== 'ADMIN') {
     return (
       <div className="card-secondary p-8 text-center">
@@ -133,7 +132,7 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         <div className="skeleton h-8 w-48"></div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {[1,2,3,4].map(i => (
+          {[1, 2, 3, 4].map((i) => (
             <div key={i} className="card-secondary p-6">
               <div className="skeleton h-4 w-24 mb-2"></div>
               <div className="skeleton h-8 w-16"></div>
@@ -182,41 +181,100 @@ export default function AdminDashboard() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <button type="button" className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow group text-left" onClick={() => alert('User management coming soon')}>
+        <button
+          type="button"
+          className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow group text-left"
+          onClick={() => alert('User management coming soon')}
+        >
           <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors">
-            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+            <svg
+              className="w-6 h-6 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+              />
             </svg>
           </div>
           <h3 className="text-h3 mb-2 text-center">Manage Users</h3>
           <p className="text-caption text-center">Add, edit, and manage user accounts and roles</p>
         </button>
 
-        <Link href="/logs" className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow group">
+        <Link
+          href="/logs"
+          className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow group"
+        >
           <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
-            <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg
+              className="w-6 h-6 text-purple-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
             </svg>
           </div>
           <h3 className="text-h3 mb-2 text-center">Audit Logs</h3>
           <p className="text-caption text-center">View system activity and user actions</p>
         </Link>
 
-        <Link href="/admin/openai" className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow group">
+        <Link
+          href="/admin/openai"
+          className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow group"
+        >
           <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
-            <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            <svg
+              className="w-6 h-6 text-purple-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+              />
             </svg>
           </div>
           <h3 className="text-h3 mb-2 text-center">OpenAI Integration</h3>
           <p className="text-caption text-center">Configure AI-powered features and API settings</p>
         </Link>
 
-        <button type="button" className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow group text-left" onClick={() => alert('Settings coming soon')}>
+        <button
+          type="button"
+          className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow group text-left"
+          onClick={() => alert('Settings coming soon')}
+        >
           <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
-            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <svg
+              className="w-6 h-6 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
             </svg>
           </div>
           <h3 className="text-h3 mb-2 text-center">System Settings</h3>
@@ -229,20 +287,31 @@ export default function AdminDashboard() {
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h2 className="text-h2">Recent Users</h2>
-            <button className="text-sm text-primary hover:underline" onClick={() => alert('View all users coming soon')}>
+            <button
+              className="text-sm text-primary hover:underline"
+              onClick={() => alert('View all users coming soon')}
+            >
               View All Users
             </button>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  User
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Role
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Created
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -257,11 +326,13 @@ export default function AdminDashboard() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      user.role === 'ADMIN' 
-                        ? 'bg-purple-100 text-purple-800' 
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        user.role === 'ADMIN'
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}
+                    >
                       {user.role}
                     </span>
                   </td>

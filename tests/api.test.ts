@@ -11,15 +11,20 @@ jest.mock('next/server', () => ({
     url: string;
     method: string;
     headers: Headers;
-    json() { return Promise.resolve({}); }
-    text() { return Promise.resolve(''); }
+    json() {
+      return Promise.resolve({});
+    }
+    text() {
+      return Promise.resolve('');
+    }
   },
   NextResponse: {
-    json: jest.fn().mockImplementation((data, init) => 
-      new Response(JSON.stringify(data), {
-        status: init?.status ?? 200,
-        headers: { 'Content-Type': 'application/json' },
-      })
+    json: jest.fn().mockImplementation(
+      (data, init) =>
+        new Response(JSON.stringify(data), {
+          status: init?.status ?? 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
     ),
   },
 }));
@@ -61,7 +66,10 @@ jest.mock('@/lib/prisma', () => ({
 }));
 
 import { GET as getUsersGET } from '@/app/api/users/route';
-import { GET as getInitiativesGET, POST as createInitiativePOST } from '@/app/api/initiatives/route';
+import {
+  GET as getInitiativesGET,
+  POST as createInitiativePOST,
+} from '@/app/api/initiatives/route';
 
 describe('API Routes', () => {
   beforeEach(() => {
@@ -74,7 +82,7 @@ describe('API Routes', () => {
       getServerSession.mockResolvedValue(null);
 
       const request = new NextRequest('http://localhost:3000/api/users', { method: 'GET' });
-      
+
       const response = await getUsersGET(request);
       const data = await response.json();
 
@@ -86,7 +94,7 @@ describe('API Routes', () => {
       // Mock authenticated session
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue({
-        user: { email: 'test@example.com' }
+        user: { email: 'test@example.com' },
       });
 
       // Mock prisma response
@@ -96,12 +104,12 @@ describe('API Routes', () => {
           id: '1',
           name: 'Test User',
           email: 'test@example.com',
-          role: 'LEADER'
-        }
+          role: 'LEADER',
+        },
       ]);
 
       const request = new NextRequest('http://localhost:3000/api/users', { method: 'GET' });
-      
+
       const response = await getUsersGET(request);
       const data = await response.json();
 
@@ -116,7 +124,7 @@ describe('API Routes', () => {
       // Mock authenticated session
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue({
-        user: { email: 'test@example.com' }
+        user: { email: 'test@example.com' },
       });
 
       // Mock prisma response
@@ -128,8 +136,8 @@ describe('API Routes', () => {
           problem: 'Test problem',
           goal: 'Test goal',
           status: 'Define',
-          progress: 0
-        }
+          progress: 0,
+        },
       ]);
 
       const response = await getInitiativesGET();
@@ -144,14 +152,14 @@ describe('API Routes', () => {
       // Mock authenticated session
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue({
-        user: { email: 'test@example.com', id: 'user1' }
+        user: { email: 'test@example.com', id: 'user1' },
       });
 
       // Mock user lookup
       const { prisma } = require('@/lib/prisma');
       prisma.user.findUnique.mockResolvedValue({
         id: 'user1',
-        email: 'test@example.com'
+        email: 'test@example.com',
       });
 
       // Mock initiative creation
@@ -161,7 +169,7 @@ describe('API Routes', () => {
         problem: 'Test problem',
         goal: 'Test goal',
         status: 'Define',
-        ownerId: 'user1'
+        ownerId: 'user1',
       });
 
       // Mock audit log creation
@@ -174,11 +182,11 @@ describe('API Routes', () => {
           problem: 'Test problem',
           goal: 'Test goal',
           kpis: ['metric1'],
-          status: 'Define'
+          status: 'Define',
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       const response = await createInitiativePOST(request);
@@ -195,7 +203,7 @@ describe('API Routes', () => {
       // Mock authenticated session
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue({
-        user: { email: 'test@example.com' }
+        user: { email: 'test@example.com' },
       });
 
       // Mock database error
@@ -203,7 +211,7 @@ describe('API Routes', () => {
       prisma.user.findMany.mockRejectedValue(new Error('Database connection failed'));
 
       const request = new NextRequest('http://localhost:3000/api/users', { method: 'GET' });
-      
+
       const response = await getUsersGET(request);
       const data = await response.json();
 

@@ -3,7 +3,7 @@ import { authOptions } from './auth';
 import { prisma } from './prisma';
 
 export type Role = 'ADMIN' | 'LEADER';
-export type Permission = 
+export type Permission =
   | 'manage_users'
   | 'view_all_initiatives'
   | 'delete_initiatives'
@@ -21,12 +21,9 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     'manage_teams',
     'view_audit_logs',
     'export_data',
-    'system_settings'
+    'system_settings',
   ],
-  LEADER: [
-    'view_all_initiatives',
-    'export_data'
-  ]
+  LEADER: ['view_all_initiatives', 'export_data'],
 };
 
 export async function getCurrentUser() {
@@ -40,7 +37,7 @@ export async function getCurrentUser() {
       email: true,
       name: true,
       role: true,
-    }
+    },
   });
 
   return user;
@@ -82,6 +79,6 @@ export function usePermissions() {
       return permissions.includes(permission);
     },
     isAdmin: (userRole?: Role) => userRole === 'ADMIN',
-    isLeader: (userRole?: Role) => userRole === 'LEADER'
+    isLeader: (userRole?: Role) => userRole === 'LEADER',
   };
 }

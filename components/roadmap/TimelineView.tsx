@@ -77,14 +77,19 @@ const getPhaseColor = (phase: string | null) => {
   }
 };
 
-const calculatePosition = (startDate: string, endDate: string, timelineStart: Date, timelineEnd: Date) => {
+const calculatePosition = (
+  startDate: string,
+  endDate: string,
+  timelineStart: Date,
+  timelineEnd: Date
+) => {
   const totalDuration = timelineEnd.getTime() - timelineStart.getTime();
   const itemStart = new Date(startDate).getTime();
   const itemEnd = new Date(endDate).getTime();
-  
+
   const leftPercent = ((itemStart - timelineStart.getTime()) / totalDuration) * 100;
   const widthPercent = ((itemEnd - itemStart) / totalDuration) * 100;
-  
+
   return {
     left: Math.max(0, leftPercent),
     width: Math.max(2, widthPercent), // Minimum 2% width for visibility
@@ -97,7 +102,7 @@ export default function TimelineView({ initiatives, onInitiativeClick }: Timelin
 
   // Calculate timeline bounds
   const timelineBounds = useMemo(() => {
-    const validInitiatives = initiatives.filter(init => init.timelineStart && init.timelineEnd);
+    const validInitiatives = initiatives.filter((init) => init.timelineStart && init.timelineEnd);
     if (validInitiatives.length === 0) {
       const now = new Date();
       return {
@@ -106,12 +111,12 @@ export default function TimelineView({ initiatives, onInitiativeClick }: Timelin
       };
     }
 
-    const starts = validInitiatives.map(init => new Date(init.timelineStart!));
-    const ends = validInitiatives.map(init => new Date(init.timelineEnd!));
-    
-    const earliestStart = new Date(Math.min(...starts.map(d => d.getTime())));
-    const latestEnd = new Date(Math.max(...ends.map(d => d.getTime())));
-    
+    const starts = validInitiatives.map((init) => new Date(init.timelineStart!));
+    const ends = validInitiatives.map((init) => new Date(init.timelineEnd!));
+
+    const earliestStart = new Date(Math.min(...starts.map((d) => d.getTime())));
+    const latestEnd = new Date(Math.max(...ends.map((d) => d.getTime())));
+
     return {
       start: startOfMonth(earliestStart),
       end: endOfMonth(latestEnd),
@@ -129,20 +134,20 @@ export default function TimelineView({ initiatives, onInitiativeClick }: Timelin
   // Group initiatives by swim lanes (departments)
   const swimLanes = useMemo(() => {
     const lanes: { [key: string]: Initiative[] } = {};
-    
-    initiatives.forEach(initiative => {
+
+    initiatives.forEach((initiative) => {
       if (!initiative.timelineStart || !initiative.timelineEnd) return;
-      
+
       // Group by primary team department
-      const primaryTeam = initiative.assignments.find(a => a.role === 'lead');
+      const primaryTeam = initiative.assignments.find((a) => a.role === 'lead');
       const department = primaryTeam?.team.department || 'Unassigned';
-      
+
       if (!lanes[department]) {
         lanes[department] = [];
       }
       lanes[department].push(initiative);
     });
-    
+
     return lanes;
   }, [initiatives]);
 
@@ -157,8 +162,8 @@ export default function TimelineView({ initiatives, onInitiativeClick }: Timelin
               <button
                 onClick={() => setSelectedView('quarter')}
                 className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                  selectedView === 'quarter' 
-                    ? 'bg-white shadow-sm text-gray-900' 
+                  selectedView === 'quarter'
+                    ? 'bg-white shadow-sm text-gray-900'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -167,8 +172,8 @@ export default function TimelineView({ initiatives, onInitiativeClick }: Timelin
               <button
                 onClick={() => setSelectedView('year')}
                 className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                  selectedView === 'year' 
-                    ? 'bg-white shadow-sm text-gray-900' 
+                  selectedView === 'year'
+                    ? 'bg-white shadow-sm text-gray-900'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -252,19 +257,19 @@ export default function TimelineView({ initiatives, onInitiativeClick }: Timelin
                         onMouseLeave={() => setHoveredInitiative(null)}
                         onClick={() => onInitiativeClick(initiative)}
                       >
-                        <div className={`h-full rounded-sm ${getStatusColor(initiative.status)} flex items-center px-2`}>
+                        <div
+                          className={`h-full rounded-sm ${getStatusColor(initiative.status)} flex items-center px-2`}
+                        >
                           <div className="flex items-center space-x-2 min-w-0">
                             <div className="text-xs font-medium text-white truncate">
                               {initiative.title}
                             </div>
-                            <div className="text-xs text-white/80">
-                              {initiative.progress}%
-                            </div>
+                            <div className="text-xs text-white/80">{initiative.progress}%</div>
                           </div>
-                          
+
                           {/* Progress Bar */}
                           <div className="absolute bottom-0 left-0 h-1 bg-white/30 rounded-b-sm">
-                            <div 
+                            <div
                               className="h-full bg-white rounded-b-sm transition-all duration-300"
                               style={{ width: `${initiative.progress}%` }}
                             />
@@ -276,7 +281,8 @@ export default function TimelineView({ initiatives, onInitiativeClick }: Timelin
                           <div className="absolute top-8 left-0 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl z-30 min-w-64">
                             <div className="font-medium">{initiative.title}</div>
                             <div className="text-gray-300 mt-1">
-                              {format(new Date(initiative.timelineStart), 'MMM d')} - {format(new Date(initiative.timelineEnd), 'MMM d, yyyy')}
+                              {format(new Date(initiative.timelineStart), 'MMM d')} -{' '}
+                              {format(new Date(initiative.timelineEnd), 'MMM d, yyyy')}
                             </div>
                             <div className="text-gray-300 mt-1">
                               Status: {initiative.status} • Progress: {initiative.progress}%
@@ -321,7 +327,7 @@ export default function TimelineView({ initiatives, onInitiativeClick }: Timelin
                 <div className="w-3 h-3 bg-gray-500 rounded"></div>
                 <span>Define</span>
               </div>
-              
+
               <div className="border-l border-gray-300 pl-6 ml-6">
                 <div className="font-medium text-gray-700 mb-1">Phase:</div>
                 <div className="flex items-center space-x-4">

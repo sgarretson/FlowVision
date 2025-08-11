@@ -23,53 +23,49 @@ interface Alert {
 export async function GET(request: NextRequest) {
   try {
     const alerts: Alert[] = [];
-    
+
     // 1. Timeline Risk Alerts
     const timelineAlerts = await generateTimelineAlerts();
     alerts.push(...timelineAlerts);
-    
+
     // 2. Resource Allocation Alerts
     const resourceAlerts = await generateResourceAlerts();
     alerts.push(...resourceAlerts);
-    
+
     // 3. ROI Performance Alerts
     const roiAlerts = await generateRoiAlerts();
     alerts.push(...roiAlerts);
-    
+
     // 4. Issue Pattern Alerts
     const issueAlerts = await generateIssuePatternAlerts();
     alerts.push(...issueAlerts);
-    
+
     // 5. Anomaly Detection Alerts
     const anomalyAlerts = await generateAnomalyAlerts();
     alerts.push(...anomalyAlerts);
-    
+
     // Sort by priority (highest first)
     alerts.sort((a, b) => b.priority - a.priority);
-    
+
     return NextResponse.json({
       alerts: alerts.slice(0, 10), // Top 10 most important alerts
       totalCount: alerts.length,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
-
   } catch (error) {
     console.error('Alert generation error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate alerts' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to generate alerts' }, { status: 500 });
   }
 }
 
 async function generateTimelineAlerts(): Promise<Alert[]> {
   const alerts: Alert[] = [];
-  
+
   // Find initiatives at risk of missing deadlines
   const activeInitiatives = await prisma.initiative.findMany({
-    where: { 
+    where: {
       status: { in: ['APPROVED', 'ACTIVE'] },
-      timelineEnd: { gte: new Date() } // Not yet overdue
+      timelineEnd: { gte: new Date() }, // Not yet overdue
     },
     select: {
       id: true,
@@ -78,39 +74,46 @@ async function generateTimelineAlerts(): Promise<Alert[]> {
       timelineStart: true,
       timelineEnd: true,
       estimatedHours: true,
-      actualHours: true
-    }
+      actualHours: true,
+    },
   });
 
   for (const initiative of activeInitiatives) {
     const now = new Date();
+    if (!initiative.timelineStart || !initiative.timelineEnd) {
+      continue;
+    }
     const totalDuration = initiative.timelineEnd.getTime() - initiative.timelineStart.getTime();
+    if (totalDuration <= 0) continue;
     const elapsed = now.getTime() - initiative.timelineStart.getTime();
     const expectedProgress = (elapsed / totalDuration) * 100;
     const actualProgress = initiative.progress || 0;
-    
+
     // Alert if significantly behind schedule
     const progressGap = expectedProgress - actualProgress;
-    
-    if (progressGap > 20) { // More than 20% behind schedule
+
+    if (progressGap > 20) {
+      // More than 20% behind schedule
       alerts.push({
         id: `timeline-${initiative.id}`,
         type: progressGap > 40 ? 'critical' : 'warning',
         category: 'timeline',
         title: `Initiative Behind Schedule`,
         description: `"${initiative.title}" is ${Math.round(progressGap)}% behind expected progress`,
-        recommendation: progressGap > 40 
-          ? 'Immediate resource reallocation or scope reduction needed'
-          : 'Consider additional resources or timeline adjustment',
+        recommendation:
+          progressGap > 40
+            ? 'Immediate resource reallocation or scope reduction needed'
+            : 'Consider additional resources or timeline adjustment',
         priority: progressGap > 40 ? 9 : 6,
         relatedId: initiative.id,
         relatedType: 'initiative',
-        createdAt: now
+        createdAt: now,
       });
     }
-    
+
     // Alert for initiatives approaching deadline with low progress
-    const daysUntilDeadline = (initiative.timelineEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+    const daysUntilDeadline =
+      (initiative.timelineEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
     if (daysUntilDeadline <= 14 && actualProgress < 70) {
       alerts.push({
         id: `deadline-${initiative.id}`,
@@ -122,41 +125,42 @@ async function generateTimelineAlerts(): Promise<Alert[]> {
         priority: 10,
         relatedId: initiative.id,
         relatedType: 'initiative',
-        createdAt: now
+        createdAt: now,
       });
     }
   }
-  
+
   return alerts;
 }
 
 async function generateResourceAlerts(): Promise<Alert[]> {
   const alerts: Alert[] = [];
   const now = new Date();
-  
+
   // Check for over-allocated team members (simplified heuristic)
   const activeInitiatives = await prisma.initiative.findMany({
     where: { status: { in: ['APPROVED', 'ACTIVE'] } },
     include: {
       owner: {
-        select: { name: true, email: true }
-      }
-    }
+        select: { name: true, email: true },
+      },
+    },
   });
-  
+
   // Group initiatives by owner to detect overallocation
   const ownerWorkload = new Map<string, number>();
-  activeInitiatives.forEach(initiative => {
+  activeInitiatives.forEach((initiative) => {
     const ownerId = initiative.ownerId;
     const currentLoad = ownerWorkload.get(ownerId) || 0;
     ownerWorkload.set(ownerId, currentLoad + 1);
   });
-  
+
   // Alert for team members with too many active initiatives
   for (const [ownerId, workload] of ownerWorkload.entries()) {
-    if (workload > 3) { // More than 3 active initiatives per person
-      const owner = activeInitiatives.find(i => i.ownerId === ownerId)?.owner;
-      
+    if (workload > 3) {
+      // More than 3 active initiatives per person
+      const owner = activeInitiatives.find((i) => i.ownerId === ownerId)?.owner;
+
       alerts.push({
         id: `resource-${ownerId}`,
         type: 'warning',
@@ -165,23 +169,23 @@ async function generateResourceAlerts(): Promise<Alert[]> {
         description: `${owner?.name || 'Team member'} has ${workload} active initiatives`,
         recommendation: 'Consider redistributing workload or prioritizing initiatives',
         priority: 7,
-        createdAt: now
+        createdAt: now,
       });
     }
   }
-  
+
   return alerts;
 }
 
 async function generateRoiAlerts(): Promise<Alert[]> {
   const alerts: Alert[] = [];
   const now = new Date();
-  
+
   // Find initiatives with concerning ROI trends
   const initiativesWithBudget = await prisma.initiative.findMany({
-    where: { 
+    where: {
       status: { in: ['ACTIVE', 'COMPLETED'] },
-      budget: { gt: 0 }
+      budget: { gt: 0 },
     },
     select: {
       id: true,
@@ -190,16 +194,18 @@ async function generateRoiAlerts(): Promise<Alert[]> {
       actualHours: true,
       estimatedHours: true,
       roi: true,
-      status: true
-    }
+      status: true,
+    },
   });
-  
+
   for (const initiative of initiativesWithBudget) {
     // Alert for budget overruns
     if (initiative.actualHours && initiative.estimatedHours) {
-      const budgetOverrun = ((initiative.actualHours - initiative.estimatedHours) / initiative.estimatedHours) * 100;
-      
-      if (budgetOverrun > 25) { // More than 25% over budget
+      const budgetOverrun =
+        ((initiative.actualHours - initiative.estimatedHours) / initiative.estimatedHours) * 100;
+
+      if (budgetOverrun > 25) {
+        // More than 25% over budget
         alerts.push({
           id: `budget-${initiative.id}`,
           type: budgetOverrun > 50 ? 'critical' : 'warning',
@@ -210,11 +216,11 @@ async function generateRoiAlerts(): Promise<Alert[]> {
           priority: budgetOverrun > 50 ? 8 : 5,
           relatedId: initiative.id,
           relatedType: 'initiative',
-          createdAt: now
+          createdAt: now,
         });
       }
     }
-    
+
     // Alert for low ROI initiatives
     if (initiative.roi !== null && initiative.roi < 10 && initiative.status === 'COMPLETED') {
       alerts.push({
@@ -227,18 +233,18 @@ async function generateRoiAlerts(): Promise<Alert[]> {
         priority: 3,
         relatedId: initiative.id,
         relatedType: 'initiative',
-        createdAt: now
+        createdAt: now,
       });
     }
   }
-  
+
   return alerts;
 }
 
 async function generateIssuePatternAlerts(): Promise<Alert[]> {
   const alerts: Alert[] = [];
   const now = new Date();
-  
+
   // Check for issue clustering patterns
   const clusters = await prisma.issueCluster.findMany({
     include: {
@@ -246,16 +252,16 @@ async function generateIssuePatternAlerts(): Promise<Alert[]> {
         select: {
           id: true,
           heatmapScore: true,
-          createdAt: true
-        }
-      }
-    }
+          createdAt: true,
+        },
+      },
+    },
   });
-  
+
   for (const cluster of clusters) {
     // Alert for clusters with high-severity issues
-    const highSeverityIssues = cluster.issues.filter(issue => issue.heatmapScore > 80);
-    
+    const highSeverityIssues = cluster.issues.filter((issue) => issue.heatmapScore > 80);
+
     if (highSeverityIssues.length > 2) {
       alerts.push({
         id: `cluster-${cluster.id}`,
@@ -267,15 +273,15 @@ async function generateIssuePatternAlerts(): Promise<Alert[]> {
         priority: 8,
         relatedId: cluster.id,
         relatedType: 'cluster',
-        createdAt: now
+        createdAt: now,
       });
     }
-    
+
     // Alert for rapidly growing clusters
-    const recentIssues = cluster.issues.filter(issue => 
-      (now.getTime() - new Date(issue.createdAt).getTime()) < (7 * 24 * 60 * 60 * 1000) // Last 7 days
+    const recentIssues = cluster.issues.filter(
+      (issue) => now.getTime() - new Date(issue.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000 // Last 7 days
     );
-    
+
     if (recentIssues.length > 3) {
       alerts.push({
         id: `growth-${cluster.id}`,
@@ -287,34 +293,35 @@ async function generateIssuePatternAlerts(): Promise<Alert[]> {
         priority: 7,
         relatedId: cluster.id,
         relatedType: 'cluster',
-        createdAt: now
+        createdAt: now,
       });
     }
   }
-  
+
   return alerts;
 }
 
 async function generateAnomalyAlerts(): Promise<Alert[]> {
   const alerts: Alert[] = [];
   const now = new Date();
-  
+
   // Check for unusual activity patterns
   const [issueCount, initiativeCount] = await Promise.all([
     prisma.issue.count({
       where: {
-        createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
-      }
+        createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+      },
     }),
     prisma.initiative.count({
       where: {
-        createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
-      }
-    })
+        createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+      },
+    }),
   ]);
-  
+
   // Alert for unusual issue spike
-  if (issueCount > 10) { // More than 10 issues in a week might indicate systemic problems
+  if (issueCount > 10) {
+    // More than 10 issues in a week might indicate systemic problems
     alerts.push({
       id: 'anomaly-issues',
       type: 'warning',
@@ -323,10 +330,10 @@ async function generateAnomalyAlerts(): Promise<Alert[]> {
       description: `${issueCount} new issues reported in the last 7 days`,
       recommendation: 'Investigate potential systemic issues or process breakdowns',
       priority: 6,
-      createdAt: now
+      createdAt: now,
     });
   }
-  
+
   // Alert for lack of activity
   if (issueCount === 0 && initiativeCount === 0) {
     alerts.push({
@@ -337,9 +344,9 @@ async function generateAnomalyAlerts(): Promise<Alert[]> {
       description: 'No new issues or initiatives created in the last 7 days',
       recommendation: 'Ensure team is actively using the platform for issue reporting',
       priority: 2,
-      createdAt: now
+      createdAt: now,
     });
   }
-  
+
   return alerts;
 }
