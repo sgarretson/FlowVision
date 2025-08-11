@@ -242,6 +242,23 @@ export default function ExecutiveDashboard() {
     } catch (err) {
       console.error('PDF export failed', err);
       // Fallback: export minimal JSON summary
+      // Fetch server-side generated brief as fallback
+      try {
+        const res = await fetch('/api/executive/brief');
+        if (res.ok) {
+          const data = await res.json();
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `executive-brief-${new Date().toISOString().split('T')[0]}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          return;
+        }
+      } catch {}
       const reportData = {
         healthScore,
         alerts: alerts.slice(0, 5),

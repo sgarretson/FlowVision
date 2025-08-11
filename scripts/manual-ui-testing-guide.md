@@ -229,8 +229,8 @@ Goal: Implement a client-facing portal that provides real-time project status, d
 
 ### Use this template for each phase:
 
-**Phase:** ******\_\_\_******  
-**Expert:** ******\_\_\_******  
+**Phase:** **\*\***\_\_\_**\*\***  
+**Expert:** **\*\***\_\_\_**\*\***  
 **Overall Rating:** \_\_\_/10
 
 #### ✅ Strengths:
@@ -255,9 +255,7 @@ Goal: Implement a client-facing portal that provides real-time project status, d
 
 -
 -
--
-
----
+- ***
 
 ## 🎯 FINAL ASSESSMENT FRAMEWORK
 
