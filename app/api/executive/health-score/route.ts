@@ -46,16 +46,16 @@ export async function GET(request: NextRequest) {
       // Completed initiatives for ROI calculation
       prisma.initiative.findMany({
         where: { status: 'COMPLETED' },
-        select: { roi: true, completedAt: true, createdAt: true },
+        select: { roi: true, updatedAt: true, createdAt: true },
       }),
 
       // Recent completions for velocity calculation
       prisma.initiative.findMany({
         where: {
           status: 'COMPLETED',
-          completedAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // Last 30 days
+          updatedAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // Last 30 days
         },
-        select: { completedAt: true, estimatedHours: true, actualHours: true },
+        select: { updatedAt: true, estimatedHours: true, actualHours: true },
       }),
     ]);
 

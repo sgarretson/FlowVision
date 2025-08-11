@@ -21,7 +21,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
-  const { title, problem, goal, kpis, timelineStart, timelineEnd, status, progress } = body ?? {};
+  const {
+    title,
+    problem,
+    goal,
+    kpis,
+    requirements,
+    acceptanceCriteria,
+    timelineStart,
+    timelineEnd,
+    status,
+    progress,
+  } = body ?? {};
   const updated = await prisma.initiative.update({
     where: { id: params.id },
     data: {
@@ -29,6 +40,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       problem,
       goal,
       kpis,
+      requirements,
+      acceptanceCriteria,
       timelineStart: timelineStart ? new Date(timelineStart) : null,
       timelineEnd: timelineEnd ? new Date(timelineEnd) : null,
       status,

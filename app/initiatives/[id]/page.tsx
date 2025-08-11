@@ -10,6 +10,8 @@ type Initiative = {
   problem: string;
   goal: string;
   kpis: string[];
+  requirements?: string[];
+  acceptanceCriteria?: string[];
   timelineStart: string | null;
   timelineEnd: string | null;
   status: string;
@@ -29,6 +31,7 @@ export default function InitiativeDetailPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     async function loadInitiative() {
@@ -84,6 +87,39 @@ export default function InitiativeDetailPage() {
   function updateForm(field: string, value: any) {
     if (!form) return;
     setForm({ ...form, [field]: value });
+  }
+
+  async function generateRequirementsWithAI() {
+    if (!form) return;
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/ai/generate-initiative', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'requirements',
+          problem: `${form.problem}\nGoal: ${form.goal}`,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.result) {
+        const reqs: string[] = Array.isArray(data.result?.requirements)
+          ? data.result.requirements
+          : [];
+        const ac: string[] = Array.isArray(data.result?.acceptanceCriteria)
+          ? data.result.acceptanceCriteria
+          : [];
+        updateForm('requirements', reqs);
+        updateForm('acceptanceCriteria', ac);
+        setMessage('AI-generated requirements added. Please review.');
+      } else {
+        setMessage(data.fallback || data.error || 'AI could not generate requirements.');
+      }
+    } catch (e) {
+      setMessage('Failed to generate requirements.');
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   function getStatusColor(status: string): string {
@@ -242,6 +278,49 @@ export default function InitiativeDetailPage() {
             </p>
           </div>
 
+          {/* Requirements & Acceptance Criteria */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <label className="block text-h3 mb-3">Business Requirements</label>
+              <textarea
+                className="textarea-field"
+                placeholder="List the key business requirements... one per line"
+                value={(form.requirements || []).join('\n')}
+                onChange={(e) =>
+                  updateForm(
+                    'requirements',
+                    e.target.value
+                      .split('\n')
+                      .map((s) => s.trim())
+                      .filter(Boolean)
+                  )
+                }
+                rows={6}
+              />
+              <p className="text-caption mt-2">
+                These guide execution teams to create epics/stories in their PM tool.
+              </p>
+            </div>
+            <div>
+              <label className="block text-h3 mb-3">Acceptance Criteria</label>
+              <textarea
+                className="textarea-field"
+                placeholder="Define how success will be verified... one per line"
+                value={(form.acceptanceCriteria || []).join('\n')}
+                onChange={(e) =>
+                  updateForm(
+                    'acceptanceCriteria',
+                    e.target.value
+                      .split('\n')
+                      .map((s) => s.trim())
+                      .filter(Boolean)
+                  )
+                }
+                rows={6}
+              />
+            </div>
+          </div>
+
           {/* Timeline */}
           <div>
             <label className="block text-h3 mb-3">Timeline</label>
@@ -348,20 +427,30 @@ export default function InitiativeDetailPage() {
             <Link href="/initiatives" className="btn-secondary">
               Cancel
             </Link>
-            <button
-              type="submit"
-              className={`btn-primary ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={saving}
-            >
-              {saving ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 loading-spinner"></div>
-                  Saving...
-                </div>
-              ) : (
-                'Save Changes'
-              )}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="btn-secondary"
+                disabled={aiLoading}
+                onClick={generateRequirementsWithAI}
+              >
+                {aiLoading ? 'Generating…' : 'AI: Draft Requirements'}
+              </button>
+              <button
+                type="submit"
+                className={`btn-primary ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={saving}
+              >
+                {saving ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 loading-spinner"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  'Save Changes'
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>

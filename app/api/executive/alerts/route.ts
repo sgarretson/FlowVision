@@ -80,8 +80,14 @@ async function generateTimelineAlerts(): Promise<Alert[]> {
 
   for (const initiative of activeInitiatives) {
     const now = new Date();
-    const totalDuration = initiative.timelineEnd.getTime() - initiative.timelineStart.getTime();
-    const elapsed = now.getTime() - initiative.timelineStart.getTime();
+    if (!initiative.timelineStart || !initiative.timelineEnd) {
+      continue;
+    }
+    const startMs = new Date(initiative.timelineStart).getTime();
+    const endMs = new Date(initiative.timelineEnd).getTime();
+    const totalDuration = endMs - startMs;
+    if (totalDuration <= 0) continue;
+    const elapsed = now.getTime() - startMs;
     const expectedProgress = (elapsed / totalDuration) * 100;
     const actualProgress = initiative.progress || 0;
 
@@ -108,8 +114,7 @@ async function generateTimelineAlerts(): Promise<Alert[]> {
     }
 
     // Alert for initiatives approaching deadline with low progress
-    const daysUntilDeadline =
-      (initiative.timelineEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+    const daysUntilDeadline = (endMs - now.getTime()) / (1000 * 60 * 60 * 24);
     if (daysUntilDeadline <= 14 && actualProgress < 70) {
       alerts.push({
         id: `deadline-${initiative.id}`,

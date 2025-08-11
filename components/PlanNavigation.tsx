@@ -72,7 +72,7 @@ export function PlanNavigation() {
             return (
               <Link
                 key={page.name}
-                href={page.href}
+                href={{ pathname: page.href as string }}
                 className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   isActive
                     ? 'border-blue-500 text-blue-600'

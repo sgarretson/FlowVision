@@ -52,6 +52,8 @@ model Initiative {
   problem        String
   goal           String
   kpis           String[]
+  requirements   String[]      @default([])
+  acceptanceCriteria String[]  @default([])
   owner          User          @relation("UserInitiatives", fields: [ownerId], references: [id])
   ownerId        String
   timelineStart  DateTime?

@@ -394,7 +394,7 @@ export default function ClusterDetailsModal({ clusterId, onClose }: ClusterDetai
                         Initiatives ({cluster.analytics.initiativeProgress.total})
                       </h3>
                       <Link
-                        href={`/plan?cluster=${cluster.id}`}
+                        href={{ pathname: '/plan', query: { cluster: cluster.id } }}
                         className="btn-primary text-sm flex items-center space-x-2"
                       >
                         <PlusIcon className="h-4 w-4" />

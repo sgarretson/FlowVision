@@ -1,5 +1,20 @@
 import { z } from 'zod';
-import rateLimit from 'express-rate-limit';
+// Lightweight in-memory rate limiter for serverless/edge compatible usage
+type RateLimiterOptions = { windowMs: number; max: number; message?: string };
+function simpleRateLimit({ windowMs, max }: RateLimiterOptions) {
+  const hits = new Map<string, { count: number; resetAt: number }>();
+  return function check(ip: string): { allowed: boolean } {
+    const now = Date.now();
+    const entry = hits.get(ip);
+    if (!entry || now > entry.resetAt) {
+      hits.set(ip, { count: 1, resetAt: now + windowMs });
+      return { allowed: true };
+    }
+    if (entry.count >= max) return { allowed: false };
+    entry.count += 1;
+    return { allowed: true };
+  };
+}
 import { NextRequest } from 'next/server';
 
 // Input validation schemas
@@ -34,21 +49,9 @@ export function sanitizeFileName(filename: string): string {
 }
 
 // Rate limiting configurations
-export const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per window
-  message: 'Too many authentication attempts, please try again later',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+export const authRateLimit = simpleRateLimit({ windowMs: 15 * 60 * 1000, max: 5 });
 
-export const apiRateLimit = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // 100 requests per minute
-  message: 'Too many API requests, please try again later',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+export const apiRateLimit = simpleRateLimit({ windowMs: 60 * 1000, max: 100 });
 
 // Security headers
 export const securityHeaders = {

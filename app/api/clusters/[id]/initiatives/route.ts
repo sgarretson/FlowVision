@@ -178,7 +178,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
               )
             : 0,
         clusterCategory: cluster.category,
-        estimatedROI: cluster.metrics?.estimatedROI || 'TBD',
+        estimatedROI:
+          typeof cluster.metrics === 'object' &&
+          cluster.metrics !== null &&
+          (cluster.metrics as any).estimatedROI
+            ? (cluster.metrics as any).estimatedROI
+            : 'TBD',
       },
     };
 

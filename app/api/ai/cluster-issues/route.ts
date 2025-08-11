@@ -216,12 +216,14 @@ export async function POST(request: NextRequest) {
           where: { id: cluster.id },
           data: {
             metrics: {
-              ...cluster.metrics,
+              ...(typeof cluster.metrics === 'object' && cluster.metrics !== null
+                ? (cluster.metrics as Record<string, any>)
+                : {}),
               analysisDate: new Date().toISOString(),
               semanticScore: Math.round(avgConfidence * 100) / 100,
               potentialIssues: clusterIssues.length,
               confidence: avgConfidence > 0.7 ? 'high' : avgConfidence > 0.5 ? 'medium' : 'low',
-            },
+            } as any,
           },
         });
       }
