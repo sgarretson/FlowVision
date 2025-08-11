@@ -91,6 +91,7 @@ export default function ExecutiveDashboard() {
   const [insights, setInsights] = useState<ExecutiveInsight[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [utilization, setUtilization] = useState<Array<{ ownerId: string; name: string; activeInitiatives: number }>>([]);
 
   useEffect(() => {
     loadDashboardData();
@@ -104,11 +105,12 @@ export default function ExecutiveDashboard() {
     try {
       setLoading(true);
       
-      const [healthRes, alertsRes, roiRes, insightsRes] = await Promise.all([
+      const [healthRes, alertsRes, roiRes, insightsRes, utilRes] = await Promise.all([
         fetch('/api/executive/health-score'),
         fetch('/api/executive/alerts'),
         fetch('/api/executive/roi-forecast'),
-        fetch('/api/executive/insights')
+        fetch('/api/executive/insights'),
+        fetch('/api/executive/team-utilization')
       ]);
 
       if (healthRes.ok) {
@@ -133,6 +135,11 @@ export default function ExecutiveDashboard() {
       if (insightsRes.ok) {
         const insightsData = await insightsRes.json();
         setInsights(insightsData.insights || []);
+      }
+
+      if (utilRes.ok) {
+        const utilData = await utilRes.json();
+        setUtilization(utilData.utilization || []);
       }
 
       setLastUpdated(new Date());
