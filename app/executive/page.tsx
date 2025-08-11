@@ -630,9 +630,18 @@ export default function ExecutiveDashboard() {
                 <>
                   <div className="h-72 w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={utilization} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <BarChart
+                        data={utilization}
+                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" interval={0} angle={-20} textAnchor="end" height={60} />
+                        <XAxis
+                          dataKey="name"
+                          interval={0}
+                          angle={-20}
+                          textAnchor="end"
+                          height={60}
+                        />
                         <YAxis allowDecimals={false} />
                         <Tooltip />
                         <Bar dataKey="activeInitiatives" fill="#2563eb" />
@@ -643,15 +652,21 @@ export default function ExecutiveDashboard() {
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Initiatives</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Owner
+                          </th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Active Initiatives
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {utilization.map((u) => (
                           <tr key={u.ownerId}>
                             <td className="px-4 py-2 text-sm text-gray-900">{u.name}</td>
-                            <td className="px-4 py-2 text-sm text-gray-900">{u.activeInitiatives}</td>
+                            <td className="px-4 py-2 text-sm text-gray-900">
+                              {u.activeInitiatives}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -671,7 +686,9 @@ export default function ExecutiveDashboard() {
                             <div key={u.ownerId} className="flex items-center space-x-3">
                               <div className="w-48 text-sm text-gray-800 truncate">{u.name}</div>
                               <div className="flex-1 h-6 rounded" style={{ backgroundColor: bg }} />
-                              <div className="w-12 text-right text-sm text-gray-900">{u.activeInitiatives}</div>
+                              <div className="w-12 text-right text-sm text-gray-900">
+                                {u.activeInitiatives}
+                              </div>
                             </div>
                           );
                         })}
@@ -783,7 +800,9 @@ export default function ExecutiveDashboard() {
         {activeTab === 'alerts' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Predictive Alerts & Risk Management</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Predictive Alerts & Risk Management
+              </h2>
               <button
                 onClick={async () => {
                   setSettingsOpen(true);
@@ -851,7 +870,9 @@ export default function ExecutiveDashboard() {
                   >
                     ✕
                   </button>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Alert Settings & Weekly Brief</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Alert Settings & Weekly Brief
+                  </h3>
                   {settingsError && (
                     <div className="mb-3 p-2 rounded bg-yellow-50 border border-yellow-200 text-sm text-yellow-800">
                       {settingsError}
@@ -862,48 +883,83 @@ export default function ExecutiveDashboard() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1">Timeline Behind % (warning)</label>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Timeline Behind % (warning)
+                        </label>
                         <input
                           type="number"
                           className="w-full border rounded px-2 py-1"
                           value={alertSettings.timelineBehindPct}
-                          onChange={(e) => setAlertSettings({ ...alertSettings, timelineBehindPct: Number(e.target.value) })}
+                          onChange={(e) =>
+                            setAlertSettings({
+                              ...alertSettings,
+                              timelineBehindPct: Number(e.target.value),
+                            })
+                          }
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1">Deadline Critical (days)</label>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Deadline Critical (days)
+                        </label>
                         <input
                           type="number"
                           className="w-full border rounded px-2 py-1"
                           value={alertSettings.deadlineDaysCritical}
-                          onChange={(e) => setAlertSettings({ ...alertSettings, deadlineDaysCritical: Number(e.target.value) })}
+                          onChange={(e) =>
+                            setAlertSettings({
+                              ...alertSettings,
+                              deadlineDaysCritical: Number(e.target.value),
+                            })
+                          }
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1">Max Active Initiatives per Owner</label>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Max Active Initiatives per Owner
+                        </label>
                         <input
                           type="number"
                           className="w-full border rounded px-2 py-1"
                           value={alertSettings.ownerMaxActive}
-                          onChange={(e) => setAlertSettings({ ...alertSettings, ownerMaxActive: Number(e.target.value) })}
+                          onChange={(e) =>
+                            setAlertSettings({
+                              ...alertSettings,
+                              ownerMaxActive: Number(e.target.value),
+                            })
+                          }
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1">Budget Overrun Warn %</label>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Budget Overrun Warn %
+                        </label>
                         <input
                           type="number"
                           className="w-full border rounded px-2 py-1"
                           value={alertSettings.budgetOverrunWarnPct}
-                          onChange={(e) => setAlertSettings({ ...alertSettings, budgetOverrunWarnPct: Number(e.target.value) })}
+                          onChange={(e) =>
+                            setAlertSettings({
+                              ...alertSettings,
+                              budgetOverrunWarnPct: Number(e.target.value),
+                            })
+                          }
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1">Budget Overrun Critical %</label>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Budget Overrun Critical %
+                        </label>
                         <input
                           type="number"
                           className="w-full border rounded px-2 py-1"
                           value={alertSettings.budgetOverrunCritPct}
-                          onChange={(e) => setAlertSettings({ ...alertSettings, budgetOverrunCritPct: Number(e.target.value) })}
+                          onChange={(e) =>
+                            setAlertSettings({
+                              ...alertSettings,
+                              budgetOverrunCritPct: Number(e.target.value),
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -912,7 +968,12 @@ export default function ExecutiveDashboard() {
                           type="number"
                           className="w-full border rounded px-2 py-1"
                           value={alertSettings.lowRoiPct}
-                          onChange={(e) => setAlertSettings({ ...alertSettings, lowRoiPct: Number(e.target.value) })}
+                          onChange={(e) =>
+                            setAlertSettings({
+                              ...alertSettings,
+                              lowRoiPct: Number(e.target.value),
+                            })
+                          }
                         />
                       </div>
                       <div className="md:col-span-2 border-t pt-3 mt-1">
@@ -922,9 +983,16 @@ export default function ExecutiveDashboard() {
                             type="checkbox"
                             className="h-4 w-4"
                             checked={!!alertSettings.digest?.enabled}
-                            onChange={(e) => setAlertSettings({ ...alertSettings, digest: { ...alertSettings.digest, enabled: e.target.checked } })}
+                            onChange={(e) =>
+                              setAlertSettings({
+                                ...alertSettings,
+                                digest: { ...alertSettings.digest, enabled: e.target.checked },
+                              })
+                            }
                           />
-                          <label htmlFor="digestEnabled" className="text-sm text-gray-800">Enable Weekly Executive Brief</label>
+                          <label htmlFor="digestEnabled" className="text-sm text-gray-800">
+                            Enable Weekly Executive Brief
+                          </label>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
                           <div>
@@ -932,7 +1000,12 @@ export default function ExecutiveDashboard() {
                             <select
                               className="w-full border rounded px-2 py-1"
                               value={alertSettings.digest?.channel || 'none'}
-                              onChange={(e) => setAlertSettings({ ...alertSettings, digest: { ...alertSettings.digest, channel: e.target.value } })}
+                              onChange={(e) =>
+                                setAlertSettings({
+                                  ...alertSettings,
+                                  digest: { ...alertSettings.digest, channel: e.target.value },
+                                })
+                              }
                             >
                               <option value="none">None</option>
                               <option value="email">Email</option>
@@ -940,12 +1013,19 @@ export default function ExecutiveDashboard() {
                             </select>
                           </div>
                           <div>
-                            <label className="block text-xs text-gray-600 mb-1">Send Time (UTC)</label>
+                            <label className="block text-xs text-gray-600 mb-1">
+                              Send Time (UTC)
+                            </label>
                             <input
                               type="time"
                               className="w-full border rounded px-2 py-1"
                               value={alertSettings.digest?.timeUTC || '09:00'}
-                              onChange={(e) => setAlertSettings({ ...alertSettings, digest: { ...alertSettings.digest, timeUTC: e.target.value } })}
+                              onChange={(e) =>
+                                setAlertSettings({
+                                  ...alertSettings,
+                                  digest: { ...alertSettings.digest, timeUTC: e.target.value },
+                                })
+                              }
                             />
                           </div>
                           <div className="flex items-end">
@@ -962,7 +1042,12 @@ export default function ExecutiveDashboard() {
                     </div>
                   )}
                   <div className="mt-6 flex items-center justify-end space-x-3">
-                    <button onClick={() => setSettingsOpen(false)} className="px-3 py-2 text-sm border rounded">Cancel</button>
+                    <button
+                      onClick={() => setSettingsOpen(false)}
+                      className="px-3 py-2 text-sm border rounded"
+                    >
+                      Cancel
+                    </button>
                     <button
                       onClick={saveAlertSettings}
                       disabled={settingsSaving}
