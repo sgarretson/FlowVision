@@ -1,22 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
-// Mock NextRequest for Jest environment
-const mockNextRequest = class {
-  constructor(url: string, init?: any) {
-    this.url = url;
-    this.method = init?.method || 'GET';
-    this.headers = new Headers(init?.headers || {});
-  }
-  url: string;
-  method: string;
-  headers: Headers;
-  json() { return Promise.resolve({}); }
-  text() { return Promise.resolve(''); }
-};
-
-// Mock the NextRequest import
+// Mock the NextRequest import first
 jest.mock('next/server', () => ({
-  NextRequest: mockNextRequest,
+  NextRequest: class {
+    constructor(url: string, init?: any) {
+      this.url = url;
+      this.method = init?.method || 'GET';
+      this.headers = new Headers(init?.headers || {});
+    }
+    url: string;
+    method: string;
+    headers: Headers;
+    json() { return Promise.resolve({}); }
+    text() { return Promise.resolve(''); }
+  },
   NextResponse: {
     json: jest.fn().mockImplementation((data, init) => 
       new Response(JSON.stringify(data), {
