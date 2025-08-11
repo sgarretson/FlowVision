@@ -20,38 +20,62 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Role-aware projection and reduced payloads
+    const isAdmin = user.role === 'ADMIN';
     const cluster = await prisma.issueCluster.findUnique({
       where: { id: params.id },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category: true,
+        severity: true,
+        theme: true,
+        color: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
         issues: {
-          include: {
+          orderBy: { heatmapScore: 'desc' },
+          select: {
+            id: true,
+            description: true,
+            department: true,
+            category: true,
+            heatmapScore: true,
+            votes: true,
+            createdAt: true,
             comments: {
               take: 3,
               orderBy: { createdAt: 'desc' },
-              include: {
+              select: {
+                id: true,
+                content: true,
+                createdAt: true,
                 author: {
-                  select: { name: true, email: true }
+                  select: isAdmin ? { name: true, email: true } : { name: true }
                 }
               }
-            },
-            userVotes: true
-          },
-          orderBy: { heatmapScore: 'desc' }
+            }
+          }
         },
         initiatives: {
-          include: {
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            progress: true,
+            type: true,
+            clusterId: true,
+            createdAt: true,
             owner: {
-              select: { name: true, email: true }
+              select: isAdmin ? { name: true, email: true } : { name: true }
             },
             milestones: {
-              select: {
-                title: true,
-                status: true,
-                dueDate: true
-              }
+              select: { title: true, status: true, dueDate: true }
             }
-          },
-          orderBy: { createdAt: 'desc' }
+          }
         }
       }
     });

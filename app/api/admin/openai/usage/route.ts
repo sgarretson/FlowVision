@@ -77,14 +77,17 @@ export async function GET() {
     const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
     const recentLogs = aiLogs.filter(log => log.timestamp >= thirtyDaysAgo);
     
-    const dailyUsage = recentLogs.reduce((acc, log) => {
+    // Initialize zeroed series for last 30 days, then overlay actual counts
+    const dailyUsage = {} as Record<string, number>;
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const key = d.toISOString().split('T')[0];
+      dailyUsage[key] = 0;
+    }
+    for (const log of recentLogs) {
       const date = log.timestamp.toISOString().split('T')[0];
-      if (!acc[date]) {
-        acc[date] = 0;
-      }
-      acc[date]++;
-      return acc;
-    }, {} as Record<string, number>);
+      if (dailyUsage[date] !== undefined) dailyUsage[date] += 1;
+    }
 
     // Estimated costs (rough calculation based on typical OpenAI pricing)
     const estimatedCostPerRequest = 0.002; // $0.002 per request (rough estimate)

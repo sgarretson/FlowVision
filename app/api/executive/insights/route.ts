@@ -68,19 +68,35 @@ async function generateExecutiveInsights(): Promise<ExecutiveInsight[]> {
   // Gather comprehensive data for analysis
   const [initiatives, issues, clusters, recentActivity] = await Promise.all([
     prisma.initiative.findMany({
-      include: {
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        progress: true,
+        timelineEnd: true,
+        updatedAt: true,
+        budget: true,
+        roi: true,
+        ownerId: true,
         owner: { select: { name: true } }
       }
     }),
     prisma.issue.findMany({
-      include: {
+      select: {
+        id: true,
+        description: true,
+        createdAt: true,
+        heatmapScore: true,
         cluster: { select: { name: true, severity: true } }
       }
     }),
     prisma.issueCluster.findMany({
-      include: {
-        issues: true,
-        initiatives: true
+      select: {
+        id: true,
+        name: true,
+        severity: true,
+        issues: { select: { id: true, heatmapScore: true, createdAt: true } },
+        initiatives: { select: { id: true, status: true, progress: true, title: true } }
       }
     }),
     prisma.auditLog.findMany({

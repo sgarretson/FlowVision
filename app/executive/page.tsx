@@ -113,6 +113,10 @@ export default function ExecutiveDashboard() {
 
       if (healthRes.ok) {
         const healthData = await healthRes.json();
+        // Normalize ISO date string to Date
+        if (healthData.lastUpdated) {
+          healthData.lastUpdated = new Date(healthData.lastUpdated);
+        }
         setHealthScore(healthData);
       }
 
@@ -207,6 +211,17 @@ export default function ExecutiveDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Non-blocking error banner placeholder (surface tile errors when present) */}
+      {!loading && (!healthScore || alerts.length === 0 || !roiForecast || insights.length === 0) && (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3" role="status" aria-live="polite">
+            <div className="text-sm text-yellow-800 flex items-center justify-between">
+              <span>Some dashboard tiles could not load the latest data. Showing what’s available.</span>
+              <button className="text-yellow-900 underline" onClick={loadDashboardData}>Retry</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

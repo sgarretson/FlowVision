@@ -39,7 +39,11 @@ export default function AIAnalysis({ issueDescription, onInsights }: AIAnalysisP
           onInsights(data.insights);
         }
       } else {
-        setError(data.fallback || data.error || 'AI analysis not available');
+        if (response.status === 401) {
+          setError('Please sign in to use AI analysis.');
+        } else {
+          setError(data.fallback || data.error || 'AI analysis not available');
+        }
       }
     } catch (err) {
       setError('Failed to analyze issue with AI');
@@ -70,7 +74,7 @@ export default function AIAnalysis({ issueDescription, onInsights }: AIAnalysisP
 
       {/* Error Message */}
       {error && (
-        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md" role="alert" aria-live="polite">
           <div className="text-sm text-yellow-800">{error}</div>
         </div>
       )}
