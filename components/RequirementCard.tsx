@@ -29,6 +29,7 @@ interface RequirementCardData {
 interface RequirementCardProps {
   card: RequirementCardData;
   index: number;
+  onView: (card: RequirementCardData) => void;
   onEdit: (card: RequirementCardData) => void;
   onDelete: (cardId: string) => void;
   onStatusChange: (cardId: string, status: string) => void;
@@ -58,6 +59,7 @@ const TYPE_ICONS = {
 export default function RequirementCard({
   card,
   index,
+  onView,
   onEdit,
   onDelete,
   onStatusChange,
@@ -77,7 +79,8 @@ export default function RequirementCard({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing ${
+          onClick={() => onView(card)}
+          className={`group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
             snapshot.isDragging ? 'rotate-1 shadow-xl ring-2 ring-blue-200 scale-105' : ''
           }`}
         >
@@ -120,14 +123,20 @@ export default function RequirementCard({
               {/* Always Visible Actions */}
               <div className="flex items-center space-x-1 ml-2">
                 <button
-                  onClick={() => onEdit(card)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(card);
+                  }}
                   className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                   title="Edit card"
                 >
                   <PencilIcon className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={handleStatusToggle}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStatusToggle();
+                  }}
                   className={`p-1.5 rounded-md transition-colors ${
                     card.status === 'APPROVED'
                       ? 'text-green-600 hover:text-gray-400 hover:bg-gray-50'
@@ -138,7 +147,10 @@ export default function RequirementCard({
                   <CheckIcon className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => onDelete(card.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(card.id);
+                  }}
                   className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                   title="Delete card"
                 >
@@ -170,7 +182,10 @@ export default function RequirementCard({
               <div className="flex items-center space-x-3">
                 {card.comments.length > 0 && (
                   <button
-                    onClick={() => onComment(card.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onComment(card.id);
+                    }}
                     className="flex items-center space-x-1 text-gray-400 hover:text-blue-600 transition-colors"
                   >
                     <ChatBubbleLeftIcon className="w-4 h-4" />

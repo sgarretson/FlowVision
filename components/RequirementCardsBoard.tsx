@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { PlusIcon, SparklesIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import RequirementCard from './RequirementCard';
 import RequirementCardModal from './RequirementCardModal';
+import RequirementCardViewModal from './RequirementCardViewModal';
 
 interface RequirementCardData {
   id: string;
@@ -37,7 +38,9 @@ export default function RequirementCardsBoard({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<RequirementCardData | null>(null);
+  const [viewingCard, setViewingCard] = useState<RequirementCardData | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
 
   useEffect(() => {
@@ -82,9 +85,16 @@ export default function RequirementCardsBoard({
     }
   };
 
+  const handleCardView = (card: RequirementCardData) => {
+    setViewingCard(card);
+    setViewModalOpen(true);
+  };
+
   const handleCardEdit = (card: RequirementCardData) => {
     setEditingCard(card);
     setModalOpen(true);
+    // Close view modal if it's open
+    setViewModalOpen(false);
   };
 
   const handleCardUpdate = async (cardData: any) => {
@@ -100,6 +110,12 @@ export default function RequirementCardsBoard({
       if (response.ok) {
         const updatedCard = await response.json();
         setCards(cards.map((c) => (c.id === updatedCard.id ? updatedCard : c)));
+
+        // Update viewing card if it's the same card being edited
+        if (viewingCard && viewingCard.id === updatedCard.id) {
+          setViewingCard(updatedCard);
+        }
+
         setModalOpen(false);
         setEditingCard(null);
       } else {
@@ -140,6 +156,11 @@ export default function RequirementCardsBoard({
       if (response.ok) {
         const updatedCard = await response.json();
         setCards(cards.map((c) => (c.id === updatedCard.id ? updatedCard : c)));
+
+        // Update viewing card if it's the same card being updated
+        if (viewingCard && viewingCard.id === updatedCard.id) {
+          setViewingCard(updatedCard);
+        }
       } else {
         setError('Failed to update card status');
       }
@@ -408,6 +429,7 @@ export default function RequirementCardsBoard({
                                 key={card.id}
                                 card={card}
                                 index={cardIndex}
+                                onView={handleCardView}
                                 onEdit={handleCardEdit}
                                 onDelete={handleCardDelete}
                                 onStatusChange={handleStatusChange}
@@ -457,6 +479,7 @@ export default function RequirementCardsBoard({
                     key={card.id}
                     card={card}
                     index={index}
+                    onView={handleCardView}
                     onEdit={handleCardEdit}
                     onDelete={handleCardDelete}
                     onStatusChange={handleStatusChange}
@@ -470,7 +493,7 @@ export default function RequirementCardsBoard({
         </DragDropContext>
       )}
 
-      {/* Modal */}
+      {/* Edit Modal */}
       {modalOpen && (
         <RequirementCardModal
           isOpen={modalOpen}
@@ -481,6 +504,21 @@ export default function RequirementCardsBoard({
           onSave={editingCard ? handleCardUpdate : handleCardCreate}
           card={editingCard}
           initiativeId={initiativeId}
+        />
+      )}
+
+      {/* View Modal */}
+      {viewModalOpen && viewingCard && (
+        <RequirementCardViewModal
+          isOpen={viewModalOpen}
+          onClose={() => {
+            setViewModalOpen(false);
+            setViewingCard(null);
+          }}
+          onEdit={handleCardEdit}
+          onStatusChange={handleStatusChange}
+          onComment={() => {}} // TODO: Implement comment modal
+          card={viewingCard}
         />
       )}
     </div>
