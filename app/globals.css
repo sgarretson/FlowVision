@@ -75,6 +75,15 @@
     @apply block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-primary focus:border-primary;
   }
 
+  /* Consistent Input Field Classes */
+  .input-field {
+    @apply form-input;
+  }
+
+  .textarea-field {
+    @apply form-textarea;
+  }
+
   .form-select {
     @apply block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-primary focus:border-primary;
   }
@@ -141,6 +150,27 @@
 
   .metric-label {
     @apply text-caption;
+  }
+
+  /* Standardized Form Patterns */
+  .form-card {
+    @apply card-primary p-6;
+  }
+
+  .form-header {
+    @apply text-h2 mb-6 text-center;
+  }
+
+  .form-group {
+    @apply space-y-4;
+  }
+
+  .form-actions {
+    @apply flex justify-center space-x-4 pt-4;
+  }
+
+  .form-actions-right {
+    @apply flex justify-end space-x-4 pt-4;
   }
 
   /* Navigation Styles */
