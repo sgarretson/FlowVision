@@ -12,6 +12,7 @@ import {
   CalendarIcon,
   UsersIcon,
 } from '@heroicons/react/24/outline';
+import AlertSettingsModal from '@/components/AlertSettingsModal';
 import {
   LineChart,
   Line,
@@ -877,205 +878,14 @@ export default function ExecutiveDashboard() {
                 </div>
               )}
             </div>
-            {settingsOpen && (
-              <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center">
-                <div className="bg-white w-full max-w-2xl rounded-lg shadow-lg p-6 relative">
-                  <button
-                    onClick={() => setSettingsOpen(false)}
-                    className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-                    aria-label="Close"
-                  >
-                    ✕
-                  </button>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Alert Settings & Weekly Brief
-                  </h3>
-                  {settingsError && (
-                    <div className="mb-3 p-2 rounded bg-yellow-50 border border-yellow-200 text-sm text-yellow-800">
-                      {settingsError}
-                    </div>
-                  )}
-                  {!alertSettings ? (
-                    <div className="text-sm text-gray-500">Loading settings...</div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Timeline Behind % (warning)
-                        </label>
-                        <input
-                          type="number"
-                          className="w-full border rounded px-2 py-1"
-                          value={alertSettings.timelineBehindPct}
-                          onChange={(e) =>
-                            setAlertSettings({
-                              ...alertSettings,
-                              timelineBehindPct: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Deadline Critical (days)
-                        </label>
-                        <input
-                          type="number"
-                          className="w-full border rounded px-2 py-1"
-                          value={alertSettings.deadlineDaysCritical}
-                          onChange={(e) =>
-                            setAlertSettings({
-                              ...alertSettings,
-                              deadlineDaysCritical: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Max Active Initiatives per Owner
-                        </label>
-                        <input
-                          type="number"
-                          className="w-full border rounded px-2 py-1"
-                          value={alertSettings.ownerMaxActive}
-                          onChange={(e) =>
-                            setAlertSettings({
-                              ...alertSettings,
-                              ownerMaxActive: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Budget Overrun Warn %
-                        </label>
-                        <input
-                          type="number"
-                          className="w-full border rounded px-2 py-1"
-                          value={alertSettings.budgetOverrunWarnPct}
-                          onChange={(e) =>
-                            setAlertSettings({
-                              ...alertSettings,
-                              budgetOverrunWarnPct: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Budget Overrun Critical %
-                        </label>
-                        <input
-                          type="number"
-                          className="w-full border rounded px-2 py-1"
-                          value={alertSettings.budgetOverrunCritPct}
-                          onChange={(e) =>
-                            setAlertSettings({
-                              ...alertSettings,
-                              budgetOverrunCritPct: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Low ROI %</label>
-                        <input
-                          type="number"
-                          className="w-full border rounded px-2 py-1"
-                          value={alertSettings.lowRoiPct}
-                          onChange={(e) =>
-                            setAlertSettings({
-                              ...alertSettings,
-                              lowRoiPct: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="md:col-span-2 border-t pt-3 mt-1">
-                        <div className="flex items-center space-x-3">
-                          <input
-                            id="digestEnabled"
-                            type="checkbox"
-                            className="h-4 w-4"
-                            checked={!!alertSettings.digest?.enabled}
-                            onChange={(e) =>
-                              setAlertSettings({
-                                ...alertSettings,
-                                digest: { ...alertSettings.digest, enabled: e.target.checked },
-                              })
-                            }
-                          />
-                          <label htmlFor="digestEnabled" className="text-sm text-gray-800">
-                            Enable Weekly Executive Brief
-                          </label>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-                          <div>
-                            <label className="block text-xs text-gray-600 mb-1">Channel</label>
-                            <select
-                              className="w-full border rounded px-2 py-1"
-                              value={alertSettings.digest?.channel || 'none'}
-                              onChange={(e) =>
-                                setAlertSettings({
-                                  ...alertSettings,
-                                  digest: { ...alertSettings.digest, channel: e.target.value },
-                                })
-                              }
-                            >
-                              <option value="none">None</option>
-                              <option value="email">Email</option>
-                              <option value="slack">Slack</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="block text-xs text-gray-600 mb-1">
-                              Send Time (UTC)
-                            </label>
-                            <input
-                              type="time"
-                              className="w-full border rounded px-2 py-1"
-                              value={alertSettings.digest?.timeUTC || '09:00'}
-                              onChange={(e) =>
-                                setAlertSettings({
-                                  ...alertSettings,
-                                  digest: { ...alertSettings.digest, timeUTC: e.target.value },
-                                })
-                              }
-                            />
-                          </div>
-                          <div className="flex items-end">
-                            <button
-                              type="button"
-                              onClick={exportReport}
-                              className="w-full px-3 py-2 text-sm border rounded hover:bg-gray-50"
-                            >
-                              Send Brief Now (Download)
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div className="mt-6 flex items-center justify-end space-x-3">
-                    <button
-                      onClick={() => setSettingsOpen(false)}
-                      className="px-3 py-2 text-sm border rounded"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={saveAlertSettings}
-                      disabled={settingsSaving}
-                      className={`px-4 py-2 text-sm text-white rounded ${settingsSaving ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
-                    >
-                      {settingsSaving ? 'Saving...' : 'Save Settings'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            <AlertSettingsModal
+              isOpen={settingsOpen}
+              onClose={() => setSettingsOpen(false)}
+              settings={alertSettings}
+              onSave={saveAlertSettings}
+              saving={settingsSaving}
+              error={settingsError}
+            />
           </motion.div>
         )}
       </div>
