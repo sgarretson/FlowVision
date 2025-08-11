@@ -56,6 +56,7 @@ interface Initiative {
 
 interface ClusterDetails {
   id: string;
+  name: string;
   title: string;
   theme: string;
   description: string;
@@ -169,9 +170,9 @@ export default function ClusterDetailsModal({ clusterId, onClose }: ClusterDetai
               style={{ backgroundColor: cluster?.color || '#6366f1' }}
             ></div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                {cluster?.title || 'Loading...'}
-              </h2>
+                          <h2 className="text-xl font-semibold text-gray-900">
+              {cluster?.name || cluster?.title || 'Loading...'}
+            </h2>
               {cluster && (
                 <div className="flex items-center space-x-2 mt-1">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${getSeverityColor(cluster.severity)}`}>
