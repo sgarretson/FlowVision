@@ -60,6 +60,7 @@ export async function GET() {
 
     // Group by user
     const usageByUser = aiLogs.reduce((acc, log) => {
+      if (!log.user) return acc;
       const userEmail = log.user.email;
       if (!acc[userEmail]) {
         acc[userEmail] = {
