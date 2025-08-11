@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
       prisma.initiative.update({ where: { id }, data: { orderIndex: index } })
     )
   );
-  await prisma.auditLog.create({ data: { userId: user.id, action: 'INITIATIVE_REORDER', details: { ids } } });
+  await prisma.auditLog.create({
+    data: { userId: user.id, action: 'INITIATIVE_REORDER', details: { ids } },
+  });
   return NextResponse.json({ ok: true });
 }

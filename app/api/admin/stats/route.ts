@@ -12,7 +12,7 @@ export async function GET() {
 
     // Check if user is admin
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (user?.role !== 'ADMIN') {
@@ -20,39 +20,30 @@ export async function GET() {
     }
 
     // Get system statistics
-    const [
-      totalUsers,
-      totalInitiatives,
-      activeInitiatives,
-      totalIssues,
-      criticalIssues
-    ] = await Promise.all([
-      prisma.user.count(),
-      prisma.initiative.count(),
-      prisma.initiative.count({
-        where: { status: 'In Progress' }
-      }),
-      prisma.issue.count(),
-      prisma.issue.count({
-        where: { heatmapScore: { gte: 80 } }
-      })
-    ]);
+    const [totalUsers, totalInitiatives, activeInitiatives, totalIssues, criticalIssues] =
+      await Promise.all([
+        prisma.user.count(),
+        prisma.initiative.count(),
+        prisma.initiative.count({
+          where: { status: 'In Progress' },
+        }),
+        prisma.issue.count(),
+        prisma.issue.count({
+          where: { heatmapScore: { gte: 80 } },
+        }),
+      ]);
 
     const stats = {
       totalUsers,
       totalInitiatives,
       activeInitiatives,
       totalIssues,
-      criticalIssues
+      criticalIssues,
     };
 
     return NextResponse.json(stats);
-
   } catch (error) {
     console.error('Admin stats error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch system statistics' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch system statistics' }, { status: 500 });
   }
 }

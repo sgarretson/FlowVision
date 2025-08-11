@@ -18,22 +18,22 @@ export async function GET(request: NextRequest) {
 
     // Build filter conditions
     const where: any = {};
-    
+
     if (category) {
       where.category = category;
     }
-    
+
     if (priority) {
       where.priority = priority;
     }
-    
+
     if (status) {
       where.status = status;
     }
 
     // Build sort conditions
     let orderBy: any = { createdAt: 'desc' }; // default newest
-    
+
     switch (sortBy) {
       case 'oldest':
         orderBy = { createdAt: 'asc' };
@@ -63,13 +63,9 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(ideas);
-
   } catch (error) {
     console.error('Ideas fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch ideas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch ideas' }, { status: 500 });
   }
 }
 
@@ -84,10 +80,7 @@ export async function POST(request: NextRequest) {
     const { title, description, category, priority, tags } = body;
 
     if (!title || !description) {
-      return NextResponse.json(
-        { error: 'Title and description are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Title and description are required' }, { status: 400 });
     }
 
     const idea = await prisma.idea.create({
@@ -119,12 +112,8 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(idea, { status: 201 });
-
   } catch (error) {
     console.error('Idea creation error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create idea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create idea' }, { status: 500 });
   }
 }

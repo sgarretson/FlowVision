@@ -36,14 +36,14 @@ class LiveUserTesting {
           'User opens FlowVision application',
           'Navigates to login page',
           'Enters credentials (admin@flowvision.com)',
-          'Successfully authenticates as admin user'
+          'Successfully authenticates as admin user',
         ],
         validations: [
           'Login page loads correctly',
           'Form accepts valid credentials',
           'Redirects to dashboard after login',
-          'User sees admin-level navigation'
-        ]
+          'User sees admin-level navigation',
+        ],
       },
       {
         step: 'Issue Discovery & Analysis',
@@ -51,14 +51,14 @@ class LiveUserTesting {
           'Navigate to Issues section (Identify phase)',
           'Review existing operational issues',
           'Click on highest-priority issue',
-          'Request AI analysis of the issue'
+          'Request AI analysis of the issue',
         ],
         validations: [
           'Issues display with heatmap scores',
           'Voting functionality works',
           'AI analysis button is visible',
-          'Analysis provides actionable insights'
-        ]
+          'Analysis provides actionable insights',
+        ],
       },
       {
         step: 'Initiative Planning & Creation',
@@ -66,14 +66,14 @@ class LiveUserTesting {
           'Navigate to Initiatives section (Plan phase)',
           'Create new initiative for priority issue',
           'Use AI to generate recommendations',
-          'Refine and save the initiative'
+          'Refine and save the initiative',
         ],
         validations: [
           'Initiative creation form works',
           'AI generates comprehensive recommendations',
           'User can edit AI-generated content',
-          'Initiative saves successfully'
-        ]
+          'Initiative saves successfully',
+        ],
       },
       {
         step: 'Progress Tracking & Monitoring',
@@ -81,14 +81,14 @@ class LiveUserTesting {
           'Navigate to Track section (Execute phase)',
           'Update initiative progress',
           'Add comments and milestones',
-          'Monitor team assignments'
+          'Monitor team assignments',
         ],
         validations: [
           'Progress updates reflect correctly',
           'Comments system works',
           'Visual progress indicators update',
-          'Data persists correctly'
-        ]
+          'Data persists correctly',
+        ],
       },
       {
         step: 'Analytics & Insights Review',
@@ -96,15 +96,15 @@ class LiveUserTesting {
           'Navigate to Analytics section (Analyze phase)',
           'Review audit logs and activity',
           'Check AI usage statistics',
-          'Export data if needed'
+          'Export data if needed',
         ],
         validations: [
           'Analytics display correctly',
           'AI usage tracking is accurate',
           'Historical data is preserved',
-          'Insights are actionable'
-        ]
-      }
+          'Insights are actionable',
+        ],
+      },
     ];
 
     for (const journey of journeySteps) {
@@ -118,9 +118,12 @@ class LiveUserTesting {
         console.log(`     ✓ ${validation}`);
       });
       console.log('   Status: ⏳ MANUAL TESTING REQUIRED\n');
-      
-      this.logTestResult(`User Journey: ${journey.step}`, 'PENDING', 
-        'Requires manual validation of user interactions');
+
+      this.logTestResult(
+        `User Journey: ${journey.step}`,
+        'PENDING',
+        'Requires manual validation of user interactions'
+      );
     }
   }
 
@@ -130,11 +133,11 @@ class LiveUserTesting {
 
     // Test with real data from database
     const testIssue = await prisma.issue.findFirst({
-      orderBy: { heatmapScore: 'desc' }
+      orderBy: { heatmapScore: 'desc' },
     });
 
     const testInitiative = await prisma.initiative.findFirst({
-      include: { owner: true }
+      include: { owner: true },
     });
 
     if (testIssue) {
@@ -142,7 +145,7 @@ class LiveUserTesting {
       console.log(`   Description: ${testIssue.description.substring(0, 150)}...`);
       console.log(`   Heat Score: ${testIssue.heatmapScore}/100`);
       console.log(`   Votes: ${testIssue.votes}\n`);
-      
+
       console.log('🧠 Expected AI Analysis Structure:');
       console.log('   ✓ Category classification (process/technology/communication)');
       console.log('   ✓ Severity assessment (low/medium/high/critical)');
@@ -158,7 +161,7 @@ class LiveUserTesting {
       console.log(`   Problem: ${testInitiative.problem}`);
       console.log(`   Current Goal: ${testInitiative.goal}`);
       console.log(`   Owner: ${testInitiative.owner.name}\n`);
-      
+
       console.log('🚀 Expected AI Enhancement Structure:');
       console.log('   ✓ Refined goal with measurable outcomes');
       console.log('   ✓ Key results and success metrics');
@@ -189,15 +192,15 @@ class LiveUserTesting {
           'Verify API key status (should show "Configured")',
           'Test connection to OpenAI API',
           'Review usage statistics and costs',
-          'Check recent activity log'
+          'Check recent activity log',
         ],
         expectedResults: [
           'API key status displays correctly',
           'Connection test returns success',
           'Usage stats show accurate data',
           'Activity log shows recent operations',
-          'Cost tracking is functioning'
-        ]
+          'Cost tracking is functioning',
+        ],
       },
       {
         workflow: 'User Management',
@@ -206,15 +209,15 @@ class LiveUserTesting {
           'View user statistics',
           'Access user management section',
           'Review user roles and permissions',
-          'Check audit logs for user activities'
+          'Check audit logs for user activities',
         ],
         expectedResults: [
           'User counts display accurately',
           'Role assignments work correctly',
           'Audit logs capture user actions',
           'Admin controls function properly',
-          'Data integrity maintained'
-        ]
+          'Data integrity maintained',
+        ],
       },
       {
         workflow: 'System Monitoring',
@@ -223,19 +226,19 @@ class LiveUserTesting {
           'Review database performance',
           'Monitor AI API usage trends',
           'Validate security measures',
-          'Check error logs and alerts'
+          'Check error logs and alerts',
         ],
         expectedResults: [
           'System health indicators green',
           'Database queries performing well',
           'AI usage within expected parameters',
           'Security measures active',
-          'No critical errors present'
-        ]
-      }
+          'No critical errors present',
+        ],
+      },
     ];
 
-    adminWorkflows.forEach(workflow => {
+    adminWorkflows.forEach((workflow) => {
       console.log(`🔧 ${workflow.workflow}:`);
       console.log('   Test Steps:');
       workflow.steps.forEach((step, index) => {
@@ -246,9 +249,12 @@ class LiveUserTesting {
         console.log(`     ✓ ${result}`);
       });
       console.log('   Status: ⏳ ADMIN TESTING REQUIRED\n');
-      
-      this.logTestResult(`Admin Workflow: ${workflow.workflow}`, 'PENDING', 
-        'Requires admin user testing');
+
+      this.logTestResult(
+        `Admin Workflow: ${workflow.workflow}`,
+        'PENDING',
+        'Requires admin user testing'
+      );
     });
   }
 
@@ -278,8 +284,8 @@ class LiveUserTesting {
           'Wait for AI response (should be < 30 seconds)',
           'Verify analysis contains all required fields',
           'Check that insights are business-relevant',
-          'Confirm usage tracking updates'
-        ]
+          'Confirm usage tracking updates',
+        ],
       },
       {
         feature: 'Initiative AI Generation',
@@ -294,15 +300,17 @@ class LiveUserTesting {
           'Wait for AI response (should be < 45 seconds)',
           'Verify comprehensive structure generated',
           'Test editing AI-generated content',
-          'Save initiative with AI content'
-        ]
-      }
+          'Save initiative with AI content',
+        ],
+      },
     ];
 
-    aiTests.forEach(test => {
+    aiTests.forEach((test) => {
       console.log(`🧠 ${test.feature}:`);
       if (test.testData) {
-        console.log(`   Test Data: ${test.testData.title || test.testData.description?.substring(0, 50) + '...'}`);
+        console.log(
+          `   Test Data: ${test.testData.title || test.testData.description?.substring(0, 50) + '...'}`
+        );
       }
       console.log(`   Endpoint: ${test.endpoint}`);
       console.log('   Live Test Steps:');
@@ -310,9 +318,8 @@ class LiveUserTesting {
         console.log(`     ${index + 1}. ${step}`);
       });
       console.log('   Status: ✅ READY FOR LIVE TESTING\n');
-      
-      this.logTestResult(`AI Feature: ${test.feature}`, 'PENDING', 
-        'Ready for live user testing');
+
+      this.logTestResult(`AI Feature: ${test.feature}`, 'PENDING', 'Ready for live user testing');
     });
   }
 
@@ -321,7 +328,7 @@ class LiveUserTesting {
       name: testName,
       status: status,
       details: details,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -330,8 +337,8 @@ class LiveUserTesting {
     console.log('============================\n');
 
     const totalTime = Date.now() - this.startTime;
-    const pendingTests = this.testResults.filter(t => t.status === 'PENDING').length;
-    const readyTests = this.testResults.filter(t => t.details.includes('READY')).length;
+    const pendingTests = this.testResults.filter((t) => t.status === 'PENDING').length;
+    const readyTests = this.testResults.filter((t) => t.details.includes('READY')).length;
 
     console.log('🎯 TESTING SCOPE:');
     console.log(`   Total Test Scenarios: ${this.testResults.length}`);

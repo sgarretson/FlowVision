@@ -44,13 +44,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     return NextResponse.json(idea);
-
   } catch (error) {
     console.error('Idea fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch idea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch idea' }, { status: 500 });
   }
 }
 
@@ -109,22 +105,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       data: {
         userId: session.user.id,
         action: 'IDEA_UPDATE',
-        details: { 
-          ideaId: params.id, 
+        details: {
+          ideaId: params.id,
           changes: Object.keys(updateData),
-          title: updatedIdea.title 
+          title: updatedIdea.title,
         },
       },
     });
 
     return NextResponse.json(updatedIdea);
-
   } catch (error) {
     console.error('Idea update error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update idea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update idea' }, { status: 500 });
   }
 }
 
@@ -163,12 +155,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     });
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
     console.error('Idea deletion error:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete idea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete idea' }, { status: 500 });
   }
 }

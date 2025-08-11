@@ -3,11 +3,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const issue = await prisma.issue.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     if (!issue) {
@@ -36,7 +35,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const existingIssue = await prisma.issue.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     if (!existingIssue) {
@@ -47,13 +46,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       where: { id: params.id },
       data: {
         description: description.trim(),
-        heatmapScore: calculateHeatmapScore(description)
-      }
+        heatmapScore: calculateHeatmapScore(description),
+      },
     });
 
     // Log the action
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (user) {
@@ -64,9 +63,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
           details: {
             issueId: issue.id,
             oldDescription: existingIssue.description,
-            newDescription: issue.description
-          }
-        }
+            newDescription: issue.description,
+          },
+        },
       });
     }
 
@@ -85,7 +84,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     const existingIssue = await prisma.issue.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     if (!existingIssue) {
@@ -93,12 +92,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     await prisma.issue.delete({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     // Log the action
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (user) {
@@ -108,9 +107,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
           action: 'DELETE_ISSUE',
           details: {
             issueId: params.id,
-            description: existingIssue.description
-          }
-        }
+            description: existingIssue.description,
+          },
+        },
       });
     }
 
@@ -128,20 +127,42 @@ function calculateHeatmapScore(description: string): number {
 
   // High impact keywords
   const highImpactKeywords = [
-    'critical', 'urgent', 'blocking', 'revenue', 'customer', 'security', 
-    'downtime', 'compliance', 'risk', 'deadline', 'escalated'
+    'critical',
+    'urgent',
+    'blocking',
+    'revenue',
+    'customer',
+    'security',
+    'downtime',
+    'compliance',
+    'risk',
+    'deadline',
+    'escalated',
   ];
-  
+
   // Medium impact keywords
   const mediumImpactKeywords = [
-    'important', 'improvement', 'efficiency', 'process', 'workflow',
-    'performance', 'quality', 'user experience', 'training'
+    'important',
+    'improvement',
+    'efficiency',
+    'process',
+    'workflow',
+    'performance',
+    'quality',
+    'user experience',
+    'training',
   ];
 
   // Low impact keywords
   const lowImpactKeywords = [
-    'nice to have', 'future', 'enhancement', 'cosmetic', 'minor',
-    'suggestion', 'optional', 'documentation'
+    'nice to have',
+    'future',
+    'enhancement',
+    'cosmetic',
+    'minor',
+    'suggestion',
+    'optional',
+    'documentation',
   ];
 
   for (const keyword of highImpactKeywords) {

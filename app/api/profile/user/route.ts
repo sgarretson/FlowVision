@@ -6,15 +6,17 @@ import { z } from 'zod';
 
 const userProfileSchema = z.object({
   name: z.string().min(1).optional(),
-  preferences: z.object({
-    notifications: z.object({
-      email: z.boolean(),
-      browser: z.boolean(),
-      digest: z.enum(['daily', 'weekly', 'none'])
-    }),
-    theme: z.enum(['light', 'dark', 'system']),
-    timezone: z.string()
-  }).optional()
+  preferences: z
+    .object({
+      notifications: z.object({
+        email: z.boolean(),
+        browser: z.boolean(),
+        digest: z.enum(['daily', 'weekly', 'none']),
+      }),
+      theme: z.enum(['light', 'dark', 'system']),
+      timezone: z.string(),
+    })
+    .optional(),
 });
 
 export async function GET() {
@@ -31,8 +33,8 @@ export async function GET() {
         name: true,
         email: true,
         role: true,
-        preferences: true
-      }
+        preferences: true,
+      },
     });
 
     if (!user) {
@@ -44,23 +46,19 @@ export async function GET() {
       notifications: {
         email: true,
         browser: true,
-        digest: 'weekly'
+        digest: 'weekly',
       },
       theme: 'light',
-      timezone: 'America/New_York'
+      timezone: 'America/New_York',
     };
 
     return NextResponse.json({
       ...user,
-      preferences: user.preferences || defaultPreferences
+      preferences: user.preferences || defaultPreferences,
     });
-
   } catch (error) {
     console.error('Get user profile error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch user profile' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch user profile' }, { status: 500 });
   }
 }
 
@@ -72,7 +70,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (!user) {
@@ -95,8 +93,8 @@ export async function PUT(req: NextRequest) {
         email: true,
         role: true,
         preferences: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
 
     // Create audit log
@@ -106,26 +104,19 @@ export async function PUT(req: NextRequest) {
         action: 'USER_PROFILE_UPDATE',
         details: {
           changes: updateData,
-          timestamp: new Date().toISOString()
-        }
-      }
+          timestamp: new Date().toISOString(),
+        },
+      },
     });
 
     return NextResponse.json(updatedUser);
-
   } catch (error) {
     console.error('Update user profile error:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: error.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: error.errors }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update user profile' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update user profile' }, { status: 500 });
   }
 }

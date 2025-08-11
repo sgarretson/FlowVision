@@ -17,14 +17,11 @@ export async function POST(req: NextRequest) {
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'User already exists' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
 
     // Hash password
@@ -44,7 +41,7 @@ export async function POST(req: NextRequest) {
         name: true,
         role: true,
         createdAt: true,
-      }
+      },
     });
 
     // Create audit log
@@ -52,28 +49,21 @@ export async function POST(req: NextRequest) {
       data: {
         userId: user.id,
         action: 'USER_REGISTERED',
-        details: { email, name, role }
-      }
+        details: { email, name, role },
+      },
     });
 
     return NextResponse.json({
       message: 'User created successfully',
-      user
+      user,
     });
-
   } catch (error) {
     console.error('Registration error:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: error.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: error.errors }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

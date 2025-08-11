@@ -17,14 +17,14 @@ describe('Authentication System', () => {
   beforeEach(async () => {
     // Clean up test data
     await prisma.user.deleteMany({
-      where: { email: { contains: 'test' } }
+      where: { email: { contains: 'test' } },
     });
   });
 
   afterEach(async () => {
     // Clean up test data
     await prisma.user.deleteMany({
-      where: { email: { contains: 'test' } }
+      where: { email: { contains: 'test' } },
     });
   });
 
@@ -34,18 +34,18 @@ describe('Authentication System', () => {
         email: 'test@example.com',
         password: 'testpassword123',
         name: 'Test User',
-        role: 'LEADER' as const
+        role: 'LEADER' as const,
       };
 
       const passwordHash = await bcrypt.hash(userData.password, 10);
-      
+
       const user = await prisma.user.create({
         data: {
           email: userData.email,
           passwordHash,
           name: userData.name,
           role: userData.role,
-        }
+        },
       });
 
       expect(user).toBeDefined();
@@ -60,16 +60,14 @@ describe('Authentication System', () => {
         email: 'test@example.com',
         passwordHash: await bcrypt.hash('password123', 10),
         name: 'Test User',
-        role: 'LEADER' as const
+        role: 'LEADER' as const,
       };
 
       // Create first user
       await prisma.user.create({ data: userData });
 
       // Attempt to create duplicate
-      await expect(
-        prisma.user.create({ data: userData })
-      ).rejects.toThrow();
+      await expect(prisma.user.create({ data: userData })).rejects.toThrow();
     });
 
     it('should default to LEADER role if not specified', async () => {
@@ -78,7 +76,7 @@ describe('Authentication System', () => {
           email: 'test2@example.com',
           passwordHash: await bcrypt.hash('password123', 10),
           name: 'Test User 2',
-        }
+        },
       });
 
       expect(user.role).toBe('LEADER');
@@ -92,7 +90,7 @@ describe('Authentication System', () => {
 
       expect(hashedPassword).not.toBe(plainPassword);
       expect(hashedPassword.length).toBeGreaterThan(50);
-      
+
       const isValid = await bcrypt.compare(plainPassword, hashedPassword);
       expect(isValid).toBe(true);
     });
@@ -113,8 +111,8 @@ describe('Authentication System', () => {
           email: 'admin@test.com',
           passwordHash: await bcrypt.hash('password123', 10),
           name: 'Admin User',
-          role: 'ADMIN'
-        }
+          role: 'ADMIN',
+        },
       });
 
       const leaderUser = await prisma.user.create({
@@ -122,8 +120,8 @@ describe('Authentication System', () => {
           email: 'leader@test.com',
           passwordHash: await bcrypt.hash('password123', 10),
           name: 'Leader User',
-          role: 'LEADER'
-        }
+          role: 'LEADER',
+        },
       });
 
       expect(adminUser.role).toBe('ADMIN');

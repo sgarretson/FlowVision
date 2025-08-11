@@ -2,29 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  ArrowTrendingUpIcon, 
-  ExclamationTriangleIcon, 
+import {
+  ArrowTrendingUpIcon,
+  ExclamationTriangleIcon,
   ClockIcon,
   ChartBarIcon,
   LightBulbIcon,
   DocumentArrowDownIcon,
   CalendarIcon,
-  UsersIcon
+  UsersIcon,
 } from '@heroicons/react/24/outline';
-import { 
-  LineChart, 
-  Line, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
 } from 'recharts';
 
 interface HealthScore {
@@ -94,7 +94,7 @@ export default function ExecutiveDashboard() {
 
   useEffect(() => {
     loadDashboardData();
-    
+
     // Auto-refresh every 5 minutes
     const interval = setInterval(loadDashboardData, 5 * 60 * 1000);
     return () => clearInterval(interval);
@@ -103,12 +103,12 @@ export default function ExecutiveDashboard() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       const [healthRes, alertsRes, roiRes, insightsRes] = await Promise.all([
         fetch('/api/executive/health-score'),
         fetch('/api/executive/alerts'),
         fetch('/api/executive/roi-forecast'),
-        fetch('/api/executive/insights')
+        fetch('/api/executive/insights'),
       ]);
 
       if (healthRes.ok) {
@@ -157,17 +157,23 @@ export default function ExecutiveDashboard() {
 
   const getAlertIcon = (type: string) => {
     switch (type) {
-      case 'critical': return '🚨';
-      case 'warning': return '⚠️';
-      default: return 'ℹ️';
+      case 'critical':
+        return '🚨';
+      case 'warning':
+        return '⚠️';
+      default:
+        return 'ℹ️';
     }
   };
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-blue-100 text-blue-800';
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-blue-100 text-blue-800';
     }
   };
 
@@ -187,9 +193,9 @@ export default function ExecutiveDashboard() {
       alerts: alerts.slice(0, 5),
       roiForecast,
       insights: insights.slice(0, 10),
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     };
-    
+
     const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -212,16 +218,25 @@ export default function ExecutiveDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Non-blocking error banner placeholder (surface tile errors when present) */}
-      {!loading && (!healthScore || alerts.length === 0 || !roiForecast || insights.length === 0) && (
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3" role="status" aria-live="polite">
-            <div className="text-sm text-yellow-800 flex items-center justify-between">
-              <span>Some dashboard tiles could not load the latest data. Showing what’s available.</span>
-              <button className="text-yellow-900 underline" onClick={loadDashboardData}>Retry</button>
+      {!loading &&
+        (!healthScore || alerts.length === 0 || !roiForecast || insights.length === 0) && (
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+            <div
+              className="bg-yellow-50 border border-yellow-200 rounded-md p-3"
+              role="status"
+              aria-live="polite"
+            >
+              <div className="text-sm text-yellow-800 flex items-center justify-between">
+                <span>
+                  Some dashboard tiles could not load the latest data. Showing what’s available.
+                </span>
+                <button className="text-yellow-900 underline" onClick={loadDashboardData}>
+                  Retry
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -256,7 +271,7 @@ export default function ExecutiveDashboard() {
               { id: 'overview', name: 'Overview', icon: ChartBarIcon },
               { id: 'insights', name: 'AI Insights', icon: LightBulbIcon },
               { id: 'forecasting', name: 'ROI Forecasting', icon: ArrowTrendingUpIcon },
-              { id: 'alerts', name: 'Alerts', icon: ExclamationTriangleIcon }
+              { id: 'alerts', name: 'Alerts', icon: ExclamationTriangleIcon },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -295,13 +310,13 @@ export default function ExecutiveDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Health Score</p>
-                    <p className={`text-3xl font-bold ${getHealthScoreColor(healthScore?.score || 0)}`}>
+                    <p
+                      className={`text-3xl font-bold ${getHealthScoreColor(healthScore?.score || 0)}`}
+                    >
                       {healthScore?.score || 0}
                     </p>
                   </div>
-                  <div className="text-2xl">
-                    {getTrendIcon(healthScore?.trend || 'stable')}
-                  </div>
+                  <div className="text-2xl">{getTrendIcon(healthScore?.trend || 'stable')}</div>
                 </div>
                 <div className="mt-4">
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -323,13 +338,13 @@ export default function ExecutiveDashboard() {
                   <div>
                     <p className="text-sm font-medium text-gray-600">Critical Alerts</p>
                     <p className="text-3xl font-bold text-red-600">
-                      {alerts.filter(a => a.type === 'critical').length}
+                      {alerts.filter((a) => a.type === 'critical').length}
                     </p>
                   </div>
                   <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {alerts.filter(a => a.type === 'warning').length} warnings
+                  {alerts.filter((a) => a.type === 'warning').length} warnings
                 </p>
               </motion.div>
 
@@ -439,14 +454,16 @@ export default function ExecutiveDashboard() {
                     <div key={insight.id} className="p-3 border rounded-lg">
                       <div className="flex items-start justify-between">
                         <p className="text-sm font-medium text-gray-900">{insight.title}</p>
-                        <span className={`text-xs px-2 py-1 rounded-full ${getImpactColor(insight.impact)}`}>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${getImpactColor(insight.impact)}`}
+                        >
                           {insight.impact}
                         </span>
                       </div>
                       <p className="text-xs text-gray-600 mt-1">{insight.summary}</p>
                     </div>
                   ))}
-                  <button 
+                  <button
                     onClick={() => setActiveTab('insights')}
                     className="w-full text-sm text-blue-600 hover:text-blue-800 font-medium"
                   >
@@ -459,11 +476,7 @@ export default function ExecutiveDashboard() {
         )}
 
         {activeTab === 'insights' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-6"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900">AI-Powered Strategic Insights</h2>
             <div className="grid grid-cols-1 gap-6">
               {insights.map((insight) => (
@@ -472,7 +485,9 @@ export default function ExecutiveDashboard() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <h3 className="text-lg font-semibold text-gray-900">{insight.title}</h3>
-                        <span className={`text-xs px-2 py-1 rounded-full ${getImpactColor(insight.impact)}`}>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${getImpactColor(insight.impact)}`}
+                        >
                           {insight.impact} impact
                         </span>
                         <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
@@ -503,13 +518,9 @@ export default function ExecutiveDashboard() {
         )}
 
         {activeTab === 'forecasting' && roiForecast && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-6"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900">ROI Forecasting & Performance</h2>
-            
+
             {/* Current ROI Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-white rounded-lg shadow p-6">
@@ -543,12 +554,14 @@ export default function ExecutiveDashboard() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">ROI Forecast Timeline</h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={[
-                    { period: 'Current', roi: roiForecast.current.realizedRoi },
-                    { period: '3 Month', roi: roiForecast.forecast.threeMonth },
-                    { period: '6 Month', roi: roiForecast.forecast.sixMonth },
-                    { period: '12 Month', roi: roiForecast.forecast.twelveMonth }
-                  ]}>
+                  <LineChart
+                    data={[
+                      { period: 'Current', roi: roiForecast.current.realizedRoi },
+                      { period: '3 Month', roi: roiForecast.forecast.threeMonth },
+                      { period: '6 Month', roi: roiForecast.forecast.sixMonth },
+                      { period: '12 Month', roi: roiForecast.forecast.twelveMonth },
+                    ]}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="period" />
                     <YAxis />
@@ -565,10 +578,15 @@ export default function ExecutiveDashboard() {
             {/* Top Performers & Recommendations */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Initiatives</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Top Performing Initiatives
+                </h3>
                 <div className="space-y-3">
                   {roiForecast.topPerformers.map((performer) => (
-                    <div key={performer.id} className="flex justify-between items-center p-3 border rounded-lg">
+                    <div
+                      key={performer.id}
+                      className="flex justify-between items-center p-3 border rounded-lg"
+                    >
                       <div>
                         <p className="font-medium text-gray-900">{performer.title}</p>
                         <p className="text-sm text-gray-600">{performer.status}</p>
@@ -596,12 +614,10 @@ export default function ExecutiveDashboard() {
         )}
 
         {activeTab === 'alerts' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-6"
-          >
-            <h2 className="text-2xl font-bold text-gray-900">Predictive Alerts & Risk Management</h2>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Predictive Alerts & Risk Management
+            </h2>
             <div className="space-y-4">
               {alerts.map((alert) => (
                 <div key={alert.id} className="bg-white rounded-lg shadow p-6">
@@ -610,11 +626,15 @@ export default function ExecutiveDashboard() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
                         <h3 className="text-lg font-semibold text-gray-900">{alert.title}</h3>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          alert.type === 'critical' ? 'bg-red-100 text-red-800' :
-                          alert.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            alert.type === 'critical'
+                              ? 'bg-red-100 text-red-800'
+                              : alert.type === 'warning'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-blue-100 text-blue-800'
+                          }`}
+                        >
                           {alert.type}
                         </span>
                         <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
@@ -639,7 +659,9 @@ export default function ExecutiveDashboard() {
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">✅</div>
                   <h3 className="text-lg font-medium text-gray-900">No Active Alerts</h3>
-                  <p className="text-gray-600">Your organization is performing well with no critical issues detected.</p>
+                  <p className="text-gray-600">
+                    Your organization is performing well with no critical issues detected.
+                  </p>
                 </div>
               )}
             </div>

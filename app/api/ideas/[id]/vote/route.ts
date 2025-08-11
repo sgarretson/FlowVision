@@ -81,16 +81,12 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       },
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      votes: updatedIdea.votes 
+    return NextResponse.json({
+      success: true,
+      votes: updatedIdea.votes,
     });
-
   } catch (error) {
     console.error('Vote error:', error);
-    return NextResponse.json(
-      { error: 'Failed to process vote' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to process vote' }, { status: 500 });
   }
 }

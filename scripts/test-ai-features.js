@@ -15,7 +15,7 @@ class OpenAIService {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -45,15 +45,18 @@ const openaiService = new OpenAIService();
 
 async function testOpenAIConnection() {
   console.log('🔍 Testing OpenAI API connection...');
-  
+
   try {
-    const response = await openaiService.getCompletion([
-      {
-        role: 'user',
-        content: 'Say "Hello, FlowVision!" if you can receive this message.'
-      }
-    ], 50);
-    
+    const response = await openaiService.getCompletion(
+      [
+        {
+          role: 'user',
+          content: 'Say "Hello, FlowVision!" if you can receive this message.',
+        },
+      ],
+      50
+    );
+
     console.log('✅ OpenAI Connection Test Result:', response);
     return true;
   } catch (error) {
@@ -64,10 +67,10 @@ async function testOpenAIConnection() {
 
 async function testIssueAnalysis() {
   console.log('\n🧠 Testing AI Issue Analysis...');
-  
+
   try {
     const issueDescription = `Our current client approval process for design iterations is taking 3-4 weeks per round. Clients receive design proposals via email, often get lost in communication, multiple stakeholders need to coordinate, and we lack a centralized tracking system. This is causing project delays and client frustration.`;
-    
+
     const prompt = `As a business efficiency expert, analyze this operational issue and provide insights in JSON format:
 
 Issue: ${issueDescription}
@@ -90,14 +93,21 @@ Please respond with a JSON object containing:
   "longTermStrategy": "string (strategic recommendation)"
 }`;
 
-    const response = await openaiService.getCompletion([
-      { role: 'system', content: 'You are a business efficiency expert who analyzes operational issues and provides structured insights.' },
-      { role: 'user', content: prompt }
-    ], 800);
+    const response = await openaiService.getCompletion(
+      [
+        {
+          role: 'system',
+          content:
+            'You are a business efficiency expert who analyzes operational issues and provides structured insights.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      800
+    );
 
     console.log('📊 AI Issue Analysis Result:');
     console.log(response);
-    
+
     // Try to parse as JSON to validate structure
     try {
       const parsed = JSON.parse(response);
@@ -105,7 +115,7 @@ Please respond with a JSON object containing:
     } catch (e) {
       console.log('⚠️  Response is not valid JSON, but AI responded');
     }
-    
+
     return true;
   } catch (error) {
     console.error('❌ Issue Analysis Failed:', error.message);
@@ -115,11 +125,11 @@ Please respond with a JSON object containing:
 
 async function testInitiativeGeneration() {
   console.log('\n🎯 Testing AI Initiative Generation...');
-  
+
   try {
     const problemStatement = 'Client approval process is slow and disorganized';
     const title = 'Digital Client Portal Implementation';
-    
+
     const prompt = `As a business strategy consultant, help generate a comprehensive initiative based on this problem.
 
 Problem: ${problemStatement}
@@ -146,21 +156,28 @@ Please provide a detailed response in JSON format:
   "expectedROI": "Return on investment estimate"
 }`;
 
-    const response = await openaiService.getCompletion([
-      { role: 'system', content: 'You are a business strategy consultant specializing in digital transformation initiatives.' },
-      { role: 'user', content: prompt }
-    ], 1000);
+    const response = await openaiService.getCompletion(
+      [
+        {
+          role: 'system',
+          content:
+            'You are a business strategy consultant specializing in digital transformation initiatives.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      1000
+    );
 
     console.log('🚀 AI Initiative Generation Result:');
     console.log(response);
-    
+
     try {
       const parsed = JSON.parse(response);
       console.log('✅ Response is valid JSON with structure:', Object.keys(parsed));
     } catch (e) {
       console.log('⚠️  Response is not valid JSON, but AI responded');
     }
-    
+
     return true;
   } catch (error) {
     console.error('❌ Initiative Generation Failed:', error.message);
@@ -170,14 +187,19 @@ Please provide a detailed response in JSON format:
 
 async function testUsageTracking() {
   console.log('\n📈 Testing Usage Tracking...');
-  
+
   try {
     // Check if we have audit logs in the database
     const aiLogs = await prisma.auditLog.findMany({
       where: {
         action: {
-          in: ['AI_ISSUE_ANALYSIS', 'AI_INITIATIVE_RECOMMENDATIONS', 'AI_INITIATIVE_REQUIREMENTS', 'OPENAI_CONNECTION_TEST']
-        }
+          in: [
+            'AI_ISSUE_ANALYSIS',
+            'AI_INITIATIVE_RECOMMENDATIONS',
+            'AI_INITIATIVE_REQUIREMENTS',
+            'OPENAI_CONNECTION_TEST',
+          ],
+        },
       },
       orderBy: { timestamp: 'desc' },
       take: 5,
@@ -185,18 +207,20 @@ async function testUsageTracking() {
         user: {
           select: {
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
 
     console.log(`📊 Found ${aiLogs.length} AI usage logs in database`);
-    
+
     if (aiLogs.length > 0) {
       console.log('Recent AI activity:');
       aiLogs.forEach((log, index) => {
-        console.log(`  ${index + 1}. ${log.action} by ${log.user?.name || 'Unknown'} at ${log.timestamp.toISOString()}`);
+        console.log(
+          `  ${index + 1}. ${log.action} by ${log.user?.name || 'Unknown'} at ${log.timestamp.toISOString()}`
+        );
         if (log.details && typeof log.details === 'object') {
           const details = log.details;
           if (details.tokens) console.log(`     Tokens: ${details.tokens}`);
@@ -204,7 +228,7 @@ async function testUsageTracking() {
         }
       });
     }
-    
+
     return true;
   } catch (error) {
     console.error('❌ Usage Tracking Test Failed:', error.message);
@@ -220,7 +244,7 @@ async function main() {
     connection: false,
     issueAnalysis: false,
     initiativeGeneration: false,
-    usageTracking: false
+    usageTracking: false,
   };
 
   // Test 1: OpenAI Connection

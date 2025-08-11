@@ -39,7 +39,7 @@ export default function DashboardPage() {
     try {
       const [issuesRes, initiativesRes] = await Promise.all([
         fetch('/api/issues'),
-        fetch('/api/initiatives')
+        fetch('/api/initiatives'),
       ]);
 
       if (issuesRes.ok) {
@@ -67,10 +67,14 @@ export default function DashboardPage() {
 
   function getStatusColor(status: string): string {
     switch (status) {
-      case 'Done': return 'bg-green-100 text-green-800';
-      case 'In Progress': return 'bg-blue-100 text-blue-800';
-      case 'Prioritize': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Done':
+        return 'bg-green-100 text-green-800';
+      case 'In Progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'Prioritize':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   }
 
@@ -123,17 +127,18 @@ export default function DashboardPage() {
   const recentInitiatives = initiatives.slice(0, 3);
   const issueStats = {
     total: issues.length,
-    critical: issues.filter(i => i.heatmapScore >= 80).length,
-    high: issues.filter(i => i.heatmapScore >= 60 && i.heatmapScore < 80).length
+    critical: issues.filter((i) => i.heatmapScore >= 80).length,
+    high: issues.filter((i) => i.heatmapScore >= 60 && i.heatmapScore < 80).length,
   };
 
   return (
     <main className="space-y-8 animate-fade-in">
       {/* Hero Section */}
       <div className="text-center py-8">
-                        <h1 className="text-h1 mb-4">Welcome to FlowVision</h1>
+        <h1 className="text-h1 mb-4">Welcome to FlowVision</h1>
         <p className="text-body max-w-2xl mx-auto">
-          Transform friction into flow. Detect operational issues, categorize improvement ideas, and create strategic roadmaps to efficiency.
+          Transform friction into flow. Detect operational issues, categorize improvement ideas, and
+          create strategic roadmaps to efficiency.
         </p>
       </div>
 
@@ -141,14 +146,13 @@ export default function DashboardPage() {
       <div className="text-center">
         <div className="card-primary p-8 max-w-md mx-auto">
           <div className="text-6xl font-bold text-primary mb-2">
-            {initiatives.filter(i => i.status === 'In Progress').length}
+            {initiatives.filter((i) => i.status === 'In Progress').length}
           </div>
           <div className="text-h3 text-gray-600 mb-4">Active Initiatives</div>
           <div className="text-caption">
-            {initiatives.length > 0 
-              ? `${Math.round((initiatives.filter(i => i.status === 'In Progress').length / initiatives.length) * 100)}% of total initiatives`
-              : 'Start by identifying issues or creating your first initiative'
-            }
+            {initiatives.length > 0
+              ? `${Math.round((initiatives.filter((i) => i.status === 'In Progress').length / initiatives.length) * 100)}% of total initiatives`
+              : 'Start by identifying issues or creating your first initiative'}
           </div>
         </div>
       </div>
@@ -173,40 +177,92 @@ export default function DashboardPage() {
       <div className="text-center">
         <h2 className="text-h2 mb-6">Get Started</h2>
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          <Link href="/issues" className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow duration-200 group">
+          <Link
+            href="/issues"
+            className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow duration-200 group"
+          >
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-6 h-6 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <h3 className="text-h3 mb-2">Identify Issues</h3>
             <p className="text-caption">Report and vote on problems that need attention</p>
           </Link>
 
-          <Link href="/ideas" className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow duration-200 group">
+          <Link
+            href="/ideas"
+            className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow duration-200 group"
+          >
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-yellow-200 transition-colors">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              <svg
+                className="w-6 h-6 text-yellow-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                />
               </svg>
             </div>
             <h3 className="text-h3 mb-2">Capture Ideas</h3>
             <p className="text-caption">Brainstorm and collaborate on strategic opportunities</p>
           </Link>
 
-          <Link href="/initiatives" className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow duration-200 group">
+          <Link
+            href="/initiatives"
+            className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow duration-200 group"
+          >
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <svg
+                className="w-6 h-6 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
               </svg>
             </div>
             <h3 className="text-h3 mb-2">Plan Initiatives</h3>
             <p className="text-caption">Create and prioritize solutions to move forward</p>
           </Link>
 
-          <Link href="/track" className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow duration-200 group">
+          <Link
+            href="/track"
+            className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow duration-200 group"
+          >
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <svg
+                className="w-6 h-6 text-purple-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
               </svg>
             </div>
             <h3 className="text-h3 mb-2">Execute & Track</h3>
@@ -231,16 +287,17 @@ export default function DashboardPage() {
                 </div>
                 <div className="space-y-4">
                   {topIssues.map((issue) => (
-                    <div key={issue.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
+                    <div
+                      key={issue.id}
+                      className="flex items-start gap-3 p-3 rounded-lg bg-gray-50"
+                    >
                       <div className="flex items-center gap-2 min-w-[60px]">
                         <span className="text-sm font-semibold text-gray-700">{issue.votes}</span>
                         <div
                           className={`w-3 h-3 rounded-full ${getHeatmapColor(issue.heatmapScore)}`}
                         ></div>
                       </div>
-                      <p className="text-caption flex-1">
-                        {issue.description}
-                      </p>
+                      <p className="text-caption flex-1">{issue.description}</p>
                     </div>
                   ))}
                 </div>
@@ -252,23 +309,31 @@ export default function DashboardPage() {
               <div className="card-secondary p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3">Recent Initiatives</h3>
-                  <Link href="/initiatives" className="text-sm text-primary hover:underline font-medium">
+                  <Link
+                    href="/initiatives"
+                    className="text-sm text-primary hover:underline font-medium"
+                  >
                     View All
                   </Link>
                 </div>
                 <div className="space-y-4">
                   {recentInitiatives.map((initiative) => (
                     <div key={initiative.id} className="p-3 rounded-lg bg-gray-50">
-                      <Link href={`/initiatives/${initiative.id}`} className="text-body font-medium hover:text-primary transition-colors">
+                      <Link
+                        href={`/initiatives/${initiative.id}`}
+                        className="text-body font-medium hover:text-primary transition-colors"
+                      >
                         {initiative.title}
                       </Link>
                       <div className="flex items-center gap-3 mt-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(initiative.status)}`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(initiative.status)}`}
+                        >
                           {initiative.status}
                         </span>
                         <div className="flex items-center gap-1">
                           <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
+                            <div
                               className="h-full bg-primary rounded-full transition-all duration-300"
                               style={{ width: `${initiative.progress}%` }}
                             ></div>
@@ -284,9 +349,6 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-
-
     </main>
   );
 }
-

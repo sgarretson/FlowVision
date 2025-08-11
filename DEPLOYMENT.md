@@ -13,11 +13,13 @@ Vercel provides the best experience for Next.js applications with automatic depl
 **Manual Vercel Deployment:**
 
 1. **Install Vercel CLI**
+
    ```bash
    npm i -g vercel
    ```
 
 2. **Login and Deploy**
+
    ```bash
    vercel login
    vercel --prod
@@ -115,6 +117,7 @@ NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
 ### PostgreSQL Setup
 
 1. **Create Database**
+
    ```sql
    CREATE DATABASE flowvision;
    CREATE USER flowvision_user WITH PASSWORD 'secure_password';
@@ -122,6 +125,7 @@ NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
    ```
 
 2. **Run Migrations**
+
    ```bash
    npx prisma migrate deploy
    ```
@@ -134,16 +138,19 @@ NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
 ### Database Providers
 
 #### Neon (Recommended for Vercel)
+
 - Serverless PostgreSQL
 - Automatic scaling
 - Built-in connection pooling
 
 #### PlanetScale
+
 - MySQL-compatible
 - Branching for database schemas
 - Global distribution
 
 #### Railway PostgreSQL
+
 - Simple setup
 - Automatic backups
 - Built-in monitoring
@@ -174,11 +181,13 @@ Most hosting platforms provide automatic SSL certificates. For custom setups:
 ### Application Monitoring
 
 **Vercel Analytics**:
+
 ```bash
 npm install @vercel/analytics
 ```
 
 **Google Analytics**:
+
 ```env
 NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
 ```
@@ -186,6 +195,7 @@ NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
 ### Error Tracking
 
 **Sentry Integration**:
+
 ```bash
 npm install @sentry/nextjs
 ```
@@ -286,16 +296,19 @@ NEXTAUTH_SECRET
 ### Common Issues
 
 **Build Failures**:
+
 - Check Node.js version compatibility
 - Verify all environment variables are set
 - Review build logs for specific errors
 
 **Database Connection Issues**:
+
 - Verify DATABASE_URL format
 - Check database server accessibility
 - Ensure SSL configuration if required
 
 **Authentication Problems**:
+
 - Verify NEXTAUTH_SECRET is set
 - Check NEXTAUTH_URL matches deployed domain
 - Ensure callback URLs are configured
@@ -309,6 +322,7 @@ GET /api/health
 ```
 
 Response:
+
 ```json
 {
   "status": "ok",

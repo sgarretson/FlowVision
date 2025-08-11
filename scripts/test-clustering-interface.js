@@ -15,7 +15,7 @@ async function testClusteringInterface() {
   try {
     // 1. Test clustering data availability
     console.log('\n📊 TESTING CLUSTERING DATA AVAILABILITY:');
-    
+
     const clusters = await prisma.issueCluster.findMany({
       include: {
         issues: {
@@ -25,23 +25,23 @@ async function testClusteringInterface() {
             heatmapScore: true,
             votes: true,
             department: true,
-            category: true
-          }
+            category: true,
+          },
         },
         initiatives: {
           select: {
             id: true,
             title: true,
             status: true,
-            progress: true
-          }
-        }
+            progress: true,
+          },
+        },
       },
-      orderBy: { updatedAt: 'desc' }
+      orderBy: { updatedAt: 'desc' },
     });
 
     console.log(`✅ Found ${clusters.length} clusters in database`);
-    
+
     if (clusters.length === 0) {
       console.log('❌ No clusters found! Interface will show empty state.');
       return;
@@ -50,16 +50,16 @@ async function testClusteringInterface() {
     // 2. Calculate statistics (matching API logic)
     const totalIssues = await prisma.issue.count();
     const clusteredIssues = await prisma.issue.count({
-      where: { clusterId: { not: null } }
+      where: { clusterId: { not: null } },
     });
 
     const stats = {
       totalClusters: clusters.length,
-      activeClusters: clusters.filter(c => c.isActive).length,
+      activeClusters: clusters.filter((c) => c.isActive).length,
       totalIssues,
       clusteredIssues,
       clusteringRate: totalIssues > 0 ? Math.round((clusteredIssues / totalIssues) * 100) : 0,
-      averageClusterSize: clusters.length > 0 ? Math.round(clusteredIssues / clusters.length) : 0
+      averageClusterSize: clusters.length > 0 ? Math.round(clusteredIssues / clusters.length) : 0,
     };
 
     console.log('\n📈 CLUSTERING STATISTICS:');
@@ -77,38 +77,59 @@ async function testClusteringInterface() {
         ...cluster,
         issueCount: cluster.issues.length,
         initiativeCount: cluster.initiatives.length,
-        averageScore: cluster.issues.length > 0 
-          ? Math.round(cluster.issues.reduce((sum, issue) => sum + issue.heatmapScore, 0) / cluster.issues.length)
-          : 0
+        averageScore:
+          cluster.issues.length > 0
+            ? Math.round(
+                cluster.issues.reduce((sum, issue) => sum + issue.heatmapScore, 0) /
+                  cluster.issues.length
+              )
+            : 0,
       };
 
       console.log(`\n${index + 1}. ${enrichedCluster.name}`);
-      console.log(`   Category: ${enrichedCluster.category} | Severity: ${enrichedCluster.severity}`);
+      console.log(
+        `   Category: ${enrichedCluster.category} | Severity: ${enrichedCluster.severity}`
+      );
       console.log(`   Theme: ${enrichedCluster.theme}`);
-      console.log(`   Issues: ${enrichedCluster.issueCount} | Initiatives: ${enrichedCluster.initiativeCount}`);
-      console.log(`   Average Score: ${enrichedCluster.averageScore} | Active: ${enrichedCluster.isActive}`);
+      console.log(
+        `   Issues: ${enrichedCluster.issueCount} | Initiatives: ${enrichedCluster.initiativeCount}`
+      );
+      console.log(
+        `   Average Score: ${enrichedCluster.averageScore} | Active: ${enrichedCluster.isActive}`
+      );
       console.log(`   Color: ${enrichedCluster.color}`);
-      
+
       if (enrichedCluster.issues.length > 0) {
-        console.log(`   Sample Issue: "${enrichedCluster.issues[0].description.substring(0, 80)}..."`);
+        console.log(
+          `   Sample Issue: "${enrichedCluster.issues[0].description.substring(0, 80)}..."`
+        );
       }
     });
 
     // 4. Test UI component compatibility
     console.log('\n🖥️  UI COMPONENT COMPATIBILITY TEST:');
-    
+
     const uiTestResults = {
       hasRequiredFields: true,
       hasColorCoding: true,
       hasSeverityLevels: true,
       hasCategoryIcons: true,
-      hasValidStatistics: true
+      hasValidStatistics: true,
     };
 
     // Check required fields for UI
-    clusters.forEach(cluster => {
-      const required = ['id', 'name', 'description', 'category', 'severity', 'theme', 'color', 'isActive'];
-      required.forEach(field => {
+    clusters.forEach((cluster) => {
+      const required = [
+        'id',
+        'name',
+        'description',
+        'category',
+        'severity',
+        'theme',
+        'color',
+        'isActive',
+      ];
+      required.forEach((field) => {
         if (!cluster[field]) {
           console.log(`   ❌ Missing field '${field}' in cluster '${cluster.name}'`);
           uiTestResults.hasRequiredFields = false;
@@ -118,8 +139,8 @@ async function testClusteringInterface() {
 
     // Check severity levels
     const validSeverities = ['critical', 'high', 'medium', 'low'];
-    const foundSeverities = [...new Set(clusters.map(c => c.severity.toLowerCase()))];
-    foundSeverities.forEach(severity => {
+    const foundSeverities = [...new Set(clusters.map((c) => c.severity.toLowerCase()))];
+    foundSeverities.forEach((severity) => {
       if (!validSeverities.includes(severity)) {
         console.log(`   ❌ Invalid severity level: ${severity}`);
         uiTestResults.hasSeverityLevels = false;
@@ -128,8 +149,8 @@ async function testClusteringInterface() {
 
     // Check categories for icon mapping
     const validCategories = ['coordination', 'technology', 'process', 'management', 'knowledge'];
-    const foundCategories = [...new Set(clusters.map(c => c.category.toLowerCase()))];
-    foundCategories.forEach(category => {
+    const foundCategories = [...new Set(clusters.map((c) => c.category.toLowerCase()))];
+    foundCategories.forEach((category) => {
       if (!validCategories.includes(category)) {
         console.log(`   ❌ Unmapped category: ${category}`);
         uiTestResults.hasCategoryIcons = false;
@@ -155,7 +176,6 @@ async function testClusteringInterface() {
     console.log('   • Click clusters to expand and view issues');
     console.log('   • Statistics dashboard showing clustering metrics');
     console.log('   • Category icons and department groupings');
-
   } catch (error) {
     console.error('❌ Error testing clustering interface:', error);
   } finally {

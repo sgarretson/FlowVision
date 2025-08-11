@@ -4,8 +4,5 @@
     "types": ["jest", "node", "@testing-library/jest-dom"],
     "module": "commonjs"
   },
-  "exclude": [
-    "cypress",
-    "node_modules"
-  ]
+  "exclude": ["cypress", "node_modules"]
 }

@@ -4,15 +4,20 @@ import { NextRequest } from 'next/server';
 
 // Input validation schemas
 export const emailSchema = z.string().email().max(255);
-export const passwordSchema = z.string().min(8).max(128).regex(
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-  'Password must contain at least one lowercase letter, one uppercase letter, and one number'
-);
+export const passwordSchema = z
+  .string()
+  .min(8)
+  .max(128)
+  .regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+    'Password must contain at least one lowercase letter, one uppercase letter, and one number'
+  );
 
-export const nameSchema = z.string().min(1).max(100).regex(
-  /^[a-zA-Z\s'-]+$/,
-  'Name can only contain letters, spaces, hyphens, and apostrophes'
-);
+export const nameSchema = z
+  .string()
+  .min(1)
+  .max(100)
+  .regex(/^[a-zA-Z\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes');
 
 // Sanitization functions
 export function sanitizeString(input: string): string {
@@ -60,7 +65,9 @@ export const securityHeaders = {
     font-src 'self';
     connect-src 'self';
     frame-ancestors 'none';
-  `.replace(/\s+/g, ' ').trim()
+  `
+    .replace(/\s+/g, ' ')
+    .trim(),
 };
 
 // IP validation
@@ -73,12 +80,12 @@ export function isValidIP(ip: string): boolean {
 // File upload security
 export const ALLOWED_FILE_TYPES = [
   'image/jpeg',
-  'image/png', 
+  'image/png',
   'image/gif',
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain'
+  'text/plain',
 ];
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -87,11 +94,11 @@ export function validateFileUpload(file: File): { valid: boolean; error?: string
   if (!ALLOWED_FILE_TYPES.includes(file.type)) {
     return { valid: false, error: 'File type not allowed' };
   }
-  
+
   if (file.size > MAX_FILE_SIZE) {
     return { valid: false, error: 'File size exceeds 10MB limit' };
   }
-  
+
   return { valid: true };
 }
 
@@ -103,19 +110,18 @@ export function validateDatabaseInput(input: any): boolean {
       /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC)\b)/i,
       /(['"]);?\s*(DROP|DELETE|INSERT|UPDATE)/i,
       /(UNION\s+SELECT)/i,
-      /(-{2}|\/\*|\*\/)/
+      /(-{2}|\/\*|\*\/)/,
     ];
-    
-    return !sqlPatterns.some(pattern => pattern.test(input));
+
+    return !sqlPatterns.some((pattern) => pattern.test(input));
   }
-  
+
   return true;
 }
 
 // CSRF Protection
 export function generateCSRFToken(): string {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
 export function validateCSRFToken(token: string, sessionToken: string): boolean {
@@ -135,39 +141,39 @@ export function logSecurityEvent(event: {
     ip: event.ip,
     userAgent: event.userAgent,
     email: event.email,
-    details: event.details
+    details: event.details,
   });
 }
 
 // Environment validation
 export function validateEnvironment(): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
-  
+
   if (!process.env.DATABASE_URL) {
     errors.push('DATABASE_URL is required');
   }
-  
+
   if (!process.env.NEXTAUTH_SECRET) {
     errors.push('NEXTAUTH_SECRET is required');
   }
-  
+
   if (!process.env.NEXTAUTH_URL) {
     errors.push('NEXTAUTH_URL is required');
   }
-  
+
   if (process.env.NODE_ENV === 'production') {
     if (!process.env.DATABASE_URL?.startsWith('postgresql://')) {
       errors.push('Production requires PostgreSQL database');
     }
-    
+
     if (process.env.NEXTAUTH_SECRET && process.env.NEXTAUTH_SECRET.length < 32) {
       errors.push('NEXTAUTH_SECRET should be at least 32 characters in production');
     }
   }
-  
+
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 

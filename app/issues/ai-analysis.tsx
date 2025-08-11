@@ -27,7 +27,7 @@ export default function AIAnalysis({ issueDescription, onInsights }: AIAnalysisP
       const response = await fetch('/api/ai/analyze-issue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description: issueDescription })
+        body: JSON.stringify({ description: issueDescription }),
       });
 
       const data = await response.json();
@@ -66,15 +66,17 @@ export default function AIAnalysis({ issueDescription, onInsights }: AIAnalysisP
             Analyzing...
           </>
         ) : (
-          <>
-            🤖 AI Analysis
-          </>
+          <>🤖 AI Analysis</>
         )}
       </button>
 
       {/* Error Message */}
       {error && (
-        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md" role="alert" aria-live="polite">
+        <div
+          className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md"
+          role="alert"
+          aria-live="polite"
+        >
           <div className="text-sm text-yellow-800">{error}</div>
         </div>
       )}
@@ -91,9 +93,7 @@ export default function AIAnalysis({ issueDescription, onInsights }: AIAnalysisP
               ✕
             </button>
           </div>
-          <div className="text-sm text-blue-700 whitespace-pre-wrap">
-            {insights}
-          </div>
+          <div className="text-sm text-blue-700 whitespace-pre-wrap">{insights}</div>
           <div className="mt-3 text-xs text-blue-600">
             Analysis powered by AI • Results may vary • Always verify with domain expertise
           </div>

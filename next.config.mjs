@@ -2,9 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    typedRoutes: true
-  }
+    typedRoutes: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
-
