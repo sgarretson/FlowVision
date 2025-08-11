@@ -10,50 +10,71 @@ interface ClusterUpdateRequest {
   color?: string;
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Role-aware projection and reduced payloads
+    const isAdmin = user.role === 'ADMIN';
     const cluster = await prisma.issueCluster.findUnique({
       where: { id: params.id },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category: true,
+        severity: true,
+        theme: true,
+        color: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
         issues: {
-          include: {
+          orderBy: { heatmapScore: 'desc' },
+          select: {
+            id: true,
+            description: true,
+            department: true,
+            category: true,
+            heatmapScore: true,
+            votes: true,
+            createdAt: true,
             comments: {
               take: 3,
               orderBy: { createdAt: 'desc' },
-              include: {
+              select: {
+                id: true,
+                content: true,
+                createdAt: true,
                 author: {
-                  select: { name: true, email: true }
-                }
-              }
+                  select: isAdmin ? { name: true, email: true } : { name: true },
+                },
+              },
             },
-            userVotes: true
           },
-          orderBy: { heatmapScore: 'desc' }
         },
         initiatives: {
-          include: {
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            progress: true,
+            type: true,
+            clusterId: true,
+            createdAt: true,
             owner: {
-              select: { name: true, email: true }
+              select: isAdmin ? { name: true, email: true } : { name: true },
             },
             milestones: {
-              select: {
-                title: true,
-                status: true,
-                dueDate: true
-              }
-            }
+              select: { title: true, status: true, dueDate: true },
+            },
           },
-          orderBy: { createdAt: 'desc' }
-        }
-      }
+        },
+      },
     });
 
     if (!cluster) {
@@ -63,14 +84,18 @@ export async function GET(
     // Calculate cluster analytics
     const analytics = {
       totalIssues: cluster.issues.length,
-      averageScore: cluster.issues.length > 0 
-        ? Math.round(cluster.issues.reduce((sum, issue) => sum + issue.heatmapScore, 0) / cluster.issues.length)
-        : 0,
+      averageScore:
+        cluster.issues.length > 0
+          ? Math.round(
+              cluster.issues.reduce((sum, issue) => sum + issue.heatmapScore, 0) /
+                cluster.issues.length
+            )
+          : 0,
       totalVotes: cluster.issues.reduce((sum, issue) => sum + issue.votes, 0),
       scoreDistribution: {
-        high: cluster.issues.filter(i => i.heatmapScore > 85).length,
-        medium: cluster.issues.filter(i => i.heatmapScore > 70 && i.heatmapScore <= 85).length,
-        low: cluster.issues.filter(i => i.heatmapScore <= 70).length
+        high: cluster.issues.filter((i) => i.heatmapScore > 85).length,
+        medium: cluster.issues.filter((i) => i.heatmapScore > 70 && i.heatmapScore <= 85).length,
+        low: cluster.issues.filter((i) => i.heatmapScore <= 70).length,
       },
       departmentBreakdown: cluster.issues.reduce((acc: Record<string, number>, issue) => {
         const dept = issue.department || 'Unassigned';
@@ -79,12 +104,16 @@ export async function GET(
       }, {}),
       initiativeProgress: {
         total: cluster.initiatives.length,
-        active: cluster.initiatives.filter(i => i.status === 'ACTIVE').length,
-        completed: cluster.initiatives.filter(i => i.status === 'COMPLETED').length,
-        averageProgress: cluster.initiatives.length > 0
-          ? Math.round(cluster.initiatives.reduce((sum, init) => sum + init.progress, 0) / cluster.initiatives.length)
-          : 0
-      }
+        active: cluster.initiatives.filter((i) => i.status === 'ACTIVE').length,
+        completed: cluster.initiatives.filter((i) => i.status === 'COMPLETED').length,
+        averageProgress:
+          cluster.initiatives.length > 0
+            ? Math.round(
+                cluster.initiatives.reduce((sum, init) => sum + init.progress, 0) /
+                  cluster.initiatives.length
+              )
+            : 0,
+      },
     };
 
     // Strategic recommendations based on cluster analysis
@@ -95,23 +124,16 @@ export async function GET(
       cluster: {
         ...cluster,
         analytics,
-        recommendations
-      }
+        recommendations,
+      },
     });
-
   } catch (error) {
     console.error('Failed to fetch cluster:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch cluster details' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch cluster details' }, { status: 500 });
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -133,12 +155,12 @@ export async function PUT(
         ...(body.severity && { severity: body.severity }),
         ...(body.isActive !== undefined && { isActive: body.isActive }),
         ...(body.color && { color: body.color }),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       include: {
         issues: true,
-        initiatives: true
-      }
+        initiatives: true,
+      },
     });
 
     // Log the cluster update
@@ -150,29 +172,22 @@ export async function PUT(
           clusterId: params.id,
           clusterName: updatedCluster.name,
           changes: body,
-          timestamp: new Date().toISOString()
-        }
-      }
+          timestamp: new Date().toISOString(),
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
-      cluster: updatedCluster
+      cluster: updatedCluster,
     });
-
   } catch (error) {
     console.error('Failed to update cluster:', error);
-    return NextResponse.json(
-      { error: 'Failed to update cluster' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update cluster' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getCurrentUser();
     if (!user || user.role !== 'ADMIN') {
@@ -184,8 +199,8 @@ export async function DELETE(
       where: { id: params.id },
       include: {
         issues: true,
-        initiatives: true
-      }
+        initiatives: true,
+      },
     });
 
     if (!cluster) {
@@ -193,13 +208,16 @@ export async function DELETE(
     }
 
     if (cluster.issues.length > 0 || cluster.initiatives.length > 0) {
-      return NextResponse.json({
-        error: 'Cannot delete cluster with associated issues or initiatives'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Cannot delete cluster with associated issues or initiatives',
+        },
+        { status: 400 }
+      );
     }
 
     await prisma.issueCluster.delete({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     // Log the cluster deletion
@@ -210,22 +228,18 @@ export async function DELETE(
         details: {
           clusterId: params.id,
           clusterName: cluster.name,
-          timestamp: new Date().toISOString()
-        }
-      }
+          timestamp: new Date().toISOString(),
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Cluster deleted successfully'
+      message: 'Cluster deleted successfully',
     });
-
   } catch (error) {
     console.error('Failed to delete cluster:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete cluster' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete cluster' }, { status: 500 });
   }
 }
 
@@ -240,7 +254,7 @@ function generateClusterRecommendations(cluster: any, analytics: any) {
       title: 'Strategic Initiative Needed',
       description: `This cluster has ${analytics.totalIssues} high-impact issues (avg score: ${analytics.averageScore}). Consider creating a comprehensive strategic initiative to address the root causes.`,
       action: 'create_strategic_initiative',
-      estimatedImpact: 'High - addresses multiple high-priority issues simultaneously'
+      estimatedImpact: 'High - addresses multiple high-priority issues simultaneously',
     });
   }
 
@@ -253,7 +267,7 @@ function generateClusterRecommendations(cluster: any, analytics: any) {
       title: 'Cross-Departmental Coordination',
       description: `Issues span ${deptCount} departments. Cross-functional team coordination will be essential for successful resolution.`,
       action: 'assign_cross_functional_team',
-      estimatedImpact: 'Medium - improves collaboration and reduces silos'
+      estimatedImpact: 'Medium - improves collaboration and reduces silos',
     });
   }
 
@@ -265,7 +279,7 @@ function generateClusterRecommendations(cluster: any, analytics: any) {
       title: 'Insufficient Initiative Coverage',
       description: `${analytics.totalIssues} issues but only ${analytics.initiativeProgress.total} initiatives. More initiatives may be needed to address all cluster issues.`,
       action: 'create_additional_initiatives',
-      estimatedImpact: 'Medium - ensures comprehensive issue resolution'
+      estimatedImpact: 'Medium - ensures comprehensive issue resolution',
     });
   }
 
@@ -275,9 +289,10 @@ function generateClusterRecommendations(cluster: any, analytics: any) {
       type: 'urgency',
       priority: 'high',
       title: 'Urgent Action Required',
-      description: 'High-severity cluster with no active initiatives. Immediate action needed to prevent business impact.',
+      description:
+        'High-severity cluster with no active initiatives. Immediate action needed to prevent business impact.',
       action: 'create_urgent_initiative',
-      estimatedImpact: 'High - prevents potential business disruption'
+      estimatedImpact: 'High - prevents potential business disruption',
     });
   }
 
@@ -287,9 +302,10 @@ function generateClusterRecommendations(cluster: any, analytics: any) {
       type: 'success',
       priority: 'low',
       title: 'Successful Cluster Pattern',
-      description: 'This cluster shows excellent progress. Consider replicating successful approaches in other clusters.',
+      description:
+        'This cluster shows excellent progress. Consider replicating successful approaches in other clusters.',
       action: 'document_best_practices',
-      estimatedImpact: 'Medium - enables knowledge transfer to other clusters'
+      estimatedImpact: 'Medium - enables knowledge transfer to other clusters',
     });
   }
 

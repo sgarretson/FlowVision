@@ -387,7 +387,8 @@ async function main() {
   // Sample issues for demonstration
   await prisma.issue.create({
     data: {
-      description: 'Critical security vulnerability in customer database access controls needs immediate attention',
+      description:
+        'Critical security vulnerability in customer database access controls needs immediate attention',
       votes: 15,
       heatmapScore: 95,
     },
@@ -395,7 +396,8 @@ async function main() {
 
   await prisma.issue.create({
     data: {
-      description: 'Project timeline management process is causing delays and client dissatisfaction',
+      description:
+        'Project timeline management process is causing delays and client dissatisfaction',
       votes: 8,
       heatmapScore: 75,
     },
@@ -448,7 +450,8 @@ async function main() {
   // Create comprehensive comments for initiatives showing collaboration
   await prisma.comment.create({
     data: {
-      content: 'I think we should prioritize the user feedback integration aspect of this portal. Our current approval process lacks visibility into client sentiment, which is causing delays.',
+      content:
+        'I think we should prioritize the user feedback integration aspect of this portal. Our current approval process lacks visibility into client sentiment, which is causing delays.',
       authorId: ctoUser.id,
       initiativeId: clientPortalInit.id,
       mentions: [admin.id, vpUser.id],
@@ -457,7 +460,8 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      content: '@Sarah makes a great point about client sentiment. We should also consider adding automated notifications to reduce the back-and-forth emails. This could cut approval time by 40%.',
+      content:
+        '@Sarah makes a great point about client sentiment. We should also consider adding automated notifications to reduce the back-and-forth emails. This could cut approval time by 40%.',
       authorId: vpUser.id,
       initiativeId: clientPortalInit.id,
       mentions: [ctoUser.id, admin.id],
@@ -466,7 +470,8 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      content: 'From a project management perspective, the timeline looks aggressive. Based on our team\'s current capacity, I\'d suggest adding 2-3 weeks buffer for thorough testing.',
+      content:
+        "From a project management perspective, the timeline looks aggressive. Based on our team's current capacity, I'd suggest adding 2-3 weeks buffer for thorough testing.",
       authorId: pmUser.id,
       initiativeId: clientPortalInit.id,
       mentions: [admin.id],
@@ -480,7 +485,8 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      content: 'Agreed on the sentiment tracking. I can work with the development team to scope out the technical requirements for real-time feedback integration.',
+      content:
+        'Agreed on the sentiment tracking. I can work with the development team to scope out the technical requirements for real-time feedback integration.',
       authorId: admin.id,
       parentId: parentComment.id,
       initiativeId: clientPortalInit.id,
@@ -491,7 +497,8 @@ async function main() {
   const ideaPerformance = await prisma.idea.create({
     data: {
       title: 'Real-time Performance Dashboard',
-      description: 'Create a live dashboard showing key project metrics, team utilization, and client satisfaction scores. This would give leadership instant visibility into operations.',
+      description:
+        'Create a live dashboard showing key project metrics, team utilization, and client satisfaction scores. This would give leadership instant visibility into operations.',
       authorId: ctoUser.id,
       category: 'technology',
       priority: 'high',
@@ -504,7 +511,8 @@ async function main() {
   const ideaRemoteWork = await prisma.idea.create({
     data: {
       title: 'Hybrid Work Policy Enhancement',
-      description: 'Develop comprehensive remote collaboration tools and policies to improve team productivity and work-life balance. Include virtual brainstorming tools and async communication protocols.',
+      description:
+        'Develop comprehensive remote collaboration tools and policies to improve team productivity and work-life balance. Include virtual brainstorming tools and async communication protocols.',
       authorId: vpUser.id,
       category: 'process',
       priority: 'medium',
@@ -517,7 +525,8 @@ async function main() {
   const ideaClientPortal = await prisma.idea.create({
     data: {
       title: 'Client Self-Service Portal',
-      description: 'Allow clients to track project progress, submit feedback, and access deliverables independently. This would reduce PM workload and improve client satisfaction.',
+      description:
+        'Allow clients to track project progress, submit feedback, and access deliverables independently. This would reduce PM workload and improve client satisfaction.',
       authorId: pmUser.id,
       category: 'strategy',
       priority: 'high',
@@ -531,7 +540,8 @@ async function main() {
   const ideaTraining = await prisma.idea.create({
     data: {
       title: 'AI-Powered Skill Development Platform',
-      description: 'Implement personalized learning paths for team members based on project needs and career goals. Use AI to recommend training and track skill progression.',
+      description:
+        'Implement personalized learning paths for team members based on project needs and career goals. Use AI to recommend training and track skill progression.',
       authorId: admin.id,
       category: 'technology',
       priority: 'medium',
@@ -604,7 +614,8 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      content: 'This is definitely our top priority. The security breach risk is too high to ignore. I recommend we allocate emergency resources to address this immediately.',
+      content:
+        'This is definitely our top priority. The security breach risk is too high to ignore. I recommend we allocate emergency resources to address this immediately.',
       authorId: ctoUser.id,
       issueId: criticalIssue.id,
       mentions: [admin.id, vpUser.id],
@@ -613,7 +624,8 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      content: 'Agreed. From a business continuity perspective, we should also conduct a full security audit while we\'re addressing this. Better to be proactive.',
+      content:
+        "Agreed. From a business continuity perspective, we should also conduct a full security audit while we're addressing this. Better to be proactive.",
       authorId: vpUser.id,
       issueId: criticalIssue.id,
       mentions: [ctoUser.id],
@@ -627,7 +639,8 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      content: 'Development is progressing well. We\'ve completed the authentication module and are now working on the approval workflow APIs. On track for completion next week.',
+      content:
+        "Development is progressing well. We've completed the authentication module and are now working on the approval workflow APIs. On track for completion next week.",
       authorId: pmUser.id,
       milestoneId: apiMilestone.id,
       mentions: [admin.id],
@@ -636,7 +649,8 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      content: 'Excellent progress! Make sure we include comprehensive error handling and logging. This will be critical for debugging in production.',
+      content:
+        'Excellent progress! Make sure we include comprehensive error handling and logging. This will be critical for debugging in production.',
       authorId: ctoUser.id,
       milestoneId: apiMilestone.id,
       mentions: [pmUser.id],

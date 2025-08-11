@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
@@ -15,7 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const { increment } = body; // true to upvote, false to downvote
 
     const existingIssue = await prisma.issue.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     if (!existingIssue) {
@@ -28,13 +27,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const issue = await prisma.issue.update({
       where: { id: params.id },
       data: {
-        votes: newVoteCount
-      }
+        votes: newVoteCount,
+      },
     });
 
     // Log the action
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (user) {
@@ -45,9 +44,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           details: {
             issueId: issue.id,
             description: issue.description,
-            newVoteCount: issue.votes
-          }
-        }
+            newVoteCount: issue.votes,
+          },
+        },
       });
     }
 

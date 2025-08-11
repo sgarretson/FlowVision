@@ -3,15 +3,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-
 export async function GET() {
   try {
     const issues = await prisma.issue.findMany({
-      orderBy: [
-        { votes: 'desc' },
-        { heatmapScore: 'desc' },
-        { createdAt: 'desc' }
-      ]
+      orderBy: [{ votes: 'desc' }, { heatmapScore: 'desc' }, { createdAt: 'desc' }],
     });
     return NextResponse.json(issues);
   } catch (error) {
@@ -41,13 +36,13 @@ export async function POST(req: NextRequest) {
       data: {
         description: description.trim(),
         votes: 1, // Creator automatically votes
-        heatmapScore
-      }
+        heatmapScore,
+      },
     });
 
     // Log the action
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (user) {
@@ -57,9 +52,9 @@ export async function POST(req: NextRequest) {
           action: 'CREATE_ISSUE',
           details: {
             issueId: issue.id,
-            description: issue.description
-          }
-        }
+            description: issue.description,
+          },
+        },
       });
     }
 
@@ -77,20 +72,42 @@ function calculateHeatmapScore(description: string): number {
 
   // High impact keywords
   const highImpactKeywords = [
-    'critical', 'urgent', 'blocking', 'revenue', 'customer', 'security', 
-    'downtime', 'compliance', 'risk', 'deadline', 'escalated'
+    'critical',
+    'urgent',
+    'blocking',
+    'revenue',
+    'customer',
+    'security',
+    'downtime',
+    'compliance',
+    'risk',
+    'deadline',
+    'escalated',
   ];
-  
+
   // Medium impact keywords
   const mediumImpactKeywords = [
-    'important', 'improvement', 'efficiency', 'process', 'workflow',
-    'performance', 'quality', 'user experience', 'training'
+    'important',
+    'improvement',
+    'efficiency',
+    'process',
+    'workflow',
+    'performance',
+    'quality',
+    'user experience',
+    'training',
   ];
 
   // Low impact keywords
   const lowImpactKeywords = [
-    'nice to have', 'future', 'enhancement', 'cosmetic', 'minor',
-    'suggestion', 'optional', 'documentation'
+    'nice to have',
+    'future',
+    'enhancement',
+    'cosmetic',
+    'minor',
+    'suggestion',
+    'optional',
+    'documentation',
   ];
 
   for (const keyword of highImpactKeywords) {

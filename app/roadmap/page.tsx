@@ -105,12 +105,12 @@ export default function RoadmapPage() {
         view: viewMode,
         ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '')),
       });
-      
+
       const response = await fetch(`/api/roadmap?${params}`);
       if (!response.ok) {
         throw new Error('Failed to fetch roadmap data');
       }
-      
+
       const data = await response.json();
       setRoadmapData(data);
       setError(null);
@@ -132,7 +132,7 @@ export default function RoadmapPage() {
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const clearFilters = () => {
@@ -165,15 +165,22 @@ export default function RoadmapPage() {
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="card-primary p-6 text-center">
-            <svg className="w-12 h-12 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-12 h-12 text-red-400 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Roadmap</h3>
             <p className="text-gray-600 mb-4">{error}</p>
-            <button
-              onClick={fetchRoadmapData}
-              className="btn-primary"
-            >
+            <button onClick={fetchRoadmapData} className="btn-primary">
               Try Again
             </button>
           </div>
@@ -199,11 +206,7 @@ export default function RoadmapPage() {
             <Link href="/initiatives" className="btn-secondary">
               Manage Initiatives
             </Link>
-            <button
-              onClick={fetchRoadmapData}
-              disabled={loading}
-              className="btn-primary"
-            >
+            <button onClick={fetchRoadmapData} disabled={loading} className="btn-primary">
               {loading ? 'Refreshing...' : 'Refresh'}
             </button>
           </div>
@@ -213,19 +216,27 @@ export default function RoadmapPage() {
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <div className="card-secondary p-4">
             <div className="text-sm font-medium text-gray-600">Total Initiatives</div>
-            <div className="text-2xl font-bold text-gray-900">{roadmapData.metrics.totalInitiatives}</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {roadmapData.metrics.totalInitiatives}
+            </div>
           </div>
           <div className="card-secondary p-4">
             <div className="text-sm font-medium text-gray-600">Active</div>
-            <div className="text-2xl font-bold text-blue-600">{roadmapData.metrics.activeInitiatives}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {roadmapData.metrics.activeInitiatives}
+            </div>
           </div>
           <div className="card-secondary p-4">
             <div className="text-sm font-medium text-gray-600">Completed</div>
-            <div className="text-2xl font-bold text-green-600">{roadmapData.metrics.completedInitiatives}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {roadmapData.metrics.completedInitiatives}
+            </div>
           </div>
           <div className="card-secondary p-4">
             <div className="text-sm font-medium text-gray-600">Overdue Milestones</div>
-            <div className="text-2xl font-bold text-red-600">{roadmapData.metrics.overdueMilestones}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {roadmapData.metrics.overdueMilestones}
+            </div>
           </div>
           <div className="card-secondary p-4">
             <div className="text-sm font-medium text-gray-600">Total Budget</div>
@@ -249,8 +260,8 @@ export default function RoadmapPage() {
                 <button
                   onClick={() => setViewMode('timeline')}
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    viewMode === 'timeline' 
-                      ? 'bg-white shadow-sm text-gray-900' 
+                    viewMode === 'timeline'
+                      ? 'bg-white shadow-sm text-gray-900'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
@@ -259,8 +270,8 @@ export default function RoadmapPage() {
                 <button
                   onClick={() => setViewMode('milestones')}
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    viewMode === 'milestones' 
-                      ? 'bg-white shadow-sm text-gray-900' 
+                    viewMode === 'milestones'
+                      ? 'bg-white shadow-sm text-gray-900'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
@@ -269,8 +280,8 @@ export default function RoadmapPage() {
                 <button
                   onClick={() => setViewMode('resources')}
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    viewMode === 'resources' 
-                      ? 'bg-white shadow-sm text-gray-900' 
+                    viewMode === 'resources'
+                      ? 'bg-white shadow-sm text-gray-900'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
@@ -307,7 +318,7 @@ export default function RoadmapPage() {
                   placeholder="End Date"
                 />
 
-                {Object.values(filters).some(f => f !== '') && (
+                {Object.values(filters).some((f) => f !== '') && (
                   <button
                     onClick={clearFilters}
                     className="text-sm text-gray-600 hover:text-gray-900 underline"
@@ -322,14 +333,14 @@ export default function RoadmapPage() {
 
         {/* Main Content */}
         {viewMode === 'timeline' && (
-          <TimelineView 
+          <TimelineView
             initiatives={roadmapData.initiatives}
             onInitiativeClick={handleInitiativeClick}
           />
         )}
 
         {viewMode === 'milestones' && (
-          <MilestoneView 
+          <MilestoneView
             initiatives={roadmapData.initiatives}
             onMilestoneClick={(milestone) => {
               // Navigate to initiative detail page with milestone focus
@@ -339,7 +350,7 @@ export default function RoadmapPage() {
         )}
 
         {viewMode === 'resources' && roadmapData.teamUtilization && (
-          <ResourceView 
+          <ResourceView
             teamUtilization={roadmapData.teamUtilization}
             initiatives={roadmapData.initiatives}
             onTeamClick={(team) => {
@@ -351,8 +362,18 @@ export default function RoadmapPage() {
 
         {roadmapData.initiatives.length === 0 && (
           <div className="card-tertiary p-12 text-center">
-            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            <svg
+              className="w-16 h-16 text-gray-400 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
             </svg>
             <h3 className="text-h3 text-gray-900 mb-2">No Initiatives Found</h3>
             <p className="text-body text-gray-600 mb-6">

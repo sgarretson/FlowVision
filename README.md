@@ -37,35 +37,40 @@ FlowVision is a comprehensive efficiency intelligence platform designed for SMB 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/flowvision.git
    cd flowvision
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    # Edit .env.local with your configuration
    ```
 
 4. **Set up the database**
+
    ```bash
    # Start PostgreSQL with Docker
    docker-compose up -d
-   
+
    # Run database migrations
    npx prisma migrate dev
-   
+
    # Seed initial data
    npx prisma db seed
    ```
 
 5. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -108,12 +113,14 @@ flowvision/
 ## 👥 User Roles & Permissions
 
 ### Admin Users
+
 - **User Management**: Create, edit, delete user accounts
 - **Role Assignment**: Manage user permissions and access levels
 - **System Administration**: View audit logs, system statistics
 - **Data Export**: Access to all system data and reports
 
 ### Leader Users
+
 - **Initiative Management**: Create and manage initiatives
 - **Team Collaboration**: Participate in voting and discussions
 - **Progress Tracking**: Update status and monitor progress
@@ -181,11 +188,13 @@ OPENAI_API_KEY=your-openai-key
 ### Production Deployment
 
 1. **Build the application**
+
    ```bash
    npm run build
    ```
 
 2. **Deploy to Vercel** (recommended)
+
    ```bash
    npx vercel --prod
    ```
@@ -200,11 +209,13 @@ OPENAI_API_KEY=your-openai-key
 FlowVision is perfectly suited for professional services firms like Morrison Architecture (75 employees) dealing with operational inefficiencies:
 
 ### Challenge
+
 - Client design approvals taking 3+ weeks
 - Manual processes causing project delays
 - Lack of visibility into workflow bottlenecks
 
 ### FlowVision Solution
+
 1. **Issue Identification**: Team identifies "Client approval bottlenecks"
 2. **Collaborative Ideation**: Brainstorm "Digital approval platform" solution
 3. **Initiative Planning**: Create comprehensive project with KPIs and timeline
@@ -213,6 +224,7 @@ FlowVision is perfectly suited for professional services firms like Morrison Arc
 6. **Resource Planning**: Timeline view with team capacity management
 
 ### Results
+
 - Reduced approval time from 3 weeks to 5 days
 - Increased client satisfaction scores
 - Clear project visibility and accountability
@@ -235,24 +247,28 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ## 📋 Roadmap
 
 ### Phase 1: MVP Enhancement ✅
+
 - [x] User management and authentication
 - [x] Initiative creation and tracking
 - [x] Team collaboration features
 - [x] Basic reporting and analytics
 
 ### Phase 2: AI Intelligence (Q2 2024)
+
 - [ ] Advanced AI-powered suggestions
 - [ ] Automated requirement generation
 - [ ] Intelligent priority scoring
 - [ ] Natural language processing for issue analysis
 
 ### Phase 3: Enterprise Features (Q3 2024)
+
 - [ ] Advanced integrations (Jira, Slack, Teams)
 - [ ] Custom workflow templates
 - [ ] Advanced analytics and reporting
 - [ ] Multi-tenant support
 
 ### Phase 4: Mobile & API (Q4 2024)
+
 - [ ] Mobile application (iOS/Android)
 - [ ] Public API with webhooks
 - [ ] Third-party integrations marketplace

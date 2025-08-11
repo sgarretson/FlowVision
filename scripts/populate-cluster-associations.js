@@ -28,9 +28,9 @@ async function populateAssociations() {
     const departmentClusterMap = {
       'Project Management': 'Project Coordination & Communication',
       'Architecture Design': 'Design Coordination & Standards',
-      'Engineering': 'Technical Integration & MEP',
-      'Operations': 'Operational Efficiency',
-      'Business Development': 'Client Management & Growth'
+      Engineering: 'Technical Integration & MEP',
+      Operations: 'Operational Efficiency',
+      'Business Development': 'Client Management & Growth',
     };
 
     let associationsCreated = 0;
@@ -41,21 +41,22 @@ async function populateAssociations() {
 
       // Find appropriate cluster based on department or randomly distribute
       let targetCluster = null;
-      
+
       // Try department mapping first
       const targetClusterName = departmentClusterMap[issue.department];
       if (targetClusterName) {
-        targetCluster = clusters.find(c => c.name.includes(targetClusterName.split(' ')[0]));
+        targetCluster = clusters.find((c) => c.name.includes(targetClusterName.split(' ')[0]));
       }
-      
+
       // If no match, try category matching
       if (!targetCluster && issue.department) {
-        targetCluster = clusters.find(c => 
-          c.category.toLowerCase().includes(issue.department.toLowerCase()) ||
-          c.name.toLowerCase().includes(issue.department.toLowerCase())
+        targetCluster = clusters.find(
+          (c) =>
+            c.category.toLowerCase().includes(issue.department.toLowerCase()) ||
+            c.name.toLowerCase().includes(issue.department.toLowerCase())
         );
       }
-      
+
       // If still no match, distribute round-robin
       if (!targetCluster) {
         targetCluster = clusters[associationsCreated % clusters.length];
@@ -64,10 +65,12 @@ async function populateAssociations() {
       if (targetCluster) {
         await prisma.issue.update({
           where: { id: issue.id },
-          data: { clusterId: targetCluster.id }
+          data: { clusterId: targetCluster.id },
         });
-        
-        console.log(`   ✅ Associated issue "${issue.description.substring(0, 50)}..." with cluster "${targetCluster.name}"`);
+
+        console.log(
+          `   ✅ Associated issue "${issue.description.substring(0, 50)}..." with cluster "${targetCluster.name}"`
+        );
         associationsCreated++;
       }
     }
@@ -78,7 +81,7 @@ async function populateAssociations() {
     console.log('\n🔗 Creating initiative-issue associations...\n');
 
     const initiatives = await prisma.initiative.findMany({
-      include: { cluster: true }
+      include: { cluster: true },
     });
 
     let initiativeAssociationsCreated = 0;
@@ -86,18 +89,18 @@ async function populateAssociations() {
     for (const initiative of initiatives) {
       // Find issues in the same cluster
       let eligibleIssues = [];
-      
+
       if (initiative.cluster) {
         eligibleIssues = await prisma.issue.findMany({
           where: { clusterId: initiative.cluster.id },
-          take: 3 // Associate with up to 3 issues per initiative
+          take: 3, // Associate with up to 3 issues per initiative
         });
       } else {
         // If no cluster, just pick some issues to associate
         eligibleIssues = await prisma.issue.findMany({
           where: { clusterId: { not: null } },
           take: 2,
-          skip: Math.floor(Math.random() * 5) // Random selection
+          skip: Math.floor(Math.random() * 5), // Random selection
         });
       }
 
@@ -107,12 +110,14 @@ async function populateAssociations() {
           where: { id: initiative.id },
           data: {
             addressedIssues: {
-              connect: eligibleIssues.map(issue => ({ id: issue.id }))
-            }
-          }
+              connect: eligibleIssues.map((issue) => ({ id: issue.id })),
+            },
+          },
         });
 
-        console.log(`   ✅ Associated initiative "${initiative.title}" with ${eligibleIssues.length} issues`);
+        console.log(
+          `   ✅ Associated initiative "${initiative.title}" with ${eligibleIssues.length} issues`
+        );
         initiativeAssociationsCreated++;
       }
     }
@@ -122,19 +127,20 @@ async function populateAssociations() {
     // Summary
     console.log('\n📊 Final Summary:');
     const clusteredIssues = await prisma.issue.count({
-      where: { clusterId: { not: null } }
+      where: { clusterId: { not: null } },
     });
-    
+
     const initiativesWithIssues = await prisma.initiative.count({
       where: {
-        addressedIssues: { some: {} }
-      }
+        addressedIssues: { some: {} },
+      },
     });
 
     console.log(`   • ${clusteredIssues}/${issues.length} issues are now clustered`);
-    console.log(`   • ${initiativesWithIssues}/${initiatives.length} initiatives have issue associations`);
+    console.log(
+      `   • ${initiativesWithIssues}/${initiatives.length} initiatives have issue associations`
+    );
     console.log('   • Cluster details modal will now show comprehensive information');
-
   } catch (error) {
     console.error('❌ Failed to populate associations:', error);
     process.exit(1);

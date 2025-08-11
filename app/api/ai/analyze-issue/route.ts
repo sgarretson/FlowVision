@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (!user) {
@@ -28,31 +28,39 @@ export async function POST(req: NextRequest) {
 
     // Check if OpenAI is configured
     if (!openAIService.isConfigured()) {
-      return NextResponse.json({ 
-        error: 'AI analysis not available - OpenAI not configured',
-        fallback: 'Use the admin panel to configure OpenAI integration for AI-powered insights.'
-      }, { status: 503 });
+      return NextResponse.json(
+        {
+          error: 'AI analysis not available - OpenAI not configured',
+          fallback: 'Use the admin panel to configure OpenAI integration for AI-powered insights.',
+        },
+        { status: 503 }
+      );
     }
 
     // Get user's business profile for context
     const businessProfile = await prisma.businessProfile.findUnique({
-      where: { userId: user.id }
+      where: { userId: user.id },
     });
 
-    const businessContext = businessProfile ? {
-      industry: businessProfile.industry,
-      size: businessProfile.size,
-      metrics: businessProfile.metrics
-    } : undefined;
+    const businessContext = businessProfile
+      ? {
+          industry: businessProfile.industry,
+          size: businessProfile.size,
+          metrics: businessProfile.metrics,
+        }
+      : undefined;
 
     // Generate AI insights
     const insights = await openAIService.generateIssueInsights(description, businessContext);
 
     if (!insights) {
-      return NextResponse.json({ 
-        error: 'Failed to generate AI insights',
-        fallback: 'AI analysis temporarily unavailable. Please try again later.'
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'Failed to generate AI insights',
+          fallback: 'AI analysis temporarily unavailable. Please try again later.',
+        },
+        { status: 500 }
+      );
     }
 
     // Log the AI usage
@@ -62,21 +70,23 @@ export async function POST(req: NextRequest) {
         action: 'AI_ISSUE_ANALYSIS',
         details: {
           description: description.substring(0, 100) + '...',
-          hasInsights: !!insights
-        }
-      }
+          hasInsights: !!insights,
+        },
+      },
     });
 
     return NextResponse.json({
       insights,
-      source: 'openai'
+      source: 'openai',
     });
-
   } catch (error) {
     console.error('AI issue analysis error:', error);
-    return NextResponse.json({ 
-      error: 'Failed to analyze issue',
-      fallback: 'AI analysis temporarily unavailable. Please try again later.'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to analyze issue',
+        fallback: 'AI analysis temporarily unavailable. Please try again later.',
+      },
+      { status: 500 }
+    );
   }
 }

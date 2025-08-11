@@ -55,11 +55,11 @@ async function testExecutePageMapping() {
   try {
     // Get all initiatives
     const initiatives = await prisma.initiative.findMany({
-      select: { id: true, title: true, status: true }
+      select: { id: true, title: true, status: true },
     });
 
     console.log(`\n📊 Found ${initiatives.length} initiatives in database`);
-    
+
     if (initiatives.length === 0) {
       console.log('❌ No initiatives found! Execute page will show empty state.');
       return;
@@ -67,31 +67,31 @@ async function testExecutePageMapping() {
 
     // Group by mapped kanban columns
     const columnGroups = {
-      'Define': [],
-      'Prioritize': [],
+      Define: [],
+      Prioritize: [],
       'In Progress': [],
-      'Done': []
+      Done: [],
     };
 
-    initiatives.forEach(init => {
+    initiatives.forEach((init) => {
       const kanbanColumn = mapStatusToColumn(init.status);
       columnGroups[kanbanColumn].push({
         title: init.title,
         originalStatus: init.status,
-        mappedColumn: kanbanColumn
+        mappedColumn: kanbanColumn,
       });
     });
 
     // Display results
     console.log('\n🎯 KANBAN BOARD DISTRIBUTION:');
     console.log('============================');
-    
+
     Object.entries(columnGroups).forEach(([column, items]) => {
       console.log(`\n📋 ${column} (${items.length} items):`);
       if (items.length === 0) {
         console.log('   (empty)');
       } else {
-        items.forEach(item => {
+        items.forEach((item) => {
           console.log(`   • ${item.title} [${item.originalStatus} → ${item.mappedColumn}]`);
         });
       }
@@ -100,9 +100,9 @@ async function testExecutePageMapping() {
     // Test round-trip mapping
     console.log('\n🔄 TESTING ROUND-TRIP STATUS MAPPING:');
     console.log('====================================');
-    
+
     const testColumns = ['Define', 'Prioritize', 'In Progress', 'Done'];
-    testColumns.forEach(column => {
+    testColumns.forEach((column) => {
       const dbStatus = mapColumnToStatus(column);
       const backToColumn = mapStatusToColumn(dbStatus);
       const success = column === backToColumn ? '✅' : '❌';
@@ -114,7 +114,6 @@ async function testExecutePageMapping() {
     console.log('   • COMPLETED initiatives appear in "Done" column');
     console.log('   • Users can drag between columns to update status');
     console.log('   • Database status values are preserved and mapped correctly');
-
   } catch (error) {
     console.error('❌ Error testing Execute page:', error);
   } finally {

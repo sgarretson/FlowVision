@@ -2,7 +2,13 @@
 
 import React from 'react';
 
-export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   return (
     <html>
       <body className="min-h-screen bg-red-50 text-red-800">

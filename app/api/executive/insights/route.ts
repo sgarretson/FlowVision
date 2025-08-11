@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'insights'; // 'insights' or 'summary'
-    
+
     if (type === 'summary') {
       const weeklySummary = await generateWeeklySummary();
       return NextResponse.json(weeklySummary);
@@ -49,61 +49,73 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         insights: insights.slice(0, 8), // Top 8 insights
         totalCount: insights.length,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       });
     }
-
   } catch (error) {
     console.error('Executive insights error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate executive insights' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to generate executive insights' }, { status: 500 });
   }
 }
 
 async function generateExecutiveInsights(): Promise<ExecutiveInsight[]> {
   const insights: ExecutiveInsight[] = [];
-  
+
   // Gather comprehensive data for analysis
   const [initiatives, issues, clusters, recentActivity] = await Promise.all([
     prisma.initiative.findMany({
-      include: {
-        owner: { select: { name: true } }
-      }
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        progress: true,
+        timelineEnd: true,
+        updatedAt: true,
+        budget: true,
+        roi: true,
+        ownerId: true,
+        owner: { select: { name: true } },
+      },
     }),
     prisma.issue.findMany({
-      include: {
-        cluster: { select: { name: true, severity: true } }
-      }
+      select: {
+        id: true,
+        description: true,
+        createdAt: true,
+        heatmapScore: true,
+        cluster: { select: { name: true, severity: true } },
+      },
     }),
     prisma.issueCluster.findMany({
-      include: {
-        issues: true,
-        initiatives: true
-      }
+      select: {
+        id: true,
+        name: true,
+        severity: true,
+        issues: { select: { id: true, heatmapScore: true, createdAt: true } },
+        initiatives: { select: { id: true, status: true, progress: true, title: true } },
+      },
     }),
     prisma.auditLog.findMany({
       where: {
-        timestamp: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+        timestamp: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
       },
       orderBy: { timestamp: 'desc' },
-      take: 50
-    })
+      take: 50,
+    }),
   ]);
 
   // 1. Strategic Insights
-  insights.push(...await generateStrategicInsights(initiatives, issues, clusters));
-  
+  insights.push(...(await generateStrategicInsights(initiatives, issues, clusters)));
+
   // 2. Operational Insights
-  insights.push(...await generateOperationalInsights(initiatives, issues, recentActivity));
-  
+  insights.push(...(await generateOperationalInsights(initiatives, issues, recentActivity)));
+
   // 3. Financial Insights
-  insights.push(...await generateFinancialInsights(initiatives));
-  
+  insights.push(...(await generateFinancialInsights(initiatives)));
+
   // 4. Risk Insights
-  insights.push(...await generateRiskInsights(initiatives, issues, clusters));
-  
+  insights.push(...(await generateRiskInsights(initiatives, issues, clusters)));
+
   // Sort by impact and confidence
   insights.sort((a, b) => {
     const impactScore = { high: 3, medium: 2, low: 1 };
@@ -111,18 +123,22 @@ async function generateExecutiveInsights(): Promise<ExecutiveInsight[]> {
     const bScore = impactScore[b.impact] * (b.confidence / 100);
     return bScore - aScore;
   });
-  
+
   return insights;
 }
 
-async function generateStrategicInsights(initiatives: any[], issues: any[], clusters: any[]): Promise<ExecutiveInsight[]> {
+async function generateStrategicInsights(
+  initiatives: any[],
+  issues: any[],
+  clusters: any[]
+): Promise<ExecutiveInsight[]> {
   const insights: ExecutiveInsight[] = [];
   const now = new Date();
-  
+
   // Initiative Portfolio Analysis
-  const activeInitiatives = initiatives.filter(i => ['APPROVED', 'ACTIVE'].includes(i.status));
-  const completedInitiatives = initiatives.filter(i => i.status === 'COMPLETED');
-  
+  const activeInitiatives = initiatives.filter((i) => ['APPROVED', 'ACTIVE'].includes(i.status));
+  const completedInitiatives = initiatives.filter((i) => i.status === 'COMPLETED');
+
   // Insight: Portfolio Balance
   if (activeInitiatives.length > completedInitiatives.length * 1.5) {
     insights.push({
@@ -132,15 +148,18 @@ async function generateStrategicInsights(initiatives: any[], issues: any[], clus
       summary: `${activeInitiatives.length} active initiatives vs ${completedInitiatives.length} completed - potential resource dilution`,
       impact: 'medium',
       actionRequired: true,
-      recommendation: 'Consider consolidating or prioritizing active initiatives to improve completion velocity',
+      recommendation:
+        'Consider consolidating or prioritizing active initiatives to improve completion velocity',
       confidence: 85,
-      relatedData: [{ activeCount: activeInitiatives.length, completedCount: completedInitiatives.length }],
-      generatedAt: now
+      relatedData: [
+        { activeCount: activeInitiatives.length, completedCount: completedInitiatives.length },
+      ],
+      generatedAt: now,
     });
   }
-  
+
   // Insight: Issue Cluster Prioritization
-  const highImpactClusters = clusters.filter(c => c.severity === 'high' && c.issues.length > 3);
+  const highImpactClusters = clusters.filter((c) => c.severity === 'high' && c.issues.length > 3);
   if (highImpactClusters.length > 0) {
     insights.push({
       id: 'strategic-cluster-priority',
@@ -151,25 +170,31 @@ async function generateStrategicInsights(initiatives: any[], issues: any[], clus
       actionRequired: true,
       recommendation: 'Create dedicated initiatives to address top issue clusters systematically',
       confidence: 90,
-      relatedData: highImpactClusters.map(c => ({ name: c.name, issueCount: c.issues.length })),
-      generatedAt: now
+      relatedData: highImpactClusters.map((c) => ({ name: c.name, issueCount: c.issues.length })),
+      generatedAt: now,
     });
   }
-  
+
   return insights;
 }
 
-async function generateOperationalInsights(initiatives: any[], issues: any[], recentActivity: any[]): Promise<ExecutiveInsight[]> {
+async function generateOperationalInsights(
+  initiatives: any[],
+  issues: any[],
+  recentActivity: any[]
+): Promise<ExecutiveInsight[]> {
   const insights: ExecutiveInsight[] = [];
   const now = new Date();
-  
+
   // Team Velocity Analysis
-  const recentCompletions = initiatives.filter(i => {
-    return i.status === 'COMPLETED' && 
-           i.updatedAt && 
-           (now.getTime() - new Date(i.updatedAt).getTime()) < (30 * 24 * 60 * 60 * 1000);
+  const recentCompletions = initiatives.filter((i) => {
+    return (
+      i.status === 'COMPLETED' &&
+      i.updatedAt &&
+      now.getTime() - new Date(i.updatedAt).getTime() < 30 * 24 * 60 * 60 * 1000
+    );
   });
-  
+
   if (recentCompletions.length > 2) {
     insights.push({
       id: 'operational-velocity-positive',
@@ -180,8 +205,8 @@ async function generateOperationalInsights(initiatives: any[], issues: any[], re
       actionRequired: false,
       recommendation: 'Maintain current execution momentum and document successful patterns',
       confidence: 95,
-      relatedData: recentCompletions.map(i => ({ title: i.title, completedDate: i.updatedAt })),
-      generatedAt: now
+      relatedData: recentCompletions.map((i) => ({ title: i.title, completedDate: i.updatedAt })),
+      generatedAt: now,
     });
   } else if (recentCompletions.length === 0) {
     insights.push({
@@ -194,15 +219,15 @@ async function generateOperationalInsights(initiatives: any[], issues: any[], re
       recommendation: 'Review active initiatives for blockers and consider resource reallocation',
       confidence: 80,
       relatedData: [],
-      generatedAt: now
+      generatedAt: now,
     });
   }
-  
+
   // Issue Reporting Patterns
-  const recentIssues = issues.filter(i => 
-    (now.getTime() - new Date(i.createdAt).getTime()) < (7 * 24 * 60 * 60 * 1000)
+  const recentIssues = issues.filter(
+    (i) => now.getTime() - new Date(i.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000
   );
-  
+
   if (recentIssues.length > 5) {
     insights.push({
       id: 'operational-issue-spike',
@@ -213,28 +238,30 @@ async function generateOperationalInsights(initiatives: any[], issues: any[], re
       actionRequired: true,
       recommendation: 'Investigate potential systemic issues or process changes',
       confidence: 75,
-      relatedData: recentIssues.map(i => ({ description: i.description.substring(0, 100) + '...' })),
-      generatedAt: now
+      relatedData: recentIssues.map((i) => ({
+        description: i.description.substring(0, 100) + '...',
+      })),
+      generatedAt: now,
     });
   }
-  
+
   return insights;
 }
 
 async function generateFinancialInsights(initiatives: any[]): Promise<ExecutiveInsight[]> {
   const insights: ExecutiveInsight[] = [];
   const now = new Date();
-  
+
   // Budget Utilization Analysis
-  const initiativesWithBudget = initiatives.filter(i => i.budget && i.budget > 0);
+  const initiativesWithBudget = initiatives.filter((i) => i.budget && i.budget > 0);
   const totalBudget = initiativesWithBudget.reduce((sum, i) => sum + i.budget, 0);
   const completedBudget = initiativesWithBudget
-    .filter(i => i.status === 'COMPLETED')
+    .filter((i) => i.status === 'COMPLETED')
     .reduce((sum, i) => sum + i.budget, 0);
-  
+
   if (totalBudget > 0) {
     const utilizationRate = (completedBudget / totalBudget) * 100;
-    
+
     if (utilizationRate < 30) {
       insights.push({
         id: 'financial-low-utilization',
@@ -246,15 +273,15 @@ async function generateFinancialInsights(initiatives: any[]): Promise<ExecutiveI
         recommendation: 'Accelerate initiative execution or reallocate budget to active priorities',
         confidence: 85,
         relatedData: [{ totalBudget, completedBudget, utilizationRate }],
-        generatedAt: now
+        generatedAt: now,
       });
     }
-    
+
     // ROI Performance Analysis
-    const completedWithRoi = initiatives.filter(i => i.status === 'COMPLETED' && i.roi);
+    const completedWithRoi = initiatives.filter((i) => i.status === 'COMPLETED' && i.roi);
     if (completedWithRoi.length > 0) {
       const avgRoi = completedWithRoi.reduce((sum, i) => sum + i.roi, 0) / completedWithRoi.length;
-      
+
       if (avgRoi > 20) {
         insights.push({
           id: 'financial-strong-roi',
@@ -266,26 +293,28 @@ async function generateFinancialInsights(initiatives: any[]): Promise<ExecutiveI
           recommendation: 'Scale successful initiative patterns and share best practices',
           confidence: 90,
           relatedData: [{ averageRoi: avgRoi, completedCount: completedWithRoi.length }],
-          generatedAt: now
+          generatedAt: now,
         });
       }
     }
   }
-  
+
   return insights;
 }
 
-async function generateRiskInsights(initiatives: any[], issues: any[], clusters: any[]): Promise<ExecutiveInsight[]> {
+async function generateRiskInsights(
+  initiatives: any[],
+  issues: any[],
+  clusters: any[]
+): Promise<ExecutiveInsight[]> {
   const insights: ExecutiveInsight[] = [];
   const now = new Date();
-  
+
   // Timeline Risk Analysis
-  const overdueInitiatives = initiatives.filter(i => 
-    i.timelineEnd && 
-    new Date(i.timelineEnd) < now && 
-    i.status !== 'COMPLETED'
+  const overdueInitiatives = initiatives.filter(
+    (i) => i.timelineEnd && new Date(i.timelineEnd) < now && i.status !== 'COMPLETED'
   );
-  
+
   if (overdueInitiatives.length > 0) {
     insights.push({
       id: 'risk-overdue-initiatives',
@@ -296,18 +325,20 @@ async function generateRiskInsights(initiatives: any[], issues: any[], clusters:
       actionRequired: true,
       recommendation: 'Immediate review and resource reallocation needed for overdue initiatives',
       confidence: 100,
-      relatedData: overdueInitiatives.map(i => ({ title: i.title, deadline: i.timelineEnd })),
-      generatedAt: now
+      relatedData: overdueInitiatives.map((i) => ({ title: i.title, deadline: i.timelineEnd })),
+      generatedAt: now,
     });
   }
-  
+
   // Resource Concentration Risk
   const ownerCounts = new Map();
-  initiatives.filter(i => ['APPROVED', 'ACTIVE'].includes(i.status)).forEach(i => {
-    const count = ownerCounts.get(i.ownerId) || 0;
-    ownerCounts.set(i.ownerId, count + 1);
-  });
-  
+  initiatives
+    .filter((i) => ['APPROVED', 'ACTIVE'].includes(i.status))
+    .forEach((i) => {
+      const count = ownerCounts.get(i.ownerId) || 0;
+      ownerCounts.set(i.ownerId, count + 1);
+    });
+
   const overloadedOwners = Array.from(ownerCounts.entries()).filter(([_, count]) => count > 3);
   if (overloadedOwners.length > 0) {
     insights.push({
@@ -319,63 +350,71 @@ async function generateRiskInsights(initiatives: any[], issues: any[], clusters:
       actionRequired: true,
       recommendation: 'Redistribute workload to prevent burnout and single points of failure',
       confidence: 80,
-      relatedData: overloadedOwners.map(([ownerId, count]) => ({ ownerId, activeInitiatives: count })),
-      generatedAt: now
+      relatedData: overloadedOwners.map(([ownerId, count]) => ({
+        ownerId,
+        activeInitiatives: count,
+      })),
+      generatedAt: now,
     });
   }
-  
+
   return insights;
 }
 
 async function generateWeeklySummary(): Promise<WeeklySummary> {
   const now = new Date();
   const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  
+
   // Gather week's data
   const [weeklyInitiatives, weeklyIssues, weeklyActivity] = await Promise.all([
     prisma.initiative.findMany({
       where: {
-        OR: [
-          { createdAt: { gte: weekStart } },
-          { updatedAt: { gte: weekStart } }
-        ]
-      }
+        OR: [{ createdAt: { gte: weekStart } }, { updatedAt: { gte: weekStart } }],
+      },
     }),
     prisma.issue.findMany({
-      where: { createdAt: { gte: weekStart } }
+      where: { createdAt: { gte: weekStart } },
     }),
     prisma.auditLog.findMany({
-      where: { timestamp: { gte: weekStart } }
-    })
+      where: { timestamp: { gte: weekStart } },
+    }),
   ]);
-  
+
   // Calculate performance metrics
   const performanceMetrics = {
     initiativeVelocity: calculateInitiativeVelocity(weeklyInitiatives),
     issueResolutionRate: calculateIssueResolutionRate(weeklyIssues, weeklyActivity),
     teamUtilization: calculateTeamUtilization(weeklyActivity),
-    riskLevel: calculateRiskLevel(weeklyInitiatives, weeklyIssues) as 'low' | 'medium' | 'high'
+    riskLevel: calculateRiskLevel(weeklyInitiatives, weeklyIssues) as 'low' | 'medium' | 'high',
   };
-  
+
   // Use AI to generate narrative summary
   const executiveSummary = await generateAIExecutiveSummary(
-    weeklyInitiatives, 
-    weeklyIssues, 
+    weeklyInitiatives,
+    weeklyIssues,
     performanceMetrics
   );
-  
+
   return {
     weekOf: weekStart,
     executiveSummary,
     keyAchievements: extractKeyAchievements(weeklyInitiatives, weeklyActivity),
     criticalConcerns: extractCriticalConcerns(weeklyInitiatives, weeklyIssues),
-    recommendedActions: generateActionRecommendations(weeklyInitiatives, weeklyIssues, performanceMetrics),
+    recommendedActions: generateActionRecommendations(
+      weeklyInitiatives,
+      weeklyIssues,
+      performanceMetrics
+    ),
     nextWeekFocus: generateNextWeekFocus(weeklyInitiatives, performanceMetrics),
-    performanceMetrics
+    performanceMetrics,
   };
 }
 
-async function generateAIExecutiveSummary(initiatives: any[], issues: any[], metrics: any): Promise<string> {
+async function generateAIExecutiveSummary(
+  initiatives: any[],
+  issues: any[],
+  metrics: any
+): Promise<string> {
   try {
     const prompt = `
     Weekly Performance Data:
@@ -388,17 +427,18 @@ async function generateAIExecutiveSummary(initiatives: any[], issues: any[], met
     
     Generate a concise executive summary (2-3 sentences) focusing on key business outcomes and strategic insights.
     `;
-    
+
     // Use the existing generateIssueInsights method as a template but create direct API call
     if (!openAIService.isConfigured()) {
       throw new Error('OpenAI not configured');
     }
-    
+
     // For now, return a structured summary based on the data
-    const summary = `This week demonstrated ${metrics.riskLevel} operational risk with ${initiatives.length} initiative activities and ${issues.length} new issues. ` +
+    const summary =
+      `This week demonstrated ${metrics.riskLevel} operational risk with ${initiatives.length} initiative activities and ${issues.length} new issues. ` +
       `Team achieved ${metrics.initiativeVelocity}% initiative velocity and ${metrics.issueResolutionRate}% issue resolution rate. ` +
       `Current utilization at ${metrics.teamUtilization}% suggests ${metrics.riskLevel === 'low' ? 'stable operations' : 'attention needed'} for optimal performance.`;
-    
+
     return summary;
   } catch (error) {
     console.error('AI summary generation failed:', error);
@@ -408,16 +448,18 @@ async function generateAIExecutiveSummary(initiatives: any[], issues: any[], met
 
 // Helper functions for calculations
 function calculateInitiativeVelocity(initiatives: any[]): number {
-  const completedThisWeek = initiatives.filter(i => i.status === 'COMPLETED').length;
-  const activeInitiatives = initiatives.filter(i => ['APPROVED', 'ACTIVE'].includes(i.status)).length;
-  
+  const completedThisWeek = initiatives.filter((i) => i.status === 'COMPLETED').length;
+  const activeInitiatives = initiatives.filter((i) =>
+    ['APPROVED', 'ACTIVE'].includes(i.status)
+  ).length;
+
   if (activeInitiatives === 0) return 100;
   return Math.round((completedThisWeek / Math.max(1, activeInitiatives)) * 100);
 }
 
 function calculateIssueResolutionRate(issues: any[], activity: any[]): number {
   // Simplified: assume issues addressed if there's been initiative activity
-  const resolutionActivity = activity.filter(a => a.action.includes('initiative')).length;
+  const resolutionActivity = activity.filter((a) => a.action.includes('initiative')).length;
   return Math.min(100, (resolutionActivity / Math.max(1, issues.length)) * 100);
 }
 
@@ -427,12 +469,12 @@ function calculateTeamUtilization(activity: any[]): number {
 }
 
 function calculateRiskLevel(initiatives: any[], issues: any[]): string {
-  const overdueCount = initiatives.filter(i => 
-    i.timelineEnd && new Date(i.timelineEnd) < new Date() && i.status !== 'COMPLETED'
+  const overdueCount = initiatives.filter(
+    (i) => i.timelineEnd && new Date(i.timelineEnd) < new Date() && i.status !== 'COMPLETED'
   ).length;
-  
-  const criticalIssues = issues.filter(i => i.heatmapScore > 80).length;
-  
+
+  const criticalIssues = issues.filter((i) => i.heatmapScore > 80).length;
+
   if (overdueCount > 2 || criticalIssues > 3) return 'high';
   if (overdueCount > 0 || criticalIssues > 1) return 'medium';
   return 'low';
@@ -440,71 +482,72 @@ function calculateRiskLevel(initiatives: any[], issues: any[]): string {
 
 function extractKeyAchievements(initiatives: any[], activity: any[]): string[] {
   const achievements: string[] = [];
-  
-  const completed = initiatives.filter(i => i.status === 'COMPLETED');
-  completed.forEach(i => {
+
+  const completed = initiatives.filter((i) => i.status === 'COMPLETED');
+  completed.forEach((i) => {
     achievements.push(`Completed initiative: ${i.title}`);
   });
-  
-  const highProgress = initiatives.filter(i => i.progress > 80 && i.status === 'ACTIVE');
+
+  const highProgress = initiatives.filter((i) => i.progress > 80 && i.status === 'ACTIVE');
   if (highProgress.length > 0) {
     achievements.push(`${highProgress.length} initiatives nearing completion`);
   }
-  
+
   return achievements.slice(0, 5);
 }
 
 function extractCriticalConcerns(initiatives: any[], issues: any[]): string[] {
   const concerns: string[] = [];
-  
-  const overdue = initiatives.filter(i => 
-    i.timelineEnd && new Date(i.timelineEnd) < new Date() && i.status !== 'COMPLETED'
+
+  const overdue = initiatives.filter(
+    (i) => i.timelineEnd && new Date(i.timelineEnd) < new Date() && i.status !== 'COMPLETED'
   );
-  
+
   if (overdue.length > 0) {
     concerns.push(`${overdue.length} initiatives overdue`);
   }
-  
-  const criticalIssues = issues.filter(i => i.heatmapScore > 80);
+
+  const criticalIssues = issues.filter((i) => i.heatmapScore > 80);
   if (criticalIssues.length > 0) {
     concerns.push(`${criticalIssues.length} critical issues identified`);
   }
-  
+
   return concerns.slice(0, 3);
 }
 
 function generateActionRecommendations(initiatives: any[], issues: any[], metrics: any): string[] {
   const actions: string[] = [];
-  
+
   if (metrics.riskLevel === 'high') {
     actions.push('Immediate resource reallocation needed for overdue initiatives');
   }
-  
+
   if (metrics.initiativeVelocity < 50) {
     actions.push('Review and prioritize active initiative portfolio');
   }
-  
+
   if (issues.length > 5) {
     actions.push('Investigate root causes of increased issue reporting');
   }
-  
+
   return actions.slice(0, 4);
 }
 
 function generateNextWeekFocus(initiatives: any[], metrics: any): string[] {
   const focus: string[] = [];
-  
-  const nearDeadline = initiatives.filter(i => {
+
+  const nearDeadline = initiatives.filter((i) => {
     if (!i.timelineEnd) return false;
-    const daysUntil = (new Date(i.timelineEnd).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
+    const daysUntil =
+      (new Date(i.timelineEnd).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
     return daysUntil <= 14 && daysUntil > 0;
   });
-  
+
   if (nearDeadline.length > 0) {
     focus.push(`Priority: ${nearDeadline.length} initiatives approaching deadline`);
   }
-  
+
   focus.push('Maintain initiative momentum and issue resolution velocity');
-  
+
   return focus.slice(0, 3);
 }

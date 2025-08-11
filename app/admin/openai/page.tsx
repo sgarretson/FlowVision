@@ -30,7 +30,11 @@ export default function OpenAISettings() {
   const [testing, setTesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [testResult, setTestResult] = useState<{ success: boolean; error?: string; model?: string } | null>(null);
+  const [testResult, setTestResult] = useState<{
+    success: boolean;
+    error?: string;
+    model?: string;
+  } | null>(null);
 
   // Form states
   const [apiKey, setApiKey] = useState('');
@@ -57,12 +61,12 @@ export default function OpenAISettings() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/openai');
-      
+
       if (response.ok) {
         const data = await response.json();
         setConfig(data.config);
         setUsageStats(data.usageStats);
-        
+
         if (data.config) {
           setModel(data.config.model || 'gpt-3.5-turbo');
           setMaxTokens(data.config.maxTokens || 500);
@@ -89,7 +93,7 @@ export default function OpenAISettings() {
     try {
       setSaving(true);
       setError(null);
-      
+
       const response = await fetch('/api/admin/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -98,8 +102,8 @@ export default function OpenAISettings() {
           model,
           maxTokens,
           temperature,
-          enabled
-        })
+          enabled,
+        }),
       });
 
       if (response.ok) {
@@ -128,14 +132,14 @@ export default function OpenAISettings() {
       setTesting(true);
       setError(null);
       setTestResult(null);
-      
+
       const response = await fetch('/api/admin/openai', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey: apiKey.trim() || undefined,
-          model
-        })
+          model,
+        }),
       });
 
       if (response.ok) {
@@ -143,16 +147,16 @@ export default function OpenAISettings() {
         setTestResult(result);
       } else {
         const errorData = await response.json();
-        setTestResult({ 
-          success: false, 
-          error: errorData.error || 'Failed to test connection' 
+        setTestResult({
+          success: false,
+          error: errorData.error || 'Failed to test connection',
         });
       }
     } catch (err) {
       console.error('Failed to test connection:', err);
-      setTestResult({ 
-        success: false, 
-        error: 'Failed to test connection' 
+      setTestResult({
+        success: false,
+        error: 'Failed to test connection',
       });
     } finally {
       setTesting(false);
@@ -180,10 +184,7 @@ export default function OpenAISettings() {
             Configure OpenAI API integration for AI-powered features
           </p>
         </div>
-        <Link
-          href="/admin"
-          className="btn-secondary"
-        >
+        <Link href="/admin" className="btn-secondary">
           Back to Admin
         </Link>
       </div>
@@ -192,30 +193,26 @@ export default function OpenAISettings() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="card-secondary p-6">
           <div className="flex items-center">
-            <div className={`w-3 h-3 rounded-full mr-3 ${
-              config?.hasApiKey ? 'bg-green-500' : 'bg-red-500'
-            }`}></div>
+            <div
+              className={`w-3 h-3 rounded-full mr-3 ${
+                config?.hasApiKey ? 'bg-green-500' : 'bg-red-500'
+              }`}
+            ></div>
             <div>
               <h3 className="text-h3">API Status</h3>
-              <p className="text-caption">
-                {config?.hasApiKey ? 'Connected' : 'Not Configured'}
-              </p>
+              <p className="text-caption">{config?.hasApiKey ? 'Connected' : 'Not Configured'}</p>
             </div>
           </div>
         </div>
 
         <div className="card-secondary p-6">
           <h3 className="text-h3">Current Model</h3>
-          <p className="text-caption">
-            {config?.model || 'Not configured'}
-          </p>
+          <p className="text-caption">{config?.model || 'Not configured'}</p>
         </div>
 
         <div className="card-secondary p-6">
           <h3 className="text-h3">AI Features</h3>
-          <p className="text-caption">
-            {config?.enabled ? 'Enabled' : 'Disabled'}
-          </p>
+          <p className="text-caption">{config?.enabled ? 'Enabled' : 'Disabled'}</p>
         </div>
       </div>
 
@@ -244,7 +241,12 @@ export default function OpenAISettings() {
             />
             <p className="text-caption mt-1">
               Your API key will be encrypted and stored securely. Get your key from{' '}
-              <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              <a
+                href="https://platform.openai.com/api-keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
                 OpenAI Platform
               </a>
             </p>
@@ -266,9 +268,7 @@ export default function OpenAISettings() {
               <option value="gpt-4">GPT-4</option>
               <option value="gpt-4-turbo-preview">GPT-4 Turbo</option>
             </select>
-            <p className="text-caption mt-1">
-              GPT-3.5 Turbo is recommended for most use cases
-            </p>
+            <p className="text-caption mt-1">GPT-3.5 Turbo is recommended for most use cases</p>
           </div>
 
           {/* Advanced Settings */}
@@ -286,9 +286,7 @@ export default function OpenAISettings() {
                 max="4000"
                 className="input-primary"
               />
-              <p className="text-caption mt-1">
-                Maximum tokens per response (1-4000)
-              </p>
+              <p className="text-caption mt-1">Maximum tokens per response (1-4000)</p>
             </div>
 
             <div>
@@ -305,9 +303,7 @@ export default function OpenAISettings() {
                 step="0.1"
                 className="input-primary"
               />
-              <p className="text-caption mt-1">
-                Creativity level (0 = focused, 2 = creative)
-              </p>
+              <p className="text-caption mt-1">Creativity level (0 = focused, 2 = creative)</p>
             </div>
           </div>
 
@@ -327,19 +323,11 @@ export default function OpenAISettings() {
 
           {/* Action Buttons */}
           <div className="flex space-x-4">
-            <button
-              onClick={testConnection}
-              disabled={testing}
-              className="btn-secondary"
-            >
+            <button onClick={testConnection} disabled={testing} className="btn-secondary">
               {testing ? 'Testing...' : 'Test Connection'}
             </button>
-            
-            <button
-              onClick={saveConfiguration}
-              disabled={saving}
-              className="btn-primary"
-            >
+
+            <button onClick={saveConfiguration} disabled={saving} className="btn-primary">
               {saving ? 'Saving...' : 'Save Configuration'}
             </button>
           </div>
@@ -348,18 +336,20 @@ export default function OpenAISettings() {
 
       {/* Test Results */}
       {testResult && (
-        <div className={`card-secondary border-l-4 ${
-          testResult.success ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'
-        }`}>
+        <div
+          className={`card-secondary border-l-4 ${
+            testResult.success ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'
+          }`}
+        >
           <div className="p-6">
             <div className="flex items-center">
-              <div className={`w-5 h-5 rounded-full mr-3 ${
-                testResult.success ? 'bg-green-500' : 'bg-red-500'
-              }`}></div>
+              <div
+                className={`w-5 h-5 rounded-full mr-3 ${
+                  testResult.success ? 'bg-green-500' : 'bg-red-500'
+                }`}
+              ></div>
               <div>
-                <h3 className={`text-h3 ${
-                  testResult.success ? 'text-green-800' : 'text-red-800'
-                }`}>
+                <h3 className={`text-h3 ${testResult.success ? 'text-green-800' : 'text-red-800'}`}>
                   Connection Test {testResult.success ? 'Successful' : 'Failed'}
                 </h3>
                 {testResult.success && testResult.model && (
@@ -379,11 +369,9 @@ export default function OpenAISettings() {
         <div className="card-secondary">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-h2">Usage Statistics</h2>
-            <p className="text-body-secondary mt-1">
-              Monitor your OpenAI API usage and costs
-            </p>
+            <p className="text-body-secondary mt-1">Monitor your OpenAI API usage and costs</p>
           </div>
-          
+
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
@@ -400,7 +388,9 @@ export default function OpenAISettings() {
               </div>
               <div>
                 <h3 className="text-h3">
-                  {usageStats.lastUsed ? new Date(usageStats.lastUsed).toLocaleDateString() : 'Never'}
+                  {usageStats.lastUsed
+                    ? new Date(usageStats.lastUsed).toLocaleDateString()
+                    : 'Never'}
                 </h3>
                 <p className="text-caption">Last Used</p>
               </div>

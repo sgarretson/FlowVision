@@ -31,7 +31,7 @@ class OpenAIService {
         model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
         maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS || '500'),
         temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
-        enabled: process.env.OPENAI_ENABLED !== 'false'
+        enabled: process.env.OPENAI_ENABLED !== 'false',
       };
       this.client = new OpenAI({ apiKey });
     }
@@ -55,22 +55,25 @@ class OpenAIService {
       const response = await this.client!.chat.completions.create({
         model: this.config!.model || 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: 'Test connection' }],
-        max_tokens: 10
+        max_tokens: 10,
       });
 
-      return { 
-        success: true, 
-        model: response.model || this.config!.model 
+      return {
+        success: true,
+        model: response.model || this.config!.model,
       };
     } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.message || 'Unknown error occurred' 
+      return {
+        success: false,
+        error: error.message || 'Unknown error occurred',
       };
     }
   }
 
-  public async generateIssueInsights(description: string, businessContext?: any): Promise<string | null> {
+  public async generateIssueInsights(
+    description: string,
+    businessContext?: any
+  ): Promise<string | null> {
     if (!this.isConfigured() || !this.config?.enabled) {
       return null;
     }
@@ -95,7 +98,7 @@ Keep response concise and actionable.
         model: this.config.model || 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: this.config.maxTokens || 500,
-        temperature: this.config.temperature || 0.7
+        temperature: this.config.temperature || 0.7,
       });
 
       return response.choices[0]?.message?.content || null;
@@ -106,8 +109,8 @@ Keep response concise and actionable.
   }
 
   public async generateInitiativeRecommendations(
-    title: string, 
-    problem: string, 
+    title: string,
+    problem: string,
     businessContext?: any
   ): Promise<{
     recommendations?: string;
@@ -139,7 +142,7 @@ Format as JSON with keys: recommendations, estimatedDifficulty, estimatedROI, su
         model: this.config.model || 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: this.config.maxTokens || 500,
-        temperature: this.config.temperature || 0.7
+        temperature: this.config.temperature || 0.7,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -187,7 +190,7 @@ Extract and format as JSON:
         model: this.config.model || 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: this.config.maxTokens || 400,
-        temperature: 0.3 // Lower temperature for more structured output
+        temperature: 0.3, // Lower temperature for more structured output
       });
 
       const content = response.choices[0]?.message?.content;
@@ -216,7 +219,7 @@ Extract and format as JSON:
       totalRequests: 0,
       totalTokens: 0,
       lastUsed: new Date().toISOString(),
-      costEstimate: 0
+      costEstimate: 0,
     };
   }
 }

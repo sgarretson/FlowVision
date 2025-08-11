@@ -9,7 +9,7 @@ async function testDatabaseData() {
     // Test admin user
     const adminUser = await prisma.user.findFirst({
       where: { role: 'ADMIN' },
-      include: { businessProfile: true }
+      include: { businessProfile: true },
     });
 
     if (adminUser) {
@@ -17,7 +17,7 @@ async function testDatabaseData() {
       console.log(`   Email: ${adminUser.email}`);
       console.log(`   Name: ${adminUser.name}`);
       console.log(`   Role: ${adminUser.role}`);
-      
+
       if (adminUser.businessProfile) {
         const metrics = adminUser.businessProfile.metrics;
         console.log(`   Company: ${metrics.companyName}`);
@@ -32,7 +32,7 @@ async function testDatabaseData() {
     // Test issues for AI analysis
     const issues = await prisma.issue.findMany({
       orderBy: { heatmapScore: 'desc' },
-      take: 3
+      take: 3,
     });
 
     console.log(`\n✅ Issues for AI Analysis (${issues.length} found):`);
@@ -45,7 +45,7 @@ async function testDatabaseData() {
     const initiatives = await prisma.initiative.findMany({
       include: { owner: true },
       orderBy: { createdAt: 'desc' },
-      take: 3
+      take: 3,
     });
 
     console.log(`\n✅ Initiatives for AI Enhancement (${initiatives.length} found):`);
@@ -60,12 +60,17 @@ async function testDatabaseData() {
     const auditLogs = await prisma.auditLog.findMany({
       where: {
         action: {
-          in: ['AI_ISSUE_ANALYSIS', 'AI_INITIATIVE_RECOMMENDATIONS', 'AI_INITIATIVE_REQUIREMENTS', 'OPENAI_CONNECTION_TEST']
-        }
+          in: [
+            'AI_ISSUE_ANALYSIS',
+            'AI_INITIATIVE_RECOMMENDATIONS',
+            'AI_INITIATIVE_REQUIREMENTS',
+            'OPENAI_CONNECTION_TEST',
+          ],
+        },
       },
       include: { user: true },
       orderBy: { timestamp: 'desc' },
-      take: 5
+      take: 5,
     });
 
     console.log(`\n✅ AI Usage Audit Logs (${auditLogs.length} found):`);
@@ -94,8 +99,8 @@ async function generateUITestPlan() {
       tests: [
         '1. Login as admin@flowvision.com / admin123',
         '2. Verify admin dashboard loads with user statistics',
-        '3. Check business profile shows Morrison Architecture details'
-      ]
+        '3. Check business profile shows Morrison Architecture details',
+      ],
     },
     {
       area: 'Admin OpenAI Configuration',
@@ -103,8 +108,8 @@ async function generateUITestPlan() {
         '1. Navigate to /admin/openai',
         '2. Verify API key field shows configured status',
         '3. Test "Test Connection" button shows success',
-        '4. Check usage statistics display properly'
-      ]
+        '4. Check usage statistics display properly',
+      ],
     },
     {
       area: 'AI-Powered Issue Analysis',
@@ -113,8 +118,8 @@ async function generateUITestPlan() {
         '2. Find issues with AI Analysis buttons',
         '3. Click "Get AI Analysis" on any issue',
         '4. Verify AI provides categorization, impact, and recommendations',
-        '5. Check analysis appears in expandable section'
-      ]
+        '5. Check analysis appears in expandable section',
+      ],
     },
     {
       area: 'AI-Enhanced Initiative Creation',
@@ -125,8 +130,8 @@ async function generateUITestPlan() {
         '4. Click "Generate AI Recommendations"',
         '5. Verify AI provides detailed initiative structure',
         '6. Test "Generate from Description" feature',
-        '7. Save initiative with AI-generated content'
-      ]
+        '7. Save initiative with AI-generated content',
+      ],
     },
     {
       area: 'Usage Monitoring & Analytics',
@@ -135,14 +140,14 @@ async function generateUITestPlan() {
         '2. Check usage statistics updated with recent API calls',
         '3. Verify cost tracking shows estimated spending',
         '4. Review recent activity log with AI operations',
-        '5. Test monthly usage trends display'
-      ]
-    }
+        '5. Test monthly usage trends display',
+      ],
+    },
   ];
 
-  testScenarios.forEach(scenario => {
+  testScenarios.forEach((scenario) => {
     console.log(`📋 ${scenario.area}:`);
-    scenario.tests.forEach(test => {
+    scenario.tests.forEach((test) => {
       console.log(`   ${test}`);
     });
     console.log('');
@@ -159,7 +164,9 @@ async function generateUITestPlan() {
 
   console.log('🎯 Expected AI Responses:');
   console.log('   Issue Analysis: Category, severity, impact, root causes, suggested initiatives');
-  console.log('   Initiative Generation: Detailed goals, KPIs, timeline, resources, success metrics');
+  console.log(
+    '   Initiative Generation: Detailed goals, KPIs, timeline, resources, success metrics'
+  );
   console.log('   Usage Tracking: Token usage, cost estimates, activity logs, trends');
   console.log('');
 
@@ -176,10 +183,10 @@ async function main() {
   console.log('=================================================\n');
 
   const databaseOK = await testDatabaseData();
-  
+
   if (databaseOK) {
     await generateUITestPlan();
-    
+
     console.log('🎉 All backend AI features are configured and ready!');
     console.log('');
     console.log('🚀 NEXT STEPS:');

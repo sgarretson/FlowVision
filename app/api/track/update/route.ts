@@ -8,6 +8,8 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { id, status } = await req.json();
   const updated = await prisma.initiative.update({ where: { id }, data: { status } });
-  await prisma.auditLog.create({ data: { userId: null, action: 'INITIATIVE_STATUS', details: { id, status } } });
+  await prisma.auditLog.create({
+    data: { userId: null, action: 'INITIATIVE_STATUS', details: { id, status } },
+  });
   return NextResponse.json(updated);
 }

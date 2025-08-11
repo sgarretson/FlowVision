@@ -14,10 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const { content, parentId } = body;
 
     if (!content || !content.trim()) {
-      return NextResponse.json(
-        { error: 'Comment content is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Comment content is required' }, { status: 400 });
     }
 
     // Check if idea exists
@@ -36,10 +33,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       });
 
       if (!parentComment || parentComment.ideaId !== params.id) {
-        return NextResponse.json(
-          { error: 'Parent comment not found' },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Parent comment not found' }, { status: 404 });
       }
     }
 
@@ -55,7 +49,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         },
         select: { id: true },
       });
-      mentions.push(...mentionUsers.map(user => user.id));
+      mentions.push(...mentionUsers.map((user) => user.id));
     }
 
     const comment = await prisma.comment.create({
@@ -78,21 +72,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       data: {
         userId: session.user.id,
         action: 'IDEA_COMMENT',
-        details: { 
-          ideaId: params.id, 
+        details: {
+          ideaId: params.id,
           commentId: comment.id,
-          parentId: parentId || null 
+          parentId: parentId || null,
         },
       },
     });
 
     return NextResponse.json(comment, { status: 201 });
-
   } catch (error) {
     console.error('Comment creation error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create comment' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create comment' }, { status: 500 });
   }
 }

@@ -12,7 +12,7 @@ async function analyzeIssueClustering() {
 
   // Fetch all issues from database
   const issues = await prisma.issue.findMany({
-    orderBy: { heatmapScore: 'desc' }
+    orderBy: { heatmapScore: 'desc' },
   });
 
   console.log(`📊 TOTAL ISSUES ANALYZED: ${issues.length}\n`);
@@ -20,7 +20,7 @@ async function analyzeIssueClustering() {
   // 1. DEPARTMENTAL ANALYSIS
   console.log('🏢 DEPARTMENTAL DISTRIBUTION:');
   const departmentGroups = {};
-  issues.forEach(issue => {
+  issues.forEach((issue) => {
     const dept = issue.department || 'Unassigned';
     if (!departmentGroups[dept]) {
       departmentGroups[dept] = [];
@@ -29,13 +29,15 @@ async function analyzeIssueClustering() {
   });
 
   Object.entries(departmentGroups).forEach(([dept, issueList]) => {
-    console.log(`   ${dept}: ${issueList.length} issues (${(issueList.length/issues.length*100).toFixed(1)}%)`);
+    console.log(
+      `   ${dept}: ${issueList.length} issues (${((issueList.length / issues.length) * 100).toFixed(1)}%)`
+    );
   });
 
   // 2. CATEGORY ANALYSIS
   console.log('\n📋 CATEGORY DISTRIBUTION:');
   const categoryGroups = {};
-  issues.forEach(issue => {
+  issues.forEach((issue) => {
     const category = issue.category || 'Uncategorized';
     if (!categoryGroups[category]) {
       categoryGroups[category] = [];
@@ -56,67 +58,104 @@ async function analyzeIssueClustering() {
     {
       name: 'Project Coordination & Communication',
       theme: 'Issues related to coordination, communication, and collaboration across teams',
-      keywords: ['coordination', 'communication', 'collaboration', 'sharing', 'access', 'approval', 'review'],
-      issues: []
+      keywords: [
+        'coordination',
+        'communication',
+        'collaboration',
+        'sharing',
+        'access',
+        'approval',
+        'review',
+      ],
+      issues: [],
     },
     {
       name: 'Technology & Integration',
       theme: 'Issues related to software, tools, technology integration, and digital workflows',
-      keywords: ['software', 'tool', 'integration', 'file', 'version', 'CAD', 'BIM', 'technology', 'digital'],
-      issues: []
+      keywords: [
+        'software',
+        'tool',
+        'integration',
+        'file',
+        'version',
+        'CAD',
+        'BIM',
+        'technology',
+        'digital',
+      ],
+      issues: [],
     },
     {
       name: 'Process Standardization',
       theme: 'Issues related to standardization, quality control, and process improvement',
-      keywords: ['standards', 'process', 'guidelines', 'quality', 'compliance', 'systematic', 'tracking'],
-      issues: []
+      keywords: [
+        'standards',
+        'process',
+        'guidelines',
+        'quality',
+        'compliance',
+        'systematic',
+        'tracking',
+      ],
+      issues: [],
     },
     {
       name: 'Resource & Project Management',
-      theme: 'Issues related to resource allocation, project management, and operational efficiency',
-      keywords: ['resource', 'allocation', 'project', 'management', 'timeline', 'budget', 'profitability'],
-      issues: []
+      theme:
+        'Issues related to resource allocation, project management, and operational efficiency',
+      keywords: [
+        'resource',
+        'allocation',
+        'project',
+        'management',
+        'timeline',
+        'budget',
+        'profitability',
+      ],
+      issues: [],
     },
     {
       name: 'Knowledge & Documentation',
       theme: 'Issues related to knowledge management, documentation, and information accessibility',
       keywords: ['knowledge', 'documentation', 'materials', 'portfolio', 'memory', 'information'],
-      issues: []
-    }
+      issues: [],
+    },
   ];
 
   // Cluster issues based on keyword matching
-  issues.forEach(issue => {
+  issues.forEach((issue) => {
     const description = issue.description.toLowerCase();
-    
-    semanticClusters.forEach(cluster => {
-      const matches = cluster.keywords.filter(keyword => 
+
+    semanticClusters.forEach((cluster) => {
+      const matches = cluster.keywords.filter((keyword) =>
         description.includes(keyword.toLowerCase())
       );
-      
+
       if (matches.length > 0) {
         cluster.issues.push({
           ...issue,
           matchedKeywords: matches,
-          relevanceScore: matches.length
+          relevanceScore: matches.length,
         });
       }
     });
   });
 
   // Display clustering results
-  semanticClusters.forEach(cluster => {
+  semanticClusters.forEach((cluster) => {
     console.log(`🎯 CLUSTER: ${cluster.name.toUpperCase()}`);
     console.log(`   Theme: ${cluster.theme}`);
     console.log(`   Issues Found: ${cluster.issues.length}`);
-    
+
     if (cluster.issues.length > 0) {
       console.log(`   Issues:`);
       cluster.issues
         .sort((a, b) => b.relevanceScore - a.relevanceScore)
-        .forEach(issue => {
+        .forEach((issue) => {
           console.log(`     • ${issue.description.substring(0, 100)}...`);
-          console.log(`       Department: ${issue.department} | Score: ${issue.heatmapScore} | Keywords: [${issue.matchedKeywords.join(', ')}]`);
+          console.log(
+            `       Department: ${issue.department} | Score: ${issue.heatmapScore} | Keywords: [${issue.matchedKeywords.join(', ')}]`
+          );
         });
     }
     console.log('');
@@ -126,16 +165,18 @@ async function analyzeIssueClustering() {
   console.log('🌐 CROSS-DEPARTMENTAL IMPACT ANALYSIS:');
   console.log('Issues that affect multiple departments:\n');
 
-  const crossDepartmentalIssues = issues.filter(issue => {
+  const crossDepartmentalIssues = issues.filter((issue) => {
     const description = issue.description.toLowerCase();
-    return description.includes('multiple') || 
-           description.includes('across') || 
-           description.includes('departments') ||
-           description.includes('team') ||
-           description.includes('coordination');
+    return (
+      description.includes('multiple') ||
+      description.includes('across') ||
+      description.includes('departments') ||
+      description.includes('team') ||
+      description.includes('coordination')
+    );
   });
 
-  crossDepartmentalIssues.forEach(issue => {
+  crossDepartmentalIssues.forEach((issue) => {
     console.log(`📊 HIGH CROSS-IMPACT ISSUE:`);
     console.log(`   Primary Dept: ${issue.department}`);
     console.log(`   Score: ${issue.heatmapScore}/100`);
@@ -151,20 +192,22 @@ async function analyzeIssueClustering() {
     {
       cluster: 'Project Coordination & Communication',
       initiative: 'Unified Project Communication Platform',
-      description: 'Integrated platform for municipal approvals, client communication, and team coordination',
+      description:
+        'Integrated platform for municipal approvals, client communication, and team coordination',
       impact: 'Addresses coordination, approval delays, and communication inefficiencies',
       estimatedROI: '25-35% reduction in project delays',
       affectedDepartments: ['Project Management', 'Architecture Design', 'Engineering'],
-      addresses: semanticClusters[0].issues.length
+      addresses: semanticClusters[0].issues.length,
     },
     {
       cluster: 'Technology & Integration',
       initiative: 'Integrated Design Technology Stack',
-      description: 'Unified CAD/BIM platform with automated version control and cross-platform compatibility',
+      description:
+        'Unified CAD/BIM platform with automated version control and cross-platform compatibility',
       impact: 'Eliminates tool fragmentation and improves collaboration',
       estimatedROI: '20-30% efficiency improvement',
       affectedDepartments: ['Architecture Design', 'Engineering', 'Operations'],
-      addresses: semanticClusters[1].issues.length
+      addresses: semanticClusters[1].issues.length,
     },
     {
       cluster: 'Process Standardization',
@@ -173,7 +216,7 @@ async function analyzeIssueClustering() {
       impact: 'Reduces rework and ensures consistent quality',
       estimatedROI: '15-25% reduction in rework costs',
       affectedDepartments: ['Architecture Design', 'Engineering'],
-      addresses: semanticClusters[2].issues.length
+      addresses: semanticClusters[2].issues.length,
     },
     {
       cluster: 'Resource & Project Management',
@@ -182,11 +225,11 @@ async function analyzeIssueClustering() {
       impact: 'Optimizes resource utilization and financial performance',
       estimatedROI: '20-40% improvement in project margins',
       affectedDepartments: ['Project Management', 'Operations'],
-      addresses: semanticClusters[3].issues.length
-    }
+      addresses: semanticClusters[3].issues.length,
+    },
   ];
 
-  strategicRecommendations.forEach(rec => {
+  strategicRecommendations.forEach((rec) => {
     console.log(`💡 STRATEGIC INITIATIVE: ${rec.initiative.toUpperCase()}`);
     console.log(`   Target Cluster: ${rec.cluster}`);
     console.log(`   Description: ${rec.description}`);
@@ -200,14 +243,16 @@ async function analyzeIssueClustering() {
   // 6. CLUSTERING VALIDATION METRICS
   console.log('📈 CLUSTERING VALIDATION METRICS:');
   const totalClustered = semanticClusters.reduce((sum, cluster) => sum + cluster.issues.length, 0);
-  const clusteringCoverage = (totalClustered / issues.length * 100).toFixed(1);
-  
+  const clusteringCoverage = ((totalClustered / issues.length) * 100).toFixed(1);
+
   console.log(`   Total Issues: ${issues.length}`);
   console.log(`   Successfully Clustered: ${totalClustered} (${clusteringCoverage}%)`);
-  console.log(`   Average Cluster Size: ${(totalClustered / semanticClusters.length).toFixed(1)} issues`);
+  console.log(
+    `   Average Cluster Size: ${(totalClustered / semanticClusters.length).toFixed(1)} issues`
+  );
   console.log(`   Cross-Departmental Issues: ${crossDepartmentalIssues.length}`);
-  
-  const highImpactClusters = semanticClusters.filter(cluster => cluster.issues.length >= 2);
+
+  const highImpactClusters = semanticClusters.filter((cluster) => cluster.issues.length >= 2);
   console.log(`   High-Impact Clusters: ${highImpactClusters.length}/${semanticClusters.length}`);
 
   // 7. NEXT STEPS RECOMMENDATION
@@ -218,7 +263,7 @@ async function analyzeIssueClustering() {
   console.log(`   • ${strategicRecommendations.length} strategic initiatives recommended`);
   console.log(`   • ${crossDepartmentalIssues.length} high cross-impact issues found`);
   console.log(`   • ${clusteringCoverage}% clustering coverage achieved`);
-  
+
   console.log('\n🚀 RECOMMENDED NEXT STEPS:');
   console.log('   1. Enhance data model with IssueCluster relationships');
   console.log('   2. Implement semantic similarity API for dynamic clustering');
@@ -231,19 +276,18 @@ async function analyzeIssueClustering() {
     clusters: semanticClusters,
     strategicRecommendations,
     crossDepartmentalIssues,
-    clusteringCoverage: parseFloat(clusteringCoverage)
+    clusteringCoverage: parseFloat(clusteringCoverage),
   };
 }
 
 async function main() {
   try {
     const analysis = await analyzeIssueClustering();
-    
+
     console.log('\n📊 ANALYSIS SUMMARY EXPORTED');
     console.log(`   Clustering accuracy: ${analysis.clusteringCoverage}%`);
     console.log(`   Strategic opportunities: ${analysis.strategicRecommendations.length}`);
     console.log(`   Ready for Phase 1 implementation: ✅`);
-    
   } catch (error) {
     console.error('❌ Analysis failed:', error);
   } finally {

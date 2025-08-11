@@ -46,7 +46,7 @@ export default function InitiativeDetailPage() {
         setLoading(false);
       }
     }
-    
+
     if (id) {
       loadInitiative();
     }
@@ -55,17 +55,17 @@ export default function InitiativeDetailPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form) return;
-    
+
     setMessage(null);
     setSaving(true);
-    
+
     try {
       const res = await fetch(`/api/initiatives/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      
+
       if (res.ok) {
         setMessage('Initiative saved successfully!');
         setTimeout(() => {
@@ -88,10 +88,14 @@ export default function InitiativeDetailPage() {
 
   function getStatusColor(status: string): string {
     switch (status) {
-      case 'Done': return 'bg-green-100 text-green-800';
-      case 'In Progress': return 'bg-blue-100 text-blue-800';
-      case 'Prioritize': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Done':
+        return 'bg-green-100 text-green-800';
+      case 'In Progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'Prioritize':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   }
 
@@ -128,7 +132,9 @@ export default function InitiativeDetailPage() {
       <div className="space-y-8 animate-fade-in">
         <div className="text-center">
           <h1 className="text-h1 mb-4">Initiative Not Found</h1>
-          <p className="text-body mb-6">The initiative you're looking for doesn't exist or has been deleted.</p>
+          <p className="text-body mb-6">
+            The initiative you're looking for doesn't exist or has been deleted.
+          </p>
           <Link href="/initiatives" className="btn-primary">
             Back to Initiatives
           </Link>
@@ -161,11 +167,13 @@ export default function InitiativeDetailPage() {
       {/* Status Message */}
       {message && (
         <div className="max-w-4xl mx-auto">
-          <div className={`p-4 rounded-lg text-center ${
-            message.includes('successfully') 
-              ? 'bg-green-50 border border-green-200 text-green-800' 
-              : 'bg-red-50 border border-red-200 text-red-800'
-          }`}>
+          <div
+            className={`p-4 rounded-lg text-center ${
+              message.includes('successfully')
+                ? 'bg-green-50 border border-green-200 text-green-800'
+                : 'bg-red-50 border border-red-200 text-red-800'
+            }`}
+          >
             {message}
           </div>
         </div>
@@ -219,7 +227,15 @@ export default function InitiativeDetailPage() {
               className="input-field"
               placeholder="Success metrics (comma-separated)"
               value={(form.kpis || []).join(', ')}
-              onChange={(e) => updateForm('kpis', e.target.value.split(',').map((s) => s.trim()).filter(Boolean))}
+              onChange={(e) =>
+                updateForm(
+                  'kpis',
+                  e.target.value
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                )
+              }
             />
             <p className="text-caption mt-2">
               Example: Revenue Growth, Customer Satisfaction, Cost Reduction
@@ -266,7 +282,9 @@ export default function InitiativeDetailPage() {
                 <option value="Done">Done</option>
               </select>
               <div className="mt-3">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(form.status)}`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(form.status)}`}
+                >
                   {form.status}
                 </span>
               </div>
@@ -309,10 +327,15 @@ export default function InitiativeDetailPage() {
                 <div className="text-caption">ROI Score</div>
               </div>
               <div className="text-center">
-                <div className={`text-2xl font-bold mb-1 ${
-                  (form.priorityScore || 0) >= 70 ? 'text-green-600' :
-                  (form.priorityScore || 0) >= 40 ? 'text-yellow-600' : 'text-red-600'
-                }`}>
+                <div
+                  className={`text-2xl font-bold mb-1 ${
+                    (form.priorityScore || 0) >= 70
+                      ? 'text-green-600'
+                      : (form.priorityScore || 0) >= 40
+                        ? 'text-yellow-600'
+                        : 'text-red-600'
+                  }`}
+                >
                   {form.priorityScore || 0}
                 </div>
                 <div className="text-caption">Priority Score</div>
@@ -327,7 +350,7 @@ export default function InitiativeDetailPage() {
             </Link>
             <button
               type="submit"
-              className={`btn-primary ${(saving) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`btn-primary ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={saving}
             >
               {saving ? (
@@ -348,17 +371,19 @@ export default function InitiativeDetailPage() {
         <div className="card-tertiary p-4">
           <div className="flex items-center justify-between text-caption">
             <span>
-              Created: {new Date(form.createdAt).toLocaleDateString('en-US', {
+              Created:{' '}
+              {new Date(form.createdAt).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
+                day: 'numeric',
               })}
             </span>
             <span>
-              Last updated: {new Date(form.updatedAt).toLocaleDateString('en-US', {
+              Last updated:{' '}
+              {new Date(form.updatedAt).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
+                day: 'numeric',
               })}
             </span>
           </div>

@@ -12,20 +12,20 @@ export default function RegisterPage() {
   const [step, setStep] = useState<RegistrationStep>('account');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Account details
   const [accountData, setAccountData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
-    name: ''
+    name: '',
   });
 
   // Business profile
   const [profileData, setProfileData] = useState({
     industry: '',
     size: 0,
-    metrics: {}
+    metrics: {},
   });
 
   async function handleAccountSubmit(e: React.FormEvent) {
@@ -51,8 +51,8 @@ export default function RegisterPage() {
         body: JSON.stringify({
           email: accountData.email,
           password: accountData.password,
-          name: accountData.name
-        })
+          name: accountData.name,
+        }),
       });
 
       const data = await res.json();
@@ -78,7 +78,7 @@ export default function RegisterPage() {
       const signInResult = await signIn('credentials', {
         email: accountData.email,
         password: accountData.password,
-        redirect: false
+        redirect: false,
       });
 
       if (signInResult?.error) {
@@ -90,7 +90,7 @@ export default function RegisterPage() {
       const profileRes = await fetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profileData)
+        body: JSON.stringify(profileData),
       });
 
       if (profileRes.ok) {
@@ -115,9 +115,7 @@ export default function RegisterPage() {
         <div className="flex justify-center">
           <img src="/logo-flowvision.svg" alt="FlowVision" className="h-12 w-auto" />
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Welcome to FlowVision
-        </h2>
+        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">Welcome to FlowVision</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Transform friction into flow with AI-powered efficiency intelligence
         </p>
@@ -125,30 +123,42 @@ export default function RegisterPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          
           {/* Progress Steps */}
           <div className="mb-8">
             <div className="flex items-center">
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
-                step === 'account' ? 'bg-primary text-white' : 'bg-green-500 text-white'
-              }`}>
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
+                  step === 'account' ? 'bg-primary text-white' : 'bg-green-500 text-white'
+                }`}
+              >
                 {step === 'account' ? '1' : '✓'}
               </div>
-              <div className={`flex-1 h-1 mx-4 ${
-                ['profile', 'complete'].includes(step) ? 'bg-green-500' : 'bg-gray-200'
-              }`}></div>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
-                step === 'profile' ? 'bg-primary text-white' : 
-                step === 'complete' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
-              }`}>
+              <div
+                className={`flex-1 h-1 mx-4 ${
+                  ['profile', 'complete'].includes(step) ? 'bg-green-500' : 'bg-gray-200'
+                }`}
+              ></div>
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
+                  step === 'profile'
+                    ? 'bg-primary text-white'
+                    : step === 'complete'
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-200 text-gray-500'
+                }`}
+              >
                 {step === 'complete' ? '✓' : '2'}
               </div>
-              <div className={`flex-1 h-1 mx-4 ${
-                step === 'complete' ? 'bg-green-500' : 'bg-gray-200'
-              }`}></div>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
-                step === 'complete' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'
-              }`}>
+              <div
+                className={`flex-1 h-1 mx-4 ${
+                  step === 'complete' ? 'bg-green-500' : 'bg-gray-200'
+                }`}
+              ></div>
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
+                  step === 'complete' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'
+                }`}
+              >
                 {step === 'complete' ? '✓' : '3'}
               </div>
             </div>
@@ -163,7 +173,7 @@ export default function RegisterPage() {
           {step === 'account' && (
             <form onSubmit={handleAccountSubmit} className="space-y-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Create Your Account</h3>
-              
+
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                   Full Name
@@ -173,7 +183,7 @@ export default function RegisterPage() {
                   type="text"
                   required
                   value={accountData.name}
-                  onChange={(e) => setAccountData({...accountData, name: e.target.value})}
+                  onChange={(e) => setAccountData({ ...accountData, name: e.target.value })}
                   className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                 />
               </div>
@@ -187,7 +197,7 @@ export default function RegisterPage() {
                   type="email"
                   required
                   value={accountData.email}
-                  onChange={(e) => setAccountData({...accountData, email: e.target.value})}
+                  onChange={(e) => setAccountData({ ...accountData, email: e.target.value })}
                   className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                 />
               </div>
@@ -201,14 +211,17 @@ export default function RegisterPage() {
                   type="password"
                   required
                   value={accountData.password}
-                  onChange={(e) => setAccountData({...accountData, password: e.target.value})}
+                  onChange={(e) => setAccountData({ ...accountData, password: e.target.value })}
                   className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                 />
                 <p className="mt-1 text-sm text-gray-500">Minimum 8 characters</p>
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Confirm Password
                 </label>
                 <input
@@ -216,7 +229,9 @@ export default function RegisterPage() {
                   type="password"
                   required
                   value={accountData.confirmPassword}
-                  onChange={(e) => setAccountData({...accountData, confirmPassword: e.target.value})}
+                  onChange={(e) =>
+                    setAccountData({ ...accountData, confirmPassword: e.target.value })
+                  }
                   className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                 />
               </div>
@@ -227,11 +242,7 @@ export default function RegisterPage() {
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full btn-primary"
-              >
+              <button type="submit" disabled={loading} className="w-full btn-primary">
                 {loading ? 'Creating Account...' : 'Create Account'}
               </button>
             </form>
@@ -240,8 +251,10 @@ export default function RegisterPage() {
           {/* Business Profile Step */}
           {step === 'profile' && (
             <form onSubmit={handleProfileSubmit} className="space-y-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Tell Us About Your Organization</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Tell Us About Your Organization
+              </h3>
+
               <div>
                 <label htmlFor="industry" className="block text-sm font-medium text-gray-700">
                   Industry
@@ -250,7 +263,7 @@ export default function RegisterPage() {
                   id="industry"
                   required
                   value={profileData.industry}
-                  onChange={(e) => setProfileData({...profileData, industry: e.target.value})}
+                  onChange={(e) => setProfileData({ ...profileData, industry: e.target.value })}
                   className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                 >
                   <option value="">Select Industry</option>
@@ -273,7 +286,9 @@ export default function RegisterPage() {
                   id="size"
                   required
                   value={profileData.size}
-                  onChange={(e) => setProfileData({...profileData, size: parseInt(e.target.value)})}
+                  onChange={(e) =>
+                    setProfileData({ ...profileData, size: parseInt(e.target.value) })
+                  }
                   className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                 >
                   <option value={0}>Select Size</option>
@@ -302,11 +317,7 @@ export default function RegisterPage() {
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full btn-primary"
-              >
+              <button type="submit" disabled={loading} className="w-full btn-primary">
                 {loading ? 'Setting up...' : 'Complete Setup'}
               </button>
             </form>
@@ -316,15 +327,26 @@ export default function RegisterPage() {
           {step === 'complete' && (
             <div className="text-center space-y-6">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-8 h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
-              
+
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Welcome to FlowVision!</h3>
                 <p className="mt-2 text-sm text-gray-600">
-                  Your account has been created successfully. You're ready to transform friction into flow.
+                  Your account has been created successfully. You're ready to transform friction
+                  into flow.
                 </p>
               </div>
 
@@ -339,10 +361,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <button
-                onClick={handleComplete}
-                className="w-full btn-primary"
-              >
+              <button onClick={handleComplete} className="w-full btn-primary">
                 Go to Dashboard
               </button>
             </div>

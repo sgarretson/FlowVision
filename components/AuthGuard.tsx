@@ -14,7 +14,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     if (status === 'loading') return; // Still loading
-    
+
     if (!session) {
       router.push('/auth');
     }

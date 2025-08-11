@@ -13,7 +13,7 @@ export async function GET() {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (!user || user.role !== 'ADMIN') {
@@ -26,16 +26,17 @@ export async function GET() {
 
     return NextResponse.json({
       isConfigured,
-      config: config ? {
-        model: config.model,
-        maxTokens: config.maxTokens,
-        temperature: config.temperature,
-        enabled: config.enabled,
-        hasApiKey: !!config.apiKey
-      } : null,
-      usageStats
+      config: config
+        ? {
+            model: config.model,
+            maxTokens: config.maxTokens,
+            temperature: config.temperature,
+            enabled: config.enabled,
+            hasApiKey: !!config.apiKey,
+          }
+        : null,
+      usageStats,
     });
-
   } catch (error) {
     console.error('Failed to get OpenAI config:', error);
     return NextResponse.json({ error: 'Failed to get configuration' }, { status: 500 });
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (!user || user.role !== 'ADMIN') {
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
       model: model || 'gpt-3.5-turbo',
       maxTokens: maxTokens || 500,
       temperature: temperature || 0.7,
-      enabled: enabled !== false
+      enabled: enabled !== false,
     });
 
     // Log the configuration change
@@ -96,16 +97,15 @@ export async function POST(req: NextRequest) {
           model: model || 'gpt-3.5-turbo',
           maxTokens: maxTokens || 500,
           temperature: temperature || 0.7,
-          enabled: enabled !== false
-        }
-      }
+          enabled: enabled !== false,
+        },
+      },
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'OpenAI configuration updated successfully' 
+    return NextResponse.json({
+      success: true,
+      message: 'OpenAI configuration updated successfully',
     });
-
   } catch (error) {
     console.error('Failed to update OpenAI config:', error);
     return NextResponse.json({ error: 'Failed to update configuration' }, { status: 500 });
@@ -121,7 +121,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (!user || user.role !== 'ADMIN') {
@@ -138,7 +138,7 @@ export async function PUT(req: NextRequest) {
         model: model || 'gpt-3.5-turbo',
         maxTokens: 10,
         temperature: 0.7,
-        enabled: true
+        enabled: true,
       });
     }
 
@@ -152,18 +152,20 @@ export async function PUT(req: NextRequest) {
         details: {
           success: testResult.success,
           model: testResult.model,
-          error: testResult.error
-        }
-      }
+          error: testResult.error,
+        },
+      },
     });
 
     return NextResponse.json(testResult);
-
   } catch (error) {
     console.error('Failed to test OpenAI connection:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Failed to test connection' 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to test connection',
+      },
+      { status: 500 }
+    );
   }
 }

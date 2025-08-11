@@ -18,7 +18,12 @@ export default function ProfileForm() {
       const res = await fetch('/api/profile');
       if (res.ok) {
         const data = await res.json();
-        if (data) setProfile({ industry: data.industry ?? '', size: data.size ?? 0, metrics: data.metrics ?? {} });
+        if (data)
+          setProfile({
+            industry: data.industry ?? '',
+            size: data.size ?? 0,
+            metrics: data.metrics ?? {},
+          });
       }
       setLoading(false);
     })();
@@ -68,7 +73,9 @@ export default function ProfileForm() {
         rows={6}
       />
       {message && <div className="text-sm text-gray-600">{message}</div>}
-      <button className="px-3 py-2 rounded bg-primary text-white" type="submit">Save</button>
+      <button className="px-3 py-2 rounded bg-primary text-white" type="submit">
+        Save
+      </button>
     </form>
   );
 }

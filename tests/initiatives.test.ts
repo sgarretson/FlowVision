@@ -12,24 +12,24 @@ describe('Initiatives System', () => {
         email: 'test-initiatives@example.com',
         passwordHash: await bcrypt.hash('password123', 10),
         name: 'Test User',
-        role: 'LEADER'
-      }
+        role: 'LEADER',
+      },
     });
 
     // Clean up test initiatives
     await prisma.initiative.deleteMany({
-      where: { title: { contains: 'Test Initiative' } }
+      where: { title: { contains: 'Test Initiative' } },
     });
   });
 
   afterEach(async () => {
     // Clean up test data
     await prisma.initiative.deleteMany({
-      where: { title: { contains: 'Test Initiative' } }
+      where: { title: { contains: 'Test Initiative' } },
     });
-    
+
     await prisma.user.delete({
-      where: { id: testUser.id }
+      where: { id: testUser.id },
     });
   });
 
@@ -42,11 +42,11 @@ describe('Initiatives System', () => {
         kpis: ['metric1', 'metric2'],
         ownerId: testUser.id,
         status: 'Define',
-        progress: 0
+        progress: 0,
       };
 
       const initiative = await prisma.initiative.create({
-        data: initiativeData
+        data: initiativeData,
       });
 
       expect(initiative).toBeDefined();
@@ -71,8 +71,8 @@ describe('Initiatives System', () => {
           timelineEnd: new Date('2024-06-01'),
           difficulty: 50,
           roi: 75,
-          priorityScore: 80
-        }
+          priorityScore: 80,
+        },
       });
 
       expect(initiative.timelineStart).toBeDefined();
@@ -93,15 +93,15 @@ describe('Initiatives System', () => {
           problem: 'Test problem',
           goal: 'Test goal',
           ownerId: testUser.id,
-          status: 'Define'
-        }
+          status: 'Define',
+        },
       });
     });
 
     it('should update initiative status', async () => {
       const updatedInitiative = await prisma.initiative.update({
         where: { id: testInitiative.id },
-        data: { status: 'In Progress' }
+        data: { status: 'In Progress' },
       });
 
       expect(updatedInitiative.status).toBe('In Progress');
@@ -110,10 +110,10 @@ describe('Initiatives System', () => {
     it('should update progress percentage', async () => {
       const updatedInitiative = await prisma.initiative.update({
         where: { id: testInitiative.id },
-        data: { 
+        data: {
           status: 'In Progress',
-          progress: 45 
-        }
+          progress: 45,
+        },
       });
 
       expect(updatedInitiative.progress).toBe(45);
@@ -132,8 +132,8 @@ describe('Initiatives System', () => {
           problem: 'Test problem 1',
           goal: 'Test goal 1',
           ownerId: testUser.id,
-          status: 'Define'
-        }
+          status: 'Define',
+        },
       });
 
       initiative2 = await prisma.initiative.create({
@@ -142,8 +142,8 @@ describe('Initiatives System', () => {
           problem: 'Test problem 2',
           goal: 'Test goal 2',
           ownerId: testUser.id,
-          status: 'Define'
-        }
+          status: 'Define',
+        },
       });
     });
 
@@ -153,13 +153,13 @@ describe('Initiatives System', () => {
         where: { id: initiative2.id },
         data: {
           dependencies: {
-            connect: { id: initiative1.id }
-          }
+            connect: { id: initiative1.id },
+          },
         },
         include: {
           dependencies: true,
-          dependents: true
-        }
+          dependents: true,
+        },
       });
 
       expect(updatedInitiative.dependencies).toHaveLength(1);
@@ -170,7 +170,7 @@ describe('Initiatives System', () => {
   describe('Initiative KPIs', () => {
     it('should store and retrieve KPIs as array', async () => {
       const kpis = ['customer_satisfaction', 'processing_time', 'error_rate'];
-      
+
       const initiative = await prisma.initiative.create({
         data: {
           title: 'Test Initiative KPIs',
@@ -178,8 +178,8 @@ describe('Initiatives System', () => {
           goal: 'Test goal',
           ownerId: testUser.id,
           status: 'Define',
-          kpis: kpis
-        }
+          kpis: kpis,
+        },
       });
 
       expect(initiative.kpis).toEqual(kpis);
@@ -194,8 +194,8 @@ describe('Initiatives System', () => {
           goal: 'Test goal',
           ownerId: testUser.id,
           status: 'Define',
-          kpis: []
-        }
+          kpis: [],
+        },
       });
 
       expect(initiative.kpis).toEqual([]);

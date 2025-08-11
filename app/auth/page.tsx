@@ -30,9 +30,9 @@ export default function AuthPage() {
         email,
         password,
         redirect: false,
-        callbackUrl: '/'
+        callbackUrl: '/',
       });
-      
+
       if (res?.error) {
         setError('Invalid email or password');
       } else if (res?.ok) {
@@ -52,9 +52,7 @@ export default function AuthPage() {
         <div className="flex justify-center">
           <img src="/logo-flowvision.svg" alt="FlowVision" className="h-12 w-auto" />
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Sign in to FlowVision
-        </h2>
+        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">Sign in to FlowVision</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Transform friction into flow with AI-powered efficiency intelligence
         </p>
@@ -99,11 +97,7 @@ export default function AuthPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-primary"
-            >
+            <button type="submit" disabled={loading} className="w-full btn-primary">
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
@@ -132,8 +126,12 @@ export default function AuthPage() {
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
             <h4 className="text-sm font-medium text-blue-900 mb-2">Demo Credentials</h4>
             <div className="text-sm text-blue-700 space-y-1">
-              <div><strong>Admin:</strong> admin@example.com / Admin123!</div>
-              <div><strong>Leader:</strong> Create account or contact admin</div>
+              <div>
+                <strong>Admin:</strong> admin@example.com / Admin123!
+              </div>
+              <div>
+                <strong>Leader:</strong> Create account or contact admin
+              </div>
             </div>
           </div>
         </div>

@@ -14,7 +14,7 @@ class QATestSuite {
       performance: [],
       security: [],
       ai: [],
-      regression: []
+      regression: [],
     };
     this.baseUrl = 'http://localhost:3000';
   }
@@ -22,7 +22,9 @@ class QATestSuite {
   async runComprehensiveTests() {
     console.log('🧪 FlowVision Comprehensive QA Test Suite');
     console.log('==========================================');
-    console.log('👥 QA Team: Senior QA Engineer, UI/UX Specialist, Performance Engineer, Security Analyst\n');
+    console.log(
+      '👥 QA Team: Senior QA Engineer, UI/UX Specialist, Performance Engineer, Security Analyst\n'
+    );
 
     await this.testDatabaseIntegrity();
     await this.testFunctionalRequirements();
@@ -41,18 +43,24 @@ class QATestSuite {
       // Test 1: Verify admin user exists with correct role
       const adminUser = await prisma.user.findFirst({
         where: { role: 'ADMIN' },
-        include: { businessProfile: true, auditLogs: true }
+        include: { businessProfile: true, auditLogs: true },
       });
 
-      this.logTestResult('functional', 'Admin User Setup', 
-        adminUser ? 'PASS' : 'FAIL', 
+      this.logTestResult(
+        'functional',
+        'Admin User Setup',
+        adminUser ? 'PASS' : 'FAIL',
         adminUser ? `Admin user found: ${adminUser.email}` : 'No admin user found'
       );
 
       // Test 2: Verify business profile exists
-      this.logTestResult('functional', 'Business Profile Integration', 
-        adminUser?.businessProfile ? 'PASS' : 'FAIL', 
-        adminUser?.businessProfile ? 'Business profile linked correctly' : 'Business profile missing'
+      this.logTestResult(
+        'functional',
+        'Business Profile Integration',
+        adminUser?.businessProfile ? 'PASS' : 'FAIL',
+        adminUser?.businessProfile
+          ? 'Business profile linked correctly'
+          : 'Business profile missing'
       );
 
       // Test 3: Verify sample data integrity
@@ -60,23 +68,33 @@ class QATestSuite {
       const initiativesCount = await prisma.initiative.count();
       const auditLogsCount = await prisma.auditLog.count();
 
-      this.logTestResult('functional', 'Sample Data Integrity', 
-        (issuesCount >= 3 && initiativesCount >= 3 && auditLogsCount >= 5) ? 'PASS' : 'FAIL',
+      this.logTestResult(
+        'functional',
+        'Sample Data Integrity',
+        issuesCount >= 3 && initiativesCount >= 3 && auditLogsCount >= 5 ? 'PASS' : 'FAIL',
         `Issues: ${issuesCount}, Initiatives: ${initiativesCount}, Audit Logs: ${auditLogsCount}`
       );
 
       // Test 4: Verify relational integrity
       const initiativeWithOwner = await prisma.initiative.findFirst({
-        include: { owner: true }
+        include: { owner: true },
       });
 
-      this.logTestResult('functional', 'Relational Data Integrity', 
+      this.logTestResult(
+        'functional',
+        'Relational Data Integrity',
         initiativeWithOwner?.owner ? 'PASS' : 'FAIL',
-        initiativeWithOwner?.owner ? 'Relationships working correctly' : 'Broken relationships detected'
+        initiativeWithOwner?.owner
+          ? 'Relationships working correctly'
+          : 'Broken relationships detected'
       );
-
     } catch (error) {
-      this.logTestResult('functional', 'Database Connection', 'FAIL', `Database error: ${error.message}`);
+      this.logTestResult(
+        'functional',
+        'Database Connection',
+        'FAIL',
+        `Database error: ${error.message}`
+      );
     }
   }
 
@@ -92,9 +110,9 @@ class QATestSuite {
           'Navigate to /auth',
           'Enter admin credentials',
           'Verify redirect to dashboard',
-          'Check role-based navigation'
+          'Check role-based navigation',
         ],
-        expectedResult: 'User successfully authenticated with admin privileges'
+        expectedResult: 'User successfully authenticated with admin privileges',
       },
       {
         name: 'Issue Management Workflow',
@@ -103,9 +121,9 @@ class QATestSuite {
           'Navigate to /issues',
           'View existing issues',
           'Test voting functionality',
-          'Verify heatmap scoring'
+          'Verify heatmap scoring',
         ],
-        expectedResult: 'Issues display correctly with interactive features'
+        expectedResult: 'Issues display correctly with interactive features',
       },
       {
         name: 'Initiative Creation & Management',
@@ -114,9 +132,9 @@ class QATestSuite {
           'Navigate to /initiatives',
           'Create new initiative',
           'Edit existing initiative',
-          'Update progress tracking'
+          'Update progress tracking',
         ],
-        expectedResult: 'Full initiative lifecycle management working'
+        expectedResult: 'Full initiative lifecycle management working',
       },
       {
         name: 'Admin Dashboard Functionality',
@@ -125,9 +143,9 @@ class QATestSuite {
           'Navigate to /admin',
           'View system statistics',
           'Access user management',
-          'Check audit logs'
+          'Check audit logs',
         ],
-        expectedResult: 'Admin dashboard displays all system information'
+        expectedResult: 'Admin dashboard displays all system information',
       },
       {
         name: 'Four-Phase Workflow Navigation',
@@ -136,13 +154,13 @@ class QATestSuite {
           'Test navigation between phases',
           'Verify contextual content',
           'Check phase-specific features',
-          'Validate workflow progression'
+          'Validate workflow progression',
         ],
-        expectedResult: 'Seamless navigation through all workflow phases'
-      }
+        expectedResult: 'Seamless navigation through all workflow phases',
+      },
     ];
 
-    functionalTests.forEach(test => {
+    functionalTests.forEach((test) => {
       console.log(`📋 ${test.name}:`);
       console.log(`   Description: ${test.description}`);
       console.log(`   Test Steps:`);
@@ -151,7 +169,7 @@ class QATestSuite {
       });
       console.log(`   Expected: ${test.expectedResult}`);
       console.log(`   Status: ✅ READY FOR MANUAL TESTING\n`);
-      
+
       this.logTestResult('functional', test.name, 'PENDING', 'Requires manual validation');
     });
   }
@@ -168,8 +186,8 @@ class QATestSuite {
           'Color scheme matches design system (blues, grays)',
           'Typography uses Inter font family',
           'Card-based design pattern implementation',
-          'Responsive layout on mobile/tablet/desktop'
-        ]
+          'Responsive layout on mobile/tablet/desktop',
+        ],
       },
       {
         category: 'Navigation & Information Architecture',
@@ -178,8 +196,8 @@ class QATestSuite {
           'Contextual sub-navigation within phases',
           'Breadcrumb navigation where appropriate',
           'Search and filter functionality',
-          'Consistent header and footer across pages'
-        ]
+          'Consistent header and footer across pages',
+        ],
       },
       {
         category: 'User Interaction Design',
@@ -188,8 +206,8 @@ class QATestSuite {
           'Form validation and error messaging',
           'Loading states for AI operations',
           'Drag-and-drop prioritization (if implemented)',
-          'Modal dialogs and overlays'
-        ]
+          'Modal dialogs and overlays',
+        ],
       },
       {
         category: 'Accessibility & Inclusivity',
@@ -198,8 +216,8 @@ class QATestSuite {
           'Screen reader compatibility',
           'Color contrast ratios meet WCAG guidelines',
           'Focus indicators visible and clear',
-          'Alternative text for images and icons'
-        ]
+          'Alternative text for images and icons',
+        ],
       },
       {
         category: 'Content & Messaging',
@@ -208,16 +226,21 @@ class QATestSuite {
           'Error messages are helpful and specific',
           'Success confirmations for user actions',
           'Help text and tooltips where needed',
-          'Professional tone matching SMB target'
-        ]
-      }
+          'Professional tone matching SMB target',
+        ],
+      },
     ];
 
-    usabilityTests.forEach(category => {
+    usabilityTests.forEach((category) => {
       console.log(`🎯 ${category.category}:`);
       category.tests.forEach((test, index) => {
         console.log(`   ${index + 1}. ${test}`);
-        this.logTestResult('usability', `${category.category}: ${test}`, 'PENDING', 'Visual inspection required');
+        this.logTestResult(
+          'usability',
+          `${category.category}: ${test}`,
+          'PENDING',
+          'Visual inspection required'
+        );
       });
       console.log('');
     });
@@ -229,7 +252,9 @@ class QATestSuite {
 
     // Test OpenAI API key configuration
     const hasApiKey = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 0;
-    this.logTestResult('ai', 'OpenAI API Key Configuration', 
+    this.logTestResult(
+      'ai',
+      'OpenAI API Key Configuration',
       hasApiKey ? 'PASS' : 'FAIL',
       hasApiKey ? 'API key properly configured' : 'API key missing or invalid'
     );
@@ -243,11 +268,11 @@ class QATestSuite {
           'Click analysis button',
           'Verify loading state appears',
           'Confirm AI response displays with proper formatting',
-          'Check that analysis includes: category, severity, impact, recommendations'
+          'Check that analysis includes: category, severity, impact, recommendations',
         ],
         endpoint: '/api/ai/analyze-issue',
         expectedTokens: '500-800 tokens',
-        expectedCost: '$0.0008-0.0012'
+        expectedCost: '$0.0008-0.0012',
       },
       {
         feature: 'Initiative Generation AI',
@@ -258,11 +283,11 @@ class QATestSuite {
           'Click "Generate AI Recommendations"',
           'Verify comprehensive initiative structure generated',
           'Test "Generate from Description" feature',
-          'Confirm all fields populated appropriately'
+          'Confirm all fields populated appropriately',
         ],
         endpoint: '/api/ai/generate-initiative',
         expectedTokens: '800-1200 tokens',
-        expectedCost: '$0.0012-0.0018'
+        expectedCost: '$0.0012-0.0018',
       },
       {
         feature: 'Admin OpenAI Configuration',
@@ -272,10 +297,10 @@ class QATestSuite {
           'Test "Test Connection" button',
           'Check usage statistics display',
           'Verify cost tracking updates',
-          'Review recent activity log'
+          'Review recent activity log',
         ],
         endpoint: '/api/admin/openai',
-        expectedResult: 'Real-time monitoring and control'
+        expectedResult: 'Real-time monitoring and control',
       },
       {
         feature: 'Usage Monitoring & Analytics',
@@ -285,14 +310,14 @@ class QATestSuite {
           'Verify usage statistics updated',
           'Check cost calculations accurate',
           'Review activity timeline',
-          'Validate monthly usage trends'
+          'Validate monthly usage trends',
         ],
         endpoint: '/api/admin/openai/usage',
-        expectedResult: 'Accurate usage tracking and reporting'
-      }
+        expectedResult: 'Accurate usage tracking and reporting',
+      },
     ];
 
-    aiTests.forEach(test => {
+    aiTests.forEach((test) => {
       console.log(`🧠 ${test.feature}:`);
       console.log(`   Test Steps:`);
       test.testSteps.forEach((step, index) => {
@@ -303,9 +328,13 @@ class QATestSuite {
       if (test.expectedCost) console.log(`   Expected Cost: ${test.expectedCost}`);
       if (test.expectedResult) console.log(`   Expected Result: ${test.expectedResult}`);
       console.log(`   Status: ${hasApiKey ? '✅ READY FOR TESTING' : '❌ REQUIRES API KEY'}\n`);
-      
-      this.logTestResult('ai', test.feature, hasApiKey ? 'PENDING' : 'BLOCKED', 
-        hasApiKey ? 'Ready for manual testing' : 'Blocked by missing API key');
+
+      this.logTestResult(
+        'ai',
+        test.feature,
+        hasApiKey ? 'PENDING' : 'BLOCKED',
+        hasApiKey ? 'Ready for manual testing' : 'Blocked by missing API key'
+      );
     });
   }
 
@@ -320,16 +349,16 @@ class QATestSuite {
           { page: 'Landing Page (/)', target: '< 2 seconds' },
           { page: 'Issues Page (/issues)', target: '< 3 seconds' },
           { page: 'Initiatives (/initiatives)', target: '< 3 seconds' },
-          { page: 'Admin Dashboard (/admin)', target: '< 4 seconds' }
-        ]
+          { page: 'Admin Dashboard (/admin)', target: '< 4 seconds' },
+        ],
       },
       {
         metric: 'AI Response Times',
         targets: [
           { operation: 'Issue Analysis', target: '< 30 seconds' },
           { operation: 'Initiative Generation', target: '< 45 seconds' },
-          { operation: 'Connection Test', target: '< 10 seconds' }
-        ]
+          { operation: 'Connection Test', target: '< 10 seconds' },
+        ],
       },
       {
         metric: 'Database Query Performance',
@@ -337,8 +366,8 @@ class QATestSuite {
           { query: 'User Authentication', target: '< 500ms' },
           { query: 'Issues List', target: '< 1 second' },
           { query: 'Initiatives List', target: '< 1 second' },
-          { query: 'Audit Logs', target: '< 2 seconds' }
-        ]
+          { query: 'Audit Logs', target: '< 2 seconds' },
+        ],
       },
       {
         metric: 'User Interface Responsiveness',
@@ -346,18 +375,22 @@ class QATestSuite {
           { interaction: 'Button Clicks', target: 'Immediate feedback' },
           { interaction: 'Form Submissions', target: 'Loading states' },
           { interaction: 'Navigation', target: '< 500ms' },
-          { interaction: 'Modal Dialogs', target: 'Smooth animations' }
-        ]
-      }
+          { interaction: 'Modal Dialogs', target: 'Smooth animations' },
+        ],
+      },
     ];
 
-    performanceTests.forEach(category => {
+    performanceTests.forEach((category) => {
       console.log(`📊 ${category.metric}:`);
-      category.targets.forEach(target => {
+      category.targets.forEach((target) => {
         const key = target.page || target.operation || target.query || target.interaction;
         console.log(`   ${key}: ${target.target}`);
-        this.logTestResult('performance', `${category.metric}: ${key}`, 'PENDING', 
-          `Target: ${target.target}`);
+        this.logTestResult(
+          'performance',
+          `${category.metric}: ${key}`,
+          'PENDING',
+          `Target: ${target.target}`
+        );
       });
       console.log('');
     });
@@ -375,8 +408,8 @@ class QATestSuite {
           'Session management prevents unauthorized access',
           'Role-based access control (Admin vs Leader)',
           'Password security (hashing, strength requirements)',
-          'Automatic logout after inactivity'
-        ]
+          'Automatic logout after inactivity',
+        ],
       },
       {
         category: 'API Security',
@@ -385,8 +418,8 @@ class QATestSuite {
           'CSRF protection implemented',
           'Rate limiting on AI endpoints',
           'Input validation and sanitization',
-          'Error messages don\'t leak sensitive information'
-        ]
+          "Error messages don't leak sensitive information",
+        ],
       },
       {
         category: 'Data Protection',
@@ -395,8 +428,8 @@ class QATestSuite {
           'OpenAI API key securely stored',
           'No sensitive data in client-side code',
           'Audit logging captures security events',
-          'User data isolation (multi-tenancy if applicable)'
-        ]
+          'User data isolation (multi-tenancy if applicable)',
+        ],
       },
       {
         category: 'Infrastructure Security',
@@ -405,17 +438,21 @@ class QATestSuite {
           'Security headers properly configured',
           'Dependencies scanned for vulnerabilities',
           'Environment variables properly secured',
-          'File upload restrictions (if applicable)'
-        ]
-      }
+          'File upload restrictions (if applicable)',
+        ],
+      },
     ];
 
-    securityTests.forEach(category => {
+    securityTests.forEach((category) => {
       console.log(`🛡️  ${category.category}:`);
       category.tests.forEach((test, index) => {
         console.log(`   ${index + 1}. ${test}`);
-        this.logTestResult('security', `${category.category}: ${test}`, 'PENDING', 
-          'Security assessment required');
+        this.logTestResult(
+          'security',
+          `${category.category}: ${test}`,
+          'PENDING',
+          'Security assessment required'
+        );
       });
       console.log('');
     });
@@ -426,7 +463,7 @@ class QATestSuite {
       name: testName,
       status: status,
       details: details,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -441,12 +478,12 @@ class QATestSuite {
     let pendingTests = 0;
     let blockedTests = 0;
 
-    categories.forEach(category => {
+    categories.forEach((category) => {
       const tests = this.testResults[category];
-      const categoryPassed = tests.filter(t => t.status === 'PASS').length;
-      const categoryFailed = tests.filter(t => t.status === 'FAIL').length;
-      const categoryPending = tests.filter(t => t.status === 'PENDING').length;
-      const categoryBlocked = tests.filter(t => t.status === 'BLOCKED').length;
+      const categoryPassed = tests.filter((t) => t.status === 'PASS').length;
+      const categoryFailed = tests.filter((t) => t.status === 'FAIL').length;
+      const categoryPending = tests.filter((t) => t.status === 'PENDING').length;
+      const categoryBlocked = tests.filter((t) => t.status === 'BLOCKED').length;
 
       totalTests += tests.length;
       passedTests += categoryPassed;
@@ -464,18 +501,22 @@ class QATestSuite {
 
     console.log('🏆 OVERALL TEST SUMMARY:');
     console.log(`   Total Tests: ${totalTests}`);
-    console.log(`   ✅ Passed: ${passedTests} (${((passedTests/totalTests)*100).toFixed(1)}%)`);
-    console.log(`   ❌ Failed: ${failedTests} (${((failedTests/totalTests)*100).toFixed(1)}%)`);
-    console.log(`   ⏳ Pending: ${pendingTests} (${((pendingTests/totalTests)*100).toFixed(1)}%)`);
-    console.log(`   🚫 Blocked: ${blockedTests} (${((blockedTests/totalTests)*100).toFixed(1)}%)\n`);
+    console.log(`   ✅ Passed: ${passedTests} (${((passedTests / totalTests) * 100).toFixed(1)}%)`);
+    console.log(`   ❌ Failed: ${failedTests} (${((failedTests / totalTests) * 100).toFixed(1)}%)`);
+    console.log(
+      `   ⏳ Pending: ${pendingTests} (${((pendingTests / totalTests) * 100).toFixed(1)}%)`
+    );
+    console.log(
+      `   🚫 Blocked: ${blockedTests} (${((blockedTests / totalTests) * 100).toFixed(1)}%)\n`
+    );
 
     // Priority Issues
-    const criticalFailures = this.testResults.functional.filter(t => t.status === 'FAIL');
-    const blockedAI = this.testResults.ai.filter(t => t.status === 'BLOCKED');
+    const criticalFailures = this.testResults.functional.filter((t) => t.status === 'FAIL');
+    const blockedAI = this.testResults.ai.filter((t) => t.status === 'BLOCKED');
 
     if (criticalFailures.length > 0) {
       console.log('🚨 CRITICAL ISSUES REQUIRING IMMEDIATE ATTENTION:');
-      criticalFailures.forEach(failure => {
+      criticalFailures.forEach((failure) => {
         console.log(`   ❌ ${failure.name}: ${failure.details}`);
       });
       console.log('');
@@ -483,7 +524,7 @@ class QATestSuite {
 
     if (blockedAI.length > 0) {
       console.log('⚠️  BLOCKED AI FEATURES:');
-      blockedAI.forEach(blocked => {
+      blockedAI.forEach((blocked) => {
         console.log(`   🚫 ${blocked.name}: ${blocked.details}`);
       });
       console.log('');
@@ -504,11 +545,13 @@ class QATestSuite {
     console.log(`   Application URL: ${this.baseUrl}`);
     console.log('   Admin Credentials: admin@flowvision.com / admin123');
     console.log('   Database: Connected and populated with test data');
-    console.log(`   OpenAI Integration: ${process.env.OPENAI_API_KEY ? 'Configured' : 'Not Configured'}`);
+    console.log(
+      `   OpenAI Integration: ${process.env.OPENAI_API_KEY ? 'Configured' : 'Not Configured'}`
+    );
     console.log('   Development Server: Running and accessible\n');
 
     // Quality Gates
-    const readinessScore = ((passedTests / (passedTests + failedTests)) * 100) || 0;
+    const readinessScore = (passedTests / (passedTests + failedTests)) * 100 || 0;
     console.log('📈 PRODUCTION READINESS ASSESSMENT:');
     if (readinessScore >= 95) {
       console.log('   🟢 EXCELLENT - Ready for production deployment');
@@ -525,7 +568,7 @@ class QATestSuite {
 
 async function main() {
   const qaTestSuite = new QATestSuite();
-  
+
   console.log('👥 QA TEAM ASSEMBLED:');
   console.log('   🧪 Senior QA Engineer - Test Strategy & Execution');
   console.log('   💻 Frontend Developer - Functional Testing Support');

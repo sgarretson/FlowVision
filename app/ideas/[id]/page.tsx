@@ -136,7 +136,10 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...editForm,
-          tags: editForm.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+          tags: editForm.tags
+            .split(',')
+            .map((tag) => tag.trim())
+            .filter(Boolean),
           assignedTo: editForm.assignedTo || null,
           dueDate: editForm.dueDate || null,
         }),
@@ -225,35 +228,48 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'technology': return 'bg-blue-100 text-blue-800';
-      case 'process': return 'bg-green-100 text-green-800';
-      case 'strategy': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'technology':
+        return 'bg-blue-100 text-blue-800';
+      case 'process':
+        return 'bg-green-100 text-green-800';
+      case 'strategy':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'reviewing': return 'bg-blue-100 text-blue-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'implemented': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'reviewing':
+        return 'bg-blue-100 text-blue-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      case 'implemented':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getUserName = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    return user ? (user.name || user.email) : 'Unknown User';
+    const user = users.find((u) => u.id === userId);
+    return user ? user.name || user.email : 'Unknown User';
   };
 
   if (loading) {
@@ -304,10 +320,7 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
               </button>
             )}
             {idea.status === 'approved' && (
-              <button
-                onClick={convertToInitiative}
-                className="btn-primary"
-              >
+              <button onClick={convertToInitiative} className="btn-primary">
                 Convert to Initiative
               </button>
             )}
@@ -332,9 +345,7 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
                   /* Edit Form */
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Title
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
                       <input
                         type="text"
                         className="input-field"
@@ -444,7 +455,9 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
                       <button
                         onClick={handleSave}
                         className="btn-primary"
-                        disabled={submitting || !editForm.title.trim() || !editForm.description.trim()}
+                        disabled={
+                          submitting || !editForm.title.trim() || !editForm.description.trim()
+                        }
                       >
                         {submitting ? 'Saving...' : 'Save Changes'}
                       </button>
@@ -464,7 +477,10 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
                     {idea.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {idea.tags.map((tag, index) => (
-                          <span key={index} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                          >
                             {tag}
                           </span>
                         ))}
@@ -475,8 +491,8 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
                     {idea.initiative && (
                       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-sm text-blue-600 mb-2">Converted to Initiative:</p>
-                        <Link 
-                          href={`/initiatives/${idea.initiative.id}`} 
+                        <Link
+                          href={`/initiatives/${idea.initiative.id}`}
                           className="text-lg font-medium text-blue-700 hover:text-blue-900"
                         >
                           {idea.initiative.title}
@@ -492,7 +508,7 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
             <div className="card-secondary">
               <div className="p-6">
                 <h3 className="text-h3 mb-6">Discussion</h3>
-                
+
                 {/* Add Comment */}
                 <div className="mb-6">
                   <div className="flex items-start space-x-3">
@@ -505,7 +521,7 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
                       <textarea
                         className="textarea-field"
                         rows={3}
-                        placeholder={replyingTo ? "Write a reply..." : "Add a comment..."}
+                        placeholder={replyingTo ? 'Write a reply...' : 'Add a comment...'}
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                       />
@@ -532,61 +548,63 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
 
                 {/* Comments List */}
                 <div className="space-y-4">
-                  {idea.comments.filter(c => !c.parentId).map((comment) => (
-                    <div key={comment.id} className="space-y-3">
-                      {/* Main Comment */}
-                      <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-700">
-                            {comment.author.name?.[0] || comment.author.email[0]}
-                          </span>
-                        </div>
-                        <div className="flex-1">
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="font-medium text-sm">
-                                {comment.author.name || comment.author.email}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {new Date(comment.createdAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-900">{comment.content}</p>
-                          </div>
-                          <button
-                            onClick={() => setReplyingTo(comment.id)}
-                            className="text-xs text-blue-600 hover:text-blue-800 mt-1"
-                          >
-                            Reply
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Replies */}
-                      {comment.replies.map((reply) => (
-                        <div key={reply.id} className="ml-11 flex items-start space-x-3">
-                          <div className="flex-shrink-0 w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                            <span className="text-xs font-medium text-gray-700">
-                              {reply.author.name?.[0] || reply.author.email[0]}
+                  {idea.comments
+                    .filter((c) => !c.parentId)
+                    .map((comment) => (
+                      <div key={comment.id} className="space-y-3">
+                        {/* Main Comment */}
+                        <div className="flex items-start space-x-3">
+                          <div className="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-medium text-gray-700">
+                              {comment.author.name?.[0] || comment.author.email[0]}
                             </span>
                           </div>
                           <div className="flex-1">
                             <div className="bg-gray-50 rounded-lg p-3">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="font-medium text-sm">
-                                  {reply.author.name || reply.author.email}
+                                  {comment.author.name || comment.author.email}
                                 </span>
                                 <span className="text-xs text-gray-500">
-                                  {new Date(reply.createdAt).toLocaleDateString()}
+                                  {new Date(comment.createdAt).toLocaleDateString()}
                                 </span>
                               </div>
-                              <p className="text-sm text-gray-900">{reply.content}</p>
+                              <p className="text-sm text-gray-900">{comment.content}</p>
                             </div>
+                            <button
+                              onClick={() => setReplyingTo(comment.id)}
+                              className="text-xs text-blue-600 hover:text-blue-800 mt-1"
+                            >
+                              Reply
+                            </button>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  ))}
+
+                        {/* Replies */}
+                        {comment.replies.map((reply) => (
+                          <div key={reply.id} className="ml-11 flex items-start space-x-3">
+                            <div className="flex-shrink-0 w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                              <span className="text-xs font-medium text-gray-700">
+                                {reply.author.name?.[0] || reply.author.email[0]}
+                              </span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="bg-gray-50 rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-medium text-sm">
+                                    {reply.author.name || reply.author.email}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(reply.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-900">{reply.content}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
 
                   {idea.comments.length === 0 && (
                     <p className="text-center text-gray-500 py-8">
@@ -603,10 +621,12 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
             {/* Status & Actions */}
             <div className="card-secondary p-6">
               <h3 className="text-h3 mb-4">Status & Actions</h3>
-              
+
               {/* Current Status */}
               <div className="mb-4">
-                <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(idea.status)}`}>
+                <span
+                  className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(idea.status)}`}
+                >
                   {idea.status.charAt(0).toUpperCase() + idea.status.slice(1)}
                 </span>
               </div>
@@ -648,10 +668,7 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
                   <span className="text-lg font-bold text-gray-900">{idea.votes}</span>
                 </div>
                 <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleVote('up')}
-                    className="flex-1 btn-secondary text-sm"
-                  >
+                  <button onClick={() => handleVote('up')} className="flex-1 btn-secondary text-sm">
                     👍 Support
                   </button>
                   <button
@@ -667,12 +684,14 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
             {/* Metadata */}
             <div className="card-secondary p-6">
               <h3 className="text-h3 mb-4">Details</h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <span className="text-sm font-medium text-gray-500">Category</span>
                   <div className="mt-1">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(idea.category)}`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(idea.category)}`}
+                    >
                       {idea.category}
                     </span>
                   </div>
@@ -681,7 +700,9 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
                 <div>
                   <span className="text-sm font-medium text-gray-500">Priority</span>
                   <div className="mt-1">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(idea.priority)}`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(idea.priority)}`}
+                    >
                       {idea.priority}
                     </span>
                   </div>
@@ -689,7 +710,9 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
 
                 <div>
                   <span className="text-sm font-medium text-gray-500">Author</span>
-                  <p className="text-sm text-gray-900 mt-1">{idea.author.name || idea.author.email}</p>
+                  <p className="text-sm text-gray-900 mt-1">
+                    {idea.author.name || idea.author.email}
+                  </p>
                 </div>
 
                 {idea.assignedTo && (
