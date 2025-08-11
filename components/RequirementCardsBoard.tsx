@@ -4,6 +4,7 @@ import { PlusIcon, SparklesIcon, DocumentArrowDownIcon } from '@heroicons/react/
 import RequirementCard from './RequirementCard';
 import RequirementCardModal from './RequirementCardModal';
 import RequirementCardViewModal from './RequirementCardViewModal';
+import RequirementCardCommentModal from './RequirementCardCommentModal';
 
 interface RequirementCardData {
   id: string;
@@ -39,8 +40,10 @@ export default function RequirementCardsBoard({
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<RequirementCardData | null>(null);
   const [viewingCard, setViewingCard] = useState<RequirementCardData | null>(null);
+  const [commentingCard, setCommentingCard] = useState<RequirementCardData | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
 
   useEffect(() => {
@@ -95,6 +98,14 @@ export default function RequirementCardsBoard({
     setModalOpen(true);
     // Close view modal if it's open
     setViewModalOpen(false);
+  };
+
+  const handleCardComment = (cardId: string) => {
+    const card = cards.find((c) => c.id === cardId);
+    if (card) {
+      setCommentingCard(card);
+      setCommentModalOpen(true);
+    }
   };
 
   const handleCardUpdate = async (cardData: any) => {
@@ -433,7 +444,7 @@ export default function RequirementCardsBoard({
                                 onEdit={handleCardEdit}
                                 onDelete={handleCardDelete}
                                 onStatusChange={handleStatusChange}
-                                onComment={() => {}} // TODO: Implement comment modal
+                                onComment={handleCardComment}
                               />
                             )
                           )}
@@ -483,7 +494,7 @@ export default function RequirementCardsBoard({
                     onEdit={handleCardEdit}
                     onDelete={handleCardDelete}
                     onStatusChange={handleStatusChange}
-                    onComment={() => {}} // TODO: Implement comment modal
+                    onComment={handleCardComment}
                   />
                 ))}
                 {provided.placeholder}
@@ -517,8 +528,23 @@ export default function RequirementCardsBoard({
           }}
           onEdit={handleCardEdit}
           onStatusChange={handleStatusChange}
-          onComment={() => {}} // TODO: Implement comment modal
+          onComment={handleCardComment}
           card={viewingCard}
+        />
+      )}
+
+      {/* Comment Modal */}
+      {commentModalOpen && commentingCard && (
+        <RequirementCardCommentModal
+          isOpen={commentModalOpen}
+          onClose={() => {
+            setCommentModalOpen(false);
+            setCommentingCard(null);
+            // Refresh cards to get updated comment counts
+            loadCards();
+          }}
+          cardId={commentingCard.id}
+          cardTitle={commentingCard.title}
         />
       )}
     </div>
