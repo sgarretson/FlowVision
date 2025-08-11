@@ -26,6 +26,9 @@ model User {
   votes         Vote[]
   auditLogs     AuditLog[]
   attachments   Attachment[]
+  assignedRequirementCards RequirementCard[] @relation("UserRequirementCards")
+  createdRequirementCards  RequirementCard[] @relation("CreatedRequirementCards")
+  approvedRequirementCards RequirementCard[] @relation("ApprovedRequirementCards")
   accounts      Account[]
   sessions      Session[]
   createdAt     DateTime       @default(now())
@@ -82,8 +85,32 @@ model Initiative {
   ideas          Idea[]
   votes          Vote[]
   attachments    Attachment[]
+  requirementCards RequirementCard[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+}
+
+model RequirementCard {
+  id            String      @id @default(cuid())
+  initiative    Initiative  @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiativeId  String
+  type          String      @default("BUSINESS") // BUSINESS, FUNCTIONAL, ACCEPTANCE
+  title         String
+  description   String
+  priority      String      @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status        String      @default("DRAFT") // DRAFT, REVIEW, APPROVED, REJECTED
+  category      String?     // Optional grouping
+  assignedTo    User?       @relation("UserRequirementCards", fields: [assignedToId], references: [id])
+  assignedToId  String?
+  createdBy     User        @relation("CreatedRequirementCards", fields: [createdById], references: [id])
+  createdById   String
+  approvedBy    User?       @relation("ApprovedRequirementCards", fields: [approvedById], references: [id])
+  approvedById  String?
+  approvedAt    DateTime?
+  orderIndex    Int         @default(0)
+  comments      Comment[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model Team {
@@ -178,6 +205,8 @@ model Comment {
   ideaId       String?
   milestone    Milestone?  @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
   milestoneId  String?
+  requirementCard RequirementCard? @relation(fields: [requirementCardId], references: [id], onDelete: Cascade)
+  requirementCardId String?
   parentComment Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
   parentId     String?
   replies      Comment[]   @relation("CommentReplies")

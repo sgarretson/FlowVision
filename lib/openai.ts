@@ -208,6 +208,92 @@ Extract and format as JSON:
     }
   }
 
+  public async generateRequirementCards(
+    title: string,
+    problem: string,
+    goal: string,
+    businessContext?: any
+  ): Promise<{
+    cards: Array<{
+      title: string;
+      description: string;
+      type: 'BUSINESS' | 'FUNCTIONAL' | 'ACCEPTANCE';
+      priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+      category?: string;
+    }>;
+  } | null> {
+    if (!this.isConfigured() || !this.config?.enabled) {
+      return null;
+    }
+
+    try {
+      const contextStr = businessContext
+        ? `Business Context: ${businessContext.industry}, ${businessContext.size} employees`
+        : '';
+
+      const prompt = `
+You are an expert business analyst helping SMB leaders create requirement cards for their initiative.
+
+Initiative:
+Title: "${title}"
+Problem: "${problem}"
+Goal: "${goal}"
+${contextStr}
+
+Generate 5-8 requirement cards that cover:
+1. Business requirements (what the business needs)
+2. Functional requirements (how it should work)
+3. Acceptance criteria (how to verify success)
+
+Each card should be specific, actionable, and help execution teams understand what to build.
+
+Format as JSON:
+{
+  "cards": [
+    {
+      "title": "Clear, specific requirement title",
+      "description": "Detailed description that execution teams can understand and implement",
+      "type": "BUSINESS|FUNCTIONAL|ACCEPTANCE",
+      "priority": "LOW|MEDIUM|HIGH|CRITICAL",
+      "category": "optional grouping like 'User Experience' or 'Data Management'"
+    }
+  ]
+}
+
+Focus on requirements that are:
+- Specific and measurable
+- Clear for implementation teams
+- Business-value focused for SMB operations
+- Realistic and achievable
+`;
+
+      const response = await this.client!.chat.completions.create({
+        model: this.config.model || 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: this.config.maxTokens || 800,
+        temperature: 0.4,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (content) {
+        try {
+          const parsed = JSON.parse(content);
+          // Validate the structure
+          if (parsed.cards && Array.isArray(parsed.cards)) {
+            return parsed;
+          }
+          return null;
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('OpenAI API error:', error);
+      return null;
+    }
+  }
+
   public getConfig(): OpenAIConfig | null {
     return this.config;
   }

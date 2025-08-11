@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import RequirementCardsBoard from '@/components/RequirementCardsBoard';
 
 type Initiative = {
   id: string;
@@ -93,30 +94,27 @@ export default function InitiativeDetailPage() {
     if (!form) return;
     setAiLoading(true);
     try {
-      const res = await fetch('/api/ai/generate-initiative', {
+      const res = await fetch(`/api/initiatives/${params.id}/generate-requirement-cards`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: 'requirements',
-          problem: `${form.problem}\nGoal: ${form.goal}`,
-        }),
       });
       const data = await res.json();
-      if (res.ok && data.result) {
-        const reqs: string[] = Array.isArray(data.result?.requirements)
-          ? data.result.requirements
-          : [];
-        const ac: string[] = Array.isArray(data.result?.acceptanceCriteria)
-          ? data.result.acceptanceCriteria
-          : [];
-        updateForm('requirements', reqs);
-        updateForm('acceptanceCriteria', ac);
-        setMessage('AI-generated requirements added. Please review.');
+      if (res.ok && data.success) {
+        setMessage(
+          `AI generated ${data.cards?.length || 0} requirement cards. Review them in the Requirements section below.`
+        );
+        // Scroll to requirements section
+        setTimeout(() => {
+          const reqSection = document.getElementById('requirements-section');
+          if (reqSection) {
+            reqSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 500);
       } else {
-        setMessage(data.fallback || data.error || 'AI could not generate requirements.');
+        setMessage(data.fallback || data.error || 'AI could not generate requirement cards.');
       }
     } catch (e) {
-      setMessage('Failed to generate requirements.');
+      setMessage('Failed to generate requirement cards.');
     } finally {
       setAiLoading(false);
     }
@@ -278,47 +276,13 @@ export default function InitiativeDetailPage() {
             </p>
           </div>
 
-          {/* Requirements & Acceptance Criteria */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <label className="block text-h3 mb-3">Business Requirements</label>
-              <textarea
-                className="textarea-field"
-                placeholder="List the key business requirements... one per line"
-                value={(form.requirements || []).join('\n')}
-                onChange={(e) =>
-                  updateForm(
-                    'requirements',
-                    e.target.value
-                      .split('\n')
-                      .map((s) => s.trim())
-                      .filter(Boolean)
-                  )
-                }
-                rows={6}
-              />
-              <p className="text-caption mt-2">
-                These guide execution teams to create epics/stories in their PM tool.
-              </p>
-            </div>
-            <div>
-              <label className="block text-h3 mb-3">Acceptance Criteria</label>
-              <textarea
-                className="textarea-field"
-                placeholder="Define how success will be verified... one per line"
-                value={(form.acceptanceCriteria || []).join('\n')}
-                onChange={(e) =>
-                  updateForm(
-                    'acceptanceCriteria',
-                    e.target.value
-                      .split('\n')
-                      .map((s) => s.trim())
-                      .filter(Boolean)
-                  )
-                }
-                rows={6}
-              />
-            </div>
+          {/* Requirements Cards Section */}
+          <div id="requirements-section">
+            <RequirementCardsBoard
+              initiativeId={params.id}
+              onGenerateWithAI={generateRequirementsWithAI}
+              aiLoading={aiLoading}
+            />
           </div>
 
           {/* Timeline */}
@@ -434,7 +398,7 @@ export default function InitiativeDetailPage() {
                 disabled={aiLoading}
                 onClick={generateRequirementsWithAI}
               >
-                {aiLoading ? 'Generating…' : 'AI: Draft Requirements'}
+                {aiLoading ? 'Generating…' : 'AI: Generate Cards'}
               </button>
               <button
                 type="submit"
