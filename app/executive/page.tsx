@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  TrendingUpIcon, 
+  ArrowTrendingUpIcon as TrendingUpIcon, 
   ExclamationTriangleIcon, 
   ClockIcon,
   ChartBarIcon,

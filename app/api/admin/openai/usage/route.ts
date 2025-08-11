@@ -26,7 +26,7 @@ export async function GET() {
           in: ['AI_ISSUE_ANALYSIS', 'AI_INITIATIVE_RECOMMENDATIONS', 'AI_INITIATIVE_REQUIREMENTS', 'OPENAI_CONNECTION_TEST']
         }
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { timestamp: 'desc' },
       take: 100,
       include: {
         user: {
@@ -43,9 +43,9 @@ export async function GET() {
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-    const thisMonthUsage = aiLogs.filter(log => log.createdAt >= thisMonth);
+    const thisMonthUsage = aiLogs.filter(log => log.timestamp >= thisMonth);
     const lastMonthUsage = aiLogs.filter(log => 
-      log.createdAt >= lastMonth && log.createdAt < thisMonth
+      log.timestamp >= lastMonth && log.timestamp < thisMonth
     );
 
     // Group by action type
@@ -74,10 +74,10 @@ export async function GET() {
 
     // Daily usage for the last 30 days
     const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
-    const recentLogs = aiLogs.filter(log => log.createdAt >= thirtyDaysAgo);
+    const recentLogs = aiLogs.filter(log => log.timestamp >= thirtyDaysAgo);
     
     const dailyUsage = recentLogs.reduce((acc, log) => {
-      const date = log.createdAt.toISOString().split('T')[0];
+      const date = log.timestamp.toISOString().split('T')[0];
       if (!acc[date]) {
         acc[date] = 0;
       }
@@ -97,7 +97,7 @@ export async function GET() {
       monthlyGrowth: lastMonthUsage.length > 0 
         ? ((thisMonthUsage.length - lastMonthUsage.length) / lastMonthUsage.length * 100).toFixed(1)
         : thisMonthUsage.length > 0 ? '100' : '0',
-      lastUsed: aiLogs.length > 0 ? aiLogs[0].createdAt.toISOString() : null,
+      lastUsed: aiLogs.length > 0 ? aiLogs[0].timestamp.toISOString() : null,
       usageByType,
       usageByUser: Object.values(usageByUser).sort((a, b) => b.count - a.count),
       dailyUsage,
@@ -109,8 +109,8 @@ export async function GET() {
       recentActivity: aiLogs.slice(0, 10).map(log => ({
         id: log.id,
         action: log.action,
-        user: log.user.name || log.user.email,
-        timestamp: log.createdAt.toISOString(),
+        user: log.user?.name || log.user?.email || 'Unknown',
+        timestamp: log.timestamp.toISOString(),
         details: log.details
       }))
     };

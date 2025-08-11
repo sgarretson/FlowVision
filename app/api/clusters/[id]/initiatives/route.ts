@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/rbac';
-import { OpenAIService } from '@/lib/openai';
+import { openAIService } from '@/lib/openai';
 
 interface CreateClusterInitiativeRequest {
   title: string;
@@ -174,7 +174,7 @@ export async function POST(
     // Use AI to enhance the initiative if requested
     if (useAI) {
       try {
-        const openaiService = new OpenAIService();
+        // Use the singleton openAIService instance
         const aiPrompt = `Create a comprehensive strategic initiative for a ${cluster.category} cluster with the following context:
 
 Cluster: ${cluster.name}
@@ -206,12 +206,11 @@ Generate a detailed initiative in JSON format:
   "resourceRequirements": ["Required resources"]
 }`;
 
-        const aiResponse = await openaiService.getCompletion([
-          { role: 'user', content: aiPrompt }
-        ], 1500);
+        const aiResponse = await openAIService.generateIssueInsights(aiPrompt, { industry: 'business', size: 'SMB' });
 
         try {
-          const aiData = JSON.parse(aiResponse);
+          // If AI response is available, try to parse it, otherwise use fallback
+          const aiData = aiResponse ? JSON.parse(aiResponse) : null;
           initiativeData = {
             ...initiativeData,
             title: aiData.title || initiativeData.title,
