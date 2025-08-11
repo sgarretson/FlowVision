@@ -66,6 +66,7 @@ model Initiative {
   estimatedHours Int?
   actualHours    Int?
   phase          String?       @default("planning")
+  type           String?       @default("Process Improvement") // Process Improvement, Technology, Strategic, Operational, Quality, Cost Reduction
   cluster        IssueCluster? @relation("ClusterInitiatives", fields: [clusterId], references: [id])
   clusterId      String?
   addressedIssues Issue[]      @relation("IssueInitiatives") // Many-to-many with issues

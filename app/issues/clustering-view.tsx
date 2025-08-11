@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import ClusterDetailsModal from '@/components/ClusterDetailsModal';
 
 interface Issue {
   id: string;
@@ -44,6 +45,7 @@ export default function ClusteringView() {
   const [loading, setLoading] = useState(true);
   const [clusteringData, setClusteringData] = useState<ClusteringData | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<string | null>(null);
+  const [detailsModalCluster, setDetailsModalCluster] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -248,7 +250,10 @@ export default function ClusteringView() {
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-2">
-                    <button className="btn-secondary text-xs flex-1">
+                    <button 
+                      className="btn-secondary text-xs flex-1"
+                      onClick={() => setDetailsModalCluster(cluster.id)}
+                    >
                       View Details
                     </button>
                     <button className="btn-success text-xs flex-1">
@@ -261,6 +266,12 @@ export default function ClusteringView() {
           </div>
         ))}
       </div>
+      
+      {/* Cluster Details Modal */}
+      <ClusterDetailsModal 
+        clusterId={detailsModalCluster}
+        onClose={() => setDetailsModalCluster(null)}
+      />
     </div>
   );
 }
