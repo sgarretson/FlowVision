@@ -77,105 +77,110 @@ export default function RequirementCard({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ${
-            snapshot.isDragging ? 'rotate-2 shadow-lg' : ''
+          className={`group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing ${
+            snapshot.isDragging ? 'rotate-1 shadow-xl ring-2 ring-blue-200 scale-105' : ''
           }`}
-          onMouseEnter={() => setShowActions(true)}
-          onMouseLeave={() => setShowActions(false)}
         >
-          {/* Card Header */}
-          <div className="p-4 border-b border-gray-100">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">{TYPE_ICONS[card.type]}</span>
-                <h3 className="font-medium text-gray-900 text-sm leading-tight">{card.title}</h3>
-              </div>
-              {showActions && (
-                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => onEdit(card)}
-                    className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                    title="Edit card"
-                  >
-                    <PencilIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleStatusToggle}
-                    className={`p-1 transition-colors ${
-                      card.status === 'APPROVED'
-                        ? 'text-green-600 hover:text-gray-400'
-                        : 'text-gray-400 hover:text-green-600'
-                    }`}
-                    title={card.status === 'APPROVED' ? 'Remove approval' : 'Approve'}
-                  >
-                    <CheckIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => onDelete(card.id)}
-                    className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                    title="Delete card"
-                  >
-                    <XMarkIcon className="w-4 h-4" />
-                  </button>
+          {/* Card Header with Type Badge */}
+          <div className="p-4 pb-3">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start space-x-3 flex-1">
+                <div
+                  className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm ${
+                    card.type === 'BUSINESS'
+                      ? 'bg-blue-100 text-blue-700'
+                      : card.type === 'FUNCTIONAL'
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-green-100 text-green-700'
+                  }`}
+                >
+                  {TYPE_ICONS[card.type]}
                 </div>
-              )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 mb-1">
+                    {card.title}
+                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-md ${
+                        PRIORITY_COLORS[card.priority]
+                      }`}
+                    >
+                      {card.priority}
+                    </span>
+                    {card.category && (
+                      <span className="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-600">
+                        {card.category}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Always Visible Actions */}
+              <div className="flex items-center space-x-1 ml-2">
+                <button
+                  onClick={() => onEdit(card)}
+                  className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                  title="Edit card"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleStatusToggle}
+                  className={`p-1.5 rounded-md transition-colors ${
+                    card.status === 'APPROVED'
+                      ? 'text-green-600 hover:text-gray-400 hover:bg-gray-50'
+                      : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                  }`}
+                  title={card.status === 'APPROVED' ? 'Remove approval' : 'Approve'}
+                >
+                  <CheckIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onDelete(card.id)}
+                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                  title="Delete card"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
-            {/* Badges */}
-            <div className="flex items-center space-x-2 mt-2">
-              <span
-                className={`px-2 py-1 text-xs font-medium rounded-full border ${
-                  PRIORITY_COLORS[card.priority]
-                }`}
-              >
-                {card.priority}
-              </span>
-              <span
-                className={`px-2 py-1 text-xs font-medium rounded-full border ${
-                  STATUS_COLORS[card.status]
-                }`}
-              >
-                {card.status}
-              </span>
-              {card.category && (
-                <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700 border border-gray-300">
-                  {card.category}
-                </span>
-              )}
-            </div>
+            {/* Description */}
+            <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">{card.description}</p>
           </div>
 
-          {/* Card Content */}
-          <div className="p-4">
-            <p className="text-sm text-gray-600 leading-relaxed">{card.description}</p>
-
-            {/* Assignment & Comments */}
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+          {/* Card Footer */}
+          <div className="px-4 pb-4">
+            <div className="flex items-center justify-between text-xs">
               <div className="flex items-center space-x-2">
                 {card.assignedTo ? (
-                  <div className="flex items-center space-x-1">
-                    <UserIcon className="w-4 h-4 text-gray-400" />
-                    <span className="text-xs text-gray-600">{card.assignedTo.name}</span>
+                  <div className="flex items-center space-x-1.5">
+                    <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
+                      <UserIcon className="w-3 h-3 text-blue-600" />
+                    </div>
+                    <span className="text-gray-700 font-medium">{card.assignedTo.name}</span>
                   </div>
                 ) : (
-                  <span className="text-xs text-gray-400">Unassigned</span>
+                  <span className="text-gray-400">Unassigned</span>
                 )}
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 {card.comments.length > 0 && (
                   <button
                     onClick={() => onComment(card.id)}
                     className="flex items-center space-x-1 text-gray-400 hover:text-blue-600 transition-colors"
                   >
                     <ChatBubbleLeftIcon className="w-4 h-4" />
-                    <span className="text-xs">{card.comments.length}</span>
+                    <span className="font-medium">{card.comments.length}</span>
                   </button>
                 )}
                 {card.status === 'APPROVED' && card.approvedBy && (
-                  <div className="flex items-center space-x-1">
-                    <CheckIcon className="w-4 h-4 text-green-600" />
-                    <span className="text-xs text-green-600">{card.approvedBy.name}</span>
+                  <div className="flex items-center space-x-1 text-green-600">
+                    <CheckIcon className="w-4 h-4" />
+                    <span className="font-medium">{card.approvedBy.name}</span>
                   </div>
                 )}
               </div>

@@ -204,45 +204,51 @@ export default function RequirementCardsBoard({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Requirements Cards</h3>
-          <p className="text-sm text-gray-600">
-            Collaborate on requirements that guide your execution team
-          </p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="ALL">All Cards</option>
-            <option value="DRAFT">Draft</option>
-            <option value="REVIEW">Review</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
-          <button
-            onClick={onGenerateWithAI}
-            disabled={aiLoading}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center space-x-2 text-sm"
-          >
-            <SparklesIcon className="w-4 h-4" />
-            <span>{aiLoading ? 'Generating...' : 'AI Generate'}</span>
-          </button>
-          <button
-            onClick={() => {
-              setEditingCard(null);
-              setModalOpen(true);
-            }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2 text-sm"
-          >
-            <PlusIcon className="w-4 h-4" />
-            <span>Add Card</span>
-          </button>
+    <div className="space-y-8">
+      {/* Enhanced Header */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div className="flex-1">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Requirements Cards</h3>
+            <p className="text-gray-600 max-w-2xl">
+              Create clear, actionable requirement cards that guide your execution team through
+              implementation. Collaborate, approve, and track progress from concept to completion.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[140px]"
+            >
+              <option value="ALL">All Cards</option>
+              <option value="DRAFT">Draft</option>
+              <option value="REVIEW">Review</option>
+              <option value="APPROVED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+
+            <button
+              onClick={onGenerateWithAI}
+              disabled={aiLoading}
+              className="px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center space-x-2 text-sm font-semibold transition-colors"
+            >
+              <SparklesIcon className="w-4 h-4" />
+              <span>{aiLoading ? 'Generating...' : 'AI Generate'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setEditingCard(null);
+                setModalOpen(true);
+              }}
+              className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2 text-sm font-semibold transition-colors"
+            >
+              <PlusIcon className="w-4 h-4" />
+              <span>Add Card</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -260,17 +266,18 @@ export default function RequirementCardsBoard({
 
       {/* Cards Board */}
       {filteredCards.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <div className="text-4xl mb-4">📋</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No requirement cards yet</h3>
-          <p className="text-gray-600 mb-4">
-            Create cards manually or generate them with AI to get started
+        <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+          <div className="text-5xl mb-6">📋</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-3">No requirement cards yet</h3>
+          <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            Create clear, actionable requirement cards that guide your execution team through
+            implementation
           </p>
-          <div className="flex items-center justify-center space-x-3">
+          <div className="flex items-center justify-center space-x-4">
             <button
               onClick={onGenerateWithAI}
               disabled={aiLoading}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 font-medium"
             >
               Generate with AI
             </button>
@@ -279,49 +286,95 @@ export default function RequirementCardsBoard({
                 setEditingCard(null);
                 setModalOpen(true);
               }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
             >
               Create Manually
             </button>
           </div>
         </div>
       ) : filterStatus === 'ALL' ? (
-        // Kanban Board View
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {['DRAFT', 'REVIEW', 'APPROVED', 'REJECTED'].map((status) => (
-            <div key={status} className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-medium text-gray-900">{status}</h4>
-                <span className="text-sm text-gray-500 bg-white px-2 py-1 rounded-full">
-                  {cardsByStatus[status as keyof typeof cardsByStatus].length}
-                </span>
-              </div>
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <Droppable droppableId={status}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className="space-y-3 min-h-[200px]"
-                    >
-                      {cardsByStatus[status as keyof typeof cardsByStatus].map((card, index) => (
-                        <RequirementCard
-                          key={card.id}
-                          card={card}
-                          index={index}
-                          onEdit={handleCardEdit}
-                          onDelete={handleCardDelete}
-                          onStatusChange={handleStatusChange}
-                          onComment={() => {}} // TODO: Implement comment modal
-                        />
-                      ))}
-                      {provided.placeholder}
+        // Improved 3-Column Kanban Board View
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 min-h-[600px]">
+            {['DRAFT', 'REVIEW', 'APPROVED'].map((status, index) => (
+              <div
+                key={status}
+                className={`${index !== 2 ? 'border-r border-gray-200' : ''} flex flex-col`}
+              >
+                {/* Column Header */}
+                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          status === 'DRAFT'
+                            ? 'bg-yellow-400'
+                            : status === 'REVIEW'
+                              ? 'bg-blue-400'
+                              : 'bg-green-400'
+                        }`}
+                      ></div>
+                      <h4 className="font-semibold text-gray-900">{status}</h4>
                     </div>
-                  )}
-                </Droppable>
-              </DragDropContext>
-            </div>
-          ))}
+                    <span className="text-sm font-medium text-gray-500 bg-white px-3 py-1 rounded-full border">
+                      {cardsByStatus[status as keyof typeof cardsByStatus].length}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Cards Container */}
+                <div className="flex-1 p-4">
+                  <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable droppableId={status}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={`space-y-4 min-h-[400px] rounded-lg transition-colors ${
+                            snapshot.isDraggingOver
+                              ? 'bg-blue-50 border-2 border-dashed border-blue-300'
+                              : ''
+                          }`}
+                        >
+                          {cardsByStatus[status as keyof typeof cardsByStatus].map(
+                            (card, cardIndex) => (
+                              <RequirementCard
+                                key={card.id}
+                                card={card}
+                                index={cardIndex}
+                                onEdit={handleCardEdit}
+                                onDelete={handleCardDelete}
+                                onStatusChange={handleStatusChange}
+                                onComment={() => {}} // TODO: Implement comment modal
+                              />
+                            )
+                          )}
+                          {provided.placeholder}
+
+                          {/* Empty State for Column */}
+                          {cardsByStatus[status as keyof typeof cardsByStatus].length === 0 &&
+                            !snapshot.isDraggingOver && (
+                              <div className="text-center py-8 text-gray-400">
+                                <div className="text-2xl mb-2">
+                                  {status === 'DRAFT' ? '✏️' : status === 'REVIEW' ? '👀' : '✅'}
+                                </div>
+                                <p className="text-sm">
+                                  {status === 'DRAFT'
+                                    ? 'Draft cards appear here'
+                                    : status === 'REVIEW'
+                                      ? 'Cards under review'
+                                      : 'Approved cards'}
+                                </p>
+                              </div>
+                            )}
+                        </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         // List View
