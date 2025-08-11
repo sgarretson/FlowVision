@@ -95,6 +95,7 @@ export default function ExecutiveDashboard() {
     Array<{ ownerId: string; name: string; activeInitiatives: number }>
   >([]);
   const reportRef = useRef<HTMLDivElement | null>(null);
+  const [utilView, setUtilView] = useState<'bar' | 'heatmap'>('bar');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
@@ -605,43 +606,80 @@ export default function ExecutiveDashboard() {
         {activeTab === 'utilization' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Team Utilization</h2>
-              <span className="text-sm text-gray-500">Owners with most active initiatives</span>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Team Utilization</h2>
+                <span className="text-sm text-gray-500">Owners with most active initiatives</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  className={`px-3 py-1 text-sm rounded border ${utilView === 'bar' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700'}`}
+                  onClick={() => setUtilView('bar')}
+                >
+                  Bar
+                </button>
+                <button
+                  className={`px-3 py-1 text-sm rounded border ${utilView === 'heatmap' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700'}`}
+                  onClick={() => setUtilView('heatmap')}
+                >
+                  Heatmap
+                </button>
+              </div>
             </div>
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="h-72 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={utilization} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" interval={0} angle={-20} textAnchor="end" height={60} />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Bar dataKey="activeInitiatives" fill="#2563eb" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-6 overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Owner
-                      </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Active Initiatives
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {utilization.map((u) => (
-                      <tr key={u.ownerId}>
-                        <td className="px-4 py-2 text-sm text-gray-900">{u.name}</td>
-                        <td className="px-4 py-2 text-sm text-gray-900">{u.activeInitiatives}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {utilView === 'bar' ? (
+                <>
+                  <div className="h-72 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={utilization} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" interval={0} angle={-20} textAnchor="end" height={60} />
+                        <YAxis allowDecimals={false} />
+                        <Tooltip />
+                        <Bar dataKey="activeInitiatives" fill="#2563eb" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-6 overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Initiatives</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {utilization.map((u) => (
+                          <tr key={u.ownerId}>
+                            <td className="px-4 py-2 text-sm text-gray-900">{u.name}</td>
+                            <td className="px-4 py-2 text-sm text-gray-900">{u.activeInitiatives}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {(() => {
+                    const max = Math.max(1, ...utilization.map((u) => u.activeInitiatives));
+                    return (
+                      <div className="space-y-2">
+                        {utilization.map((u) => {
+                          const ratio = Math.min(1, u.activeInitiatives / max);
+                          const bg = `rgba(37, 99, 235, ${0.15 + ratio * 0.85})`;
+                          return (
+                            <div key={u.ownerId} className="flex items-center space-x-3">
+                              <div className="w-48 text-sm text-gray-800 truncate">{u.name}</div>
+                              <div className="flex-1 h-6 rounded" style={{ backgroundColor: bg }} />
+                              <div className="w-12 text-right text-sm text-gray-900">{u.activeInitiatives}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
             </div>
           </motion.div>
         )}
