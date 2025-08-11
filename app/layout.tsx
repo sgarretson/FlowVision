@@ -8,11 +8,12 @@ export const metadata: Metadata = {
   title: 'FlowVision - Efficiency Intelligence Platform',
   description:
     'Transform friction into flow. AI-powered efficiency intelligence platform for SMB leadership to detect operational friction, categorize improvement ideas, and create strategic roadmaps.',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

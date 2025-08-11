@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
-import { PlusIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, SparklesIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import RequirementCard from './RequirementCard';
 import RequirementCardModal from './RequirementCardModal';
 
@@ -148,6 +148,62 @@ export default function RequirementCardsBoard({
     }
   };
 
+  const exportToCSV = () => {
+    if (filteredCards.length === 0) {
+      setError('No cards to export');
+      return;
+    }
+
+    const csvHeaders = [
+      'REQ_ID',
+      'Title',
+      'Description',
+      'Type',
+      'Priority',
+      'Status',
+      'Category',
+      'Assigned_To',
+      'Created_By',
+      'Approved_By',
+      'Created_Date',
+      'Updated_Date',
+      'Comments_Count',
+    ];
+
+    const csvData = filteredCards.map((card) => [
+      card.id,
+      `"${card.title.replace(/"/g, '""')}"`,
+      `"${card.description.replace(/"/g, '""')}"`,
+      card.type,
+      card.priority,
+      card.status,
+      card.category || '',
+      card.assignedTo?.name || 'Unassigned',
+      card.createdBy.name,
+      card.approvedBy?.name || '',
+      new Date(card.createdAt).toLocaleDateString(),
+      new Date(card.updatedAt).toLocaleDateString(),
+      card.comments.length,
+    ]);
+
+    const csvContent = [csvHeaders.join(','), ...csvData.map((row) => row.join(','))].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute(
+      'download',
+      `requirements_cards_${new Date().toISOString().split('T')[0]}.csv`
+    );
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
 
@@ -228,6 +284,16 @@ export default function RequirementCardsBoard({
               <option value="APPROVED">Approved</option>
               <option value="REJECTED">Rejected</option>
             </select>
+
+            <button
+              onClick={exportToCSV}
+              disabled={filteredCards.length === 0}
+              className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center space-x-2 text-sm font-semibold transition-colors"
+              title="Export cards to CSV for PM tools"
+            >
+              <DocumentArrowDownIcon className="w-4 h-4" />
+              <span>Export CSV</span>
+            </button>
 
             <button
               onClick={onGenerateWithAI}
