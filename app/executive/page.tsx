@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ArrowTrendingUpIcon, 
@@ -92,6 +92,7 @@ export default function ExecutiveDashboard() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [utilization, setUtilization] = useState<Array<{ ownerId: string; name: string; activeInitiatives: number }>>([]);
+  const reportRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     loadDashboardData();
@@ -188,24 +189,59 @@ export default function ExecutiveDashboard() {
   };
 
   const exportReport = async () => {
-    // In a real implementation, this would generate a PDF report
-    const reportData = {
-      healthScore,
-      alerts: alerts.slice(0, 5),
-      roiForecast,
-      insights: insights.slice(0, 10),
-      generatedAt: new Date().toISOString()
-    };
-    
-    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `executive-report-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      const [{ jsPDF }, html2canvasModule] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas')
+      ]);
+      const html2canvas = html2canvasModule.default;
+
+      const target = reportRef.current;
+      if (!target) return;
+
+      const canvas = await html2canvas(target, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = (pdf as any).getImageProperties(imgData);
+      const pdfWidth = pageWidth;
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      // Simple paginate if content exceeds one page
+      let position = 0;
+      let remainingHeight = pdfHeight;
+      while (remainingHeight > 0) {
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        remainingHeight -= pageHeight;
+        if (remainingHeight > 0) {
+          pdf.addPage();
+          position -= pageHeight;
+        }
+      }
+
+      pdf.save(`executive-brief-${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (err) {
+      console.error('PDF export failed', err);
+      // Fallback: export minimal JSON summary
+      const reportData = {
+        healthScore,
+        alerts: alerts.slice(0, 5),
+        roiForecast,
+        insights: insights.slice(0, 10),
+        generatedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `executive-report-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   };
 
   if (loading) {
@@ -217,7 +253,7 @@ export default function ExecutiveDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" ref={reportRef}>
       {/* Non-blocking error banner placeholder (surface tile errors when present) */}
       {!loading && (!healthScore || alerts.length === 0 || !roiForecast || insights.length === 0) && (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
@@ -263,7 +299,8 @@ export default function ExecutiveDashboard() {
               { id: 'overview', name: 'Overview', icon: ChartBarIcon },
               { id: 'insights', name: 'AI Insights', icon: LightBulbIcon },
               { id: 'forecasting', name: 'ROI Forecasting', icon: ArrowTrendingUpIcon },
-              { id: 'alerts', name: 'Alerts', icon: ExclamationTriangleIcon }
+              { id: 'alerts', name: 'Alerts', icon: ExclamationTriangleIcon },
+              { id: 'utilization', name: 'Team Utilization', icon: UsersIcon }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -505,6 +542,50 @@ export default function ExecutiveDashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'utilization' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-6"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Team Utilization</h2>
+              <span className="text-sm text-gray-500">Owners with most active initiatives</span>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="h-72 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={utilization} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" interval={0} angle={-20} textAnchor="end" height={60} />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Bar dataKey="activeInitiatives" fill="#2563eb" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-6 overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Initiatives</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {utilization.map((u) => (
+                      <tr key={u.ownerId}>
+                        <td className="px-4 py-2 text-sm text-gray-900">{u.name}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900">{u.activeInitiatives}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </motion.div>
         )}
