@@ -1,42 +1,46 @@
 ---
-name: Bug report
+name: Bug Report
 about: Create a report to help us improve FlowVision
 title: '[BUG] '
-labels: bug
+labels: ['bug']
 assignees: ''
+
 ---
 
-**Describe the bug**
+## Bug Description
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Steps to reproduce the behavior:
+## Steps to Reproduce
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
-**Expected behavior**
+## Expected Behavior
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
+## Actual Behavior
+A clear and concise description of what actually happened.
+
+## Screenshots
 If applicable, add screenshots to help explain your problem.
 
-**Environment Information:**
- - OS: [e.g. macOS, Windows, Linux]
- - Browser: [e.g. chrome, safari]
- - Browser Version: [e.g. 22]
- - Node.js Version: [e.g. 18.17.0]
- - FlowVision Version: [e.g. 1.0.0]
+## Environment
+- Browser: [e.g. chrome, safari]
+- Version: [e.g. 22]
+- Device: [e.g. iPhone6, Desktop]
+- OS: [e.g. iOS]
 
-**Additional context**
+## Console Errors
+If applicable, paste any console errors you see:
+```
+Paste console errors here
+```
+
+## Additional Context
 Add any other context about the problem here.
 
-**Error Logs**
-If applicable, include any error messages or logs:
-```
-Paste error logs here
-```
-
-**Possible Solution**
-If you have ideas on how to fix this bug, please describe them here.
+## Checklist
+- [ ] I have searched existing issues to ensure this isn't a duplicate
+- [ ] I have included all relevant information above
+- [ ] I have tested this in the latest version

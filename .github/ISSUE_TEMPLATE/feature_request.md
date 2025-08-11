@@ -1,39 +1,50 @@
 ---
-name: Feature request
+name: Feature Request
 about: Suggest an idea for FlowVision
 title: '[FEATURE] '
-labels: enhancement
+labels: ['enhancement']
 assignees: ''
+
 ---
 
-**Is your feature request related to a problem? Please describe.**
+## Feature Summary
+A brief, clear description of the feature you'd like to see added.
+
+## Problem Statement
+Is your feature request related to a problem? Please describe.
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-**Describe the solution you'd like**
+## Proposed Solution
+Describe the solution you'd like.
 A clear and concise description of what you want to happen.
 
-**Describe alternatives you've considered**
+## Alternative Solutions
+Describe alternatives you've considered.
 A clear and concise description of any alternative solutions or features you've considered.
 
-**User Story**
-As a [type of user], I want [goal] so that [reason].
+## User Impact
+Who would benefit from this feature?
+- [ ] End users (business leaders)
+- [ ] System administrators
+- [ ] Developers
+- [ ] All users
 
-**Acceptance Criteria**
-- [ ] Criteria 1
-- [ ] Criteria 2
-- [ ] Criteria 3
+## Implementation Considerations
+- Does this require database changes?
+- Does this affect existing workflows?
+- Are there security implications?
+- Does this require new dependencies?
 
-**Mockups/Screenshots**
-If applicable, add mockups or screenshots to help explain your feature request.
+## Additional Context
+Add any other context, mockups, or screenshots about the feature request here.
 
-**Implementation Notes**
-If you have technical suggestions for implementation, please describe them here.
+## Acceptance Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
-
-**Priority Level**
+## Priority
+- [ ] Critical - Blocking current workflow
+- [ ] High - Important for upcoming milestone
+- [ ] Medium - Would improve user experience
 - [ ] Low - Nice to have
-- [ ] Medium - Important for user experience
-- [ ] High - Critical for business functionality
-- [ ] Urgent - Blocking current workflows
