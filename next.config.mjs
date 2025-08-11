@@ -5,7 +5,6 @@ const nextConfig = {
     typedRoutes: true,
   },
   eslint: {
-    // CI runs eslint separately; avoid failing Next build on lint
     ignoreDuringBuilds: true,
   },
 };

@@ -87,9 +87,11 @@ export async function GET(request: NextRequest) {
     // Process phase distribution
     const phaseDistribution = initiativesByPhase.reduce(
       (acc, item) => {
-        const key = item.phase ?? 'unspecified';
+        const key = (item as any).phase ?? 'unspecified';
         const count =
-          typeof (item as any)._count === 'number' ? (item as any)._count : (item as any)._count?._all ?? 0;
+          typeof (item as any)._count === 'number'
+            ? (item as any)._count
+            : ((item as any)._count?._all ?? 0);
         (acc as Record<string, number>)[key] = ((acc as Record<string, number>)[key] || 0) + count;
         return acc;
       },

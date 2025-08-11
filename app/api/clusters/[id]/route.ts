@@ -171,7 +171,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         details: {
           clusterId: params.id,
           clusterName: updatedCluster.name,
-          changes: (body as any),
+          changes: body as any,
           timestamp: new Date().toISOString(),
         } as any,
       },
