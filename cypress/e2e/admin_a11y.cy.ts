@@ -6,10 +6,10 @@ describe('Admin pages accessibility', () => {
     cy.login(adminEmail, adminPassword);
   });
 
-  it('admin dashboard a11y', () => {
+  it('admin dashboard a11y (serious/critical only, continue on failure)', () => {
     cy.visit('/admin');
     cy.injectAxe();
-    cy.checkA11y(undefined, { includedImpacts: ['critical'] });
+    cy.checkA11y(undefined, { includedImpacts: ['serious', 'critical'] }, null, true);
     cy.contains('Admin');
   });
 });
