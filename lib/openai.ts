@@ -403,14 +403,40 @@ RESPONSE FORMAT (JSON):
   }
 
   public async getUsageEstimate(): Promise<AIUsageStats | null> {
-    // In a real implementation, you'd track this in your database
-    // For now, return mock data
-    return {
-      totalRequests: 0,
-      totalTokens: 0,
-      lastUsed: new Date().toISOString(),
-      costEstimate: 0,
-    };
+    try {
+      // Derive rough usage from audit logs (OPENAI_* actions)
+      const { prisma } = await import('@/lib/prisma');
+      const since = new Date();
+      since.setDate(since.getDate() - 30);
+      const logs = await prisma.auditLog.findMany({
+        where: {
+          action: { in: ['OPENAI_CONNECTION_TEST', 'OPENAI_CONFIG_UPDATE'] },
+          timestamp: { gte: since },
+        },
+        orderBy: { timestamp: 'desc' },
+        take: 100,
+      });
+
+      const totalRequests = logs.length;
+      // No token metadata yet; default to 0 until we start recording per-call tokens
+      const totalTokens = 0;
+      const lastUsed = logs[0]?.timestamp?.toISOString?.() || null;
+      const costEstimate = 0;
+
+      return {
+        totalRequests,
+        totalTokens,
+        lastUsed: lastUsed || new Date(0).toISOString(),
+        costEstimate,
+      };
+    } catch (err) {
+      return {
+        totalRequests: 0,
+        totalTokens: 0,
+        lastUsed: new Date(0).toISOString(),
+        costEstimate: 0,
+      };
+    }
   }
 }
 

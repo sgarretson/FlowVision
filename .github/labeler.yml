@@ -1,0 +1,18 @@
+feature:
+  - changed-files:
+      - any-glob-to-any-file: ['app/**', 'components/**', 'lib/**', 'app/api/**']
+backend:
+  - changed-files:
+      - any-glob-to-any-file: ['app/api/**', 'lib/**', 'prisma/**']
+frontend:
+  - changed-files:
+      - any-glob-to-any-file: ['app/**', 'components/**']
+ai:
+  - changed-files:
+      - any-glob-to-any-file: ['lib/openai.ts', 'app/api/**/ai/**']
+qa:
+  - changed-files:
+      - any-glob-to-any-file: ['cypress/**', 'tests/**']
+a11y:
+  - changed-files:
+      - any-glob-to-any-file: ['app/**', 'components/**']

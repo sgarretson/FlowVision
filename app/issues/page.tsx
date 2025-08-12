@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import AIAnalysis from './ai-analysis';
 import ClusteringView from './clustering-view';
+import AIClusters from './ai-clusters';
 
 type Issue = {
   id: string;
@@ -269,6 +270,18 @@ export default function IssuesPage() {
             <div className="w-3 h-3 bg-danger rounded-full"></div>
             {issues.filter((i) => i.heatmapScore >= 80).length} Critical
           </span>
+        </div>
+
+        {/* AI Clusters */}
+        <div className="mt-4 flex justify-center">
+          <AIClusters
+            onSelectAll={(ids) => {
+              const next = new Set(selectedIssues);
+              ids.forEach((id) => next.add(id));
+              setSelectedIssues(next);
+              setMessage(`${ids.length} issues added by AI grouping`);
+            }}
+          />
         </div>
       </div>
 

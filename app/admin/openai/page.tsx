@@ -85,11 +85,6 @@ export default function OpenAISettings() {
   }
 
   async function saveConfiguration() {
-    if (!apiKey.trim()) {
-      setError('API key is required');
-      return;
-    }
-
     try {
       setSaving(true);
       setError(null);
@@ -98,7 +93,7 @@ export default function OpenAISettings() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apiKey: apiKey.trim(),
+          apiKey: apiKey.trim() || undefined,
           model,
           maxTokens,
           temperature,

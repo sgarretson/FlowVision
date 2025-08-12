@@ -63,7 +63,9 @@ export async function POST(req: NextRequest) {
     const { apiKey, model, maxTokens, temperature, enabled } = body;
 
     // Validate inputs
-    if (!apiKey || typeof apiKey !== 'string' || !apiKey.startsWith('sk-')) {
+    const existing = openAIService.getConfig();
+    const effectiveApiKey = apiKey && typeof apiKey === 'string' ? apiKey : existing?.apiKey;
+    if (!effectiveApiKey || !effectiveApiKey.startsWith('sk-')) {
       return NextResponse.json({ error: 'Valid OpenAI API key required' }, { status: 400 });
     }
 
@@ -81,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     // Configure OpenAI service
     openAIService.configure({
-      apiKey,
+      apiKey: effectiveApiKey,
       model: model || 'gpt-3.5-turbo',
       maxTokens: maxTokens || 500,
       temperature: temperature || 0.7,

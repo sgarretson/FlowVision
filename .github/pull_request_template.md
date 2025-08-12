@@ -1,3 +1,28 @@
+## Summary
+
+Describe the change and why. Link issues (e.g., #10) and milestone.
+
+## Screenshots / Demos
+
+Add before/after or short clip for UI changes.
+
+## Checklist
+
+- [ ] Scope: one issue per PR, small and focused
+- [ ] Conventional title: `type(scope): summary`
+- [ ] Tests: unit/integration/e2e updated or added as needed
+- [ ] Accessibility: axe serious/critical = 0 on changed pages
+- [ ] Analytics: events added if applicable
+- [ ] Audit Log: key user actions recorded
+- [ ] Docs: PRD/README/CHANGELOG updated if applicable
+
+## Validation
+
+- [ ] `npm run lint` passed
+- [ ] `npm test` passed
+- [ ] `npm run build` passed
+- [ ] `npx prisma validate && npx prisma generate` passed
+
 # Pull Request
 
 ## Description

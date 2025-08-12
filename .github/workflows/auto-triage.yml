@@ -1,0 +1,55 @@
+name: Auto triage issues and PRs
+
+on:
+  issues:
+    types: [opened, labeled]
+  pull_request_target:
+    types: [opened, reopened, labeled, synchronize]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add issues to MVP P0 Board when milestone=P0
+        if: ${{ github.event_name == 'issues' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue = context.payload.issue;
+            if (!issue) return;
+            // If milestone title matches P0, add to project #1
+            const { data: milestones } = await github.rest.issues.getIssue({ owner, repo, issue_number: issue.number });
+            const ms = milestones.milestone;
+            if (ms && ms.title === 'Executive Issue-to-Initiative P0') {
+              await github.graphql(`
+                mutation($project:ID!,$content:ID!){
+                  addProjectV2ItemById(input:{projectId:$project, contentId:$content}){ item { id } }
+                }
+              `, {
+                project: 'PVT_kwHOAANP-M4BAT3q',
+                content: issue.node_id,
+              });
+            }
+      - name: Enforce PR template checklist
+        if: ${{ startsWith(github.event_name, 'pull_request') }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+            const body = pr.body || '';
+            const required = ['Conventional title', '`npm test` passed', '`npm run build` passed'];
+            let missing = [];
+            for (const key of required) if (!body.toLowerCase().includes(key.toLowerCase())) missing.push(key);
+            if (missing.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `Please complete PR checklist items: ${missing.join(', ')}`
+              });
+            }
