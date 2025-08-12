@@ -1,15 +1,18 @@
 frontend:
-  - 'app/**'
-  - 'components/**'
+  - changed-files:
+      - any-glob-to-any-file: ['app/**', 'components/**']
 backend:
-  - 'app/api/**'
-  - 'prisma/**'
+  - changed-files:
+      - any-glob-to-any-file: ['app/api/**', 'prisma/**']
 ai:
-  - 'lib/openai.ts'
+  - changed-files:
+      - any-glob-to-any-file: ['lib/openai.ts']
 analytics:
-  - 'app/api/analytics/**'
+  - changed-files:
+      - any-glob-to-any-file: ['app/api/analytics/**']
 qa:
-  - 'cypress/**'
+  - changed-files:
+      - any-glob-to-any-file: ['cypress/**']
 a11y:
-  - 'app/**'
-  - 'components/**'
+  - changed-files:
+      - any-glob-to-any-file: ['app/**', 'components/**']
