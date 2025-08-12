@@ -3,10 +3,12 @@ import 'cypress-axe';
 Cypress.Commands.add('login', (email: string, password: string) => {
   cy.session([email, password], () => {
     cy.visit('/auth');
-    cy.get('#email').clear().type(email);
-    cy.get('#password').clear().type(password);
-    cy.contains('Sign In').click();
-    cy.url().should('not.include', '/auth');
+    cy.get('#email', { timeout: 10000 }).should('be.visible').clear();
+    cy.get('#email').type(email, { log: false });
+    cy.get('#password').should('be.visible').clear();
+    cy.get('#password').type(password, { log: false });
+    cy.get('button[type="submit"]').click();
+    cy.location('pathname', { timeout: 10000 }).should('not.include', '/auth');
   });
 });
 
