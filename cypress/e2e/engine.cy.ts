@@ -6,6 +6,14 @@ describe('Engine core flow', () => {
     cy.login(adminEmail, adminPassword);
   });
   it('multi-select issues → create initiative', () => {
+    // Ensure at least one issue exists for the logged-in user
+    cy.request({
+      method: 'POST',
+      url: '/api/issues',
+      body: { description: `Cypress seed issue ${Date.now()}` },
+      failOnStatusCode: false,
+    });
+
     cy.visit('/issues');
     // wait for issues to load (stable selector)
     cy.get('.card-secondary', { timeout: 10000 }).should('exist');
