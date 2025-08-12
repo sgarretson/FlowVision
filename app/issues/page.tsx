@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import AIAnalysis from './ai-analysis';
 import ClusteringView from './clustering-view';
+import AIClusters from './ai-clusters';
 
 type Issue = {
   id: string;
@@ -33,6 +34,46 @@ export default function IssuesPage() {
     }
     fetchIssues();
   }, [session, router]);
+
+  // Restore persisted selection
+  useEffect(() => {
+    if (!session?.user?.email) return;
+    try {
+      const storageKey = `issues:selected:${session.user.email}`;
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const ids: unknown = JSON.parse(raw);
+        if (Array.isArray(ids)) {
+          // Filter against current issues once loaded
+          const valid = ids.filter((id) => typeof id === 'string');
+          setSelectedIssues(new Set(valid as string[]));
+        }
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.email]);
+
+  // Keep selection valid when issue list changes
+  useEffect(() => {
+    if (!issues?.length) return;
+    setSelectedIssues((prev) => {
+      const issueIds = new Set(issues.map((i) => i.id));
+      const next = new Set<string>();
+      prev.forEach((id) => {
+        if (issueIds.has(id)) next.add(id);
+      });
+      return next;
+    });
+  }, [issues]);
+
+  // Persist selection
+  useEffect(() => {
+    if (!session?.user?.email) return;
+    try {
+      const storageKey = `issues:selected:${session.user.email}`;
+      localStorage.setItem(storageKey, JSON.stringify(Array.from(selectedIssues)));
+    } catch {}
+  }, [selectedIssues, session?.user?.email]);
 
   async function fetchIssues() {
     try {
@@ -108,20 +149,13 @@ export default function IssuesPage() {
 
   function handleSelectIssue(issueId: string, checked: boolean) {
     const newSelected = new Set(selectedIssues);
-    if (checked) {
-      newSelected.add(issueId);
-    } else {
-      newSelected.delete(issueId);
-    }
+    if (checked) newSelected.add(issueId);
+    else newSelected.delete(issueId);
     setSelectedIssues(newSelected);
   }
 
   function handleSelectAll(checked: boolean) {
-    if (checked) {
-      setSelectedIssues(new Set(issues.map((issue) => issue.id)));
-    } else {
-      setSelectedIssues(new Set());
-    }
+    setSelectedIssues(checked ? new Set(issues.map((i) => i.id)) : new Set());
   }
 
   async function handleCreateInitiativeFromSelected() {
@@ -269,6 +303,18 @@ export default function IssuesPage() {
             <div className="w-3 h-3 bg-danger rounded-full"></div>
             {issues.filter((i) => i.heatmapScore >= 80).length} Critical
           </span>
+        </div>
+
+        {/* AI Clusters */}
+        <div className="mt-4 flex justify-center">
+          <AIClusters
+            onSelectAll={(ids) => {
+              const next = new Set(selectedIssues);
+              ids.forEach((id) => next.add(id));
+              setSelectedIssues(next);
+              setMessage(`${ids.length} issues added by AI grouping`);
+            }}
+          />
         </div>
       </div>
 
