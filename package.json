@@ -87,5 +87,10 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.39.0"
+  },
+  "cypress": {
+    "env": {
+      "AXE_DISABLED": false
+    }
   }
 }
