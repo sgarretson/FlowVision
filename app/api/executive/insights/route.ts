@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { openAIService } from '@/lib/openai';
 
+// Force dynamic server-side rendering for this API route
+export const dynamic = 'force-dynamic';
+
 const prisma = new PrismaClient();
 
 interface ExecutiveInsight {

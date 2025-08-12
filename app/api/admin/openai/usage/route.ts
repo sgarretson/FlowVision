@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+// Force dynamic server-side rendering for this API route
+export const dynamic = 'force-dynamic';
+
 // GET /api/admin/openai/usage - Get detailed usage statistics
 export async function GET() {
   try {
