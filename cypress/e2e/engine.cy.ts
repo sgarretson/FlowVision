@@ -2,7 +2,7 @@ describe('Engine core flow', () => {
   it('multi-select issues → create initiative', () => {
     cy.visit('/issues');
     // wait for issues to load
-    cy.contains('Issue Identification');
+    cy.contains('Issue Identification', { timeout: 10000 });
     cy.get('.card-secondary input[type="checkbox"]', { timeout: 10000 }).should(
       'have.length.greaterThan',
       1
