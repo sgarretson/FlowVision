@@ -9,7 +9,7 @@ describe('Admin pages accessibility', () => {
   it('admin dashboard a11y (serious/critical only, continue on failure)', () => {
     cy.visit('/admin');
     cy.injectAxe();
-    cy.checkA11y(undefined, { includedImpacts: ['serious', 'critical'] }, null, true);
+    cy.checkA11y(undefined, { includedImpacts: ['serious', 'critical'] }, undefined, true);
     cy.contains('Admin');
   });
 });
