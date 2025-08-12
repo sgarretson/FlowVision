@@ -90,7 +90,7 @@ jobs:
   e2e-tests:
     name: End-to-End Tests
     # Only run if a Cypress config exists in the repo
-    if: ${{ hashFiles('cypress.config.*') != '' }}
+    if: true
     runs-on: ubuntu-latest
 
     services:
