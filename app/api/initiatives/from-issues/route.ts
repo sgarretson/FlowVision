@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { scoreDifficulty, scoreROI, scorePriority } from '@/utils/ai';
-import { openai } from '@/lib/openai';
+import openAIService from '@/lib/openai';
 
 type IssueInput = {
   id: string;
@@ -38,12 +38,19 @@ export async function POST(req: NextRequest) {
       where: { userId: user.id },
     });
 
-    // Generate comprehensive initiative using AI
-    const aiGeneratedInitiative = await generateInitiativeFromIssues(issues, {
-      industry: profile?.industry || 'Unknown',
-      size: profile?.size || 0,
-      metrics: (profile?.metrics as any) || {},
-    });
+    // Generate comprehensive initiative using centralized OpenAI service
+    const aiGeneratedInitiative =
+      (await openAIService.generateInitiativeFromIssues(issues, {
+        industry: profile?.industry || 'Unknown',
+        size: profile?.size || 0,
+        metrics: (profile?.metrics as any) || {},
+      })) ||
+      // Fallback to local generator if AI is disabled/unavailable
+      (await generateInitiativeFromIssues(issues, {
+        industry: profile?.industry || 'Unknown',
+        size: profile?.size || 0,
+        metrics: (profile?.metrics as any) || {},
+      }));
 
     // Calculate scores
     const difficulty = scoreDifficulty(
