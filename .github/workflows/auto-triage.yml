@@ -3,12 +3,16 @@ name: Auto triage issues and PRs
 on:
   issues:
     types: [opened, labeled]
-  pull_request_target:
+  pull_request:
     types: [opened, reopened, labeled, synchronize]
 
 jobs:
   triage:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
       - name: Add issues to MVP P0 Board when milestone=P0
         if: ${{ github.event_name == 'issues' }}
@@ -34,7 +38,7 @@ jobs:
               });
             }
       - name: Enforce PR template checklist
-        if: ${{ startsWith(github.event_name, 'pull_request') }}
+        if: ${{ startsWith(github.event_name, 'pull_request') && github.event.pull_request.head.repo.full_name == github.repository }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
