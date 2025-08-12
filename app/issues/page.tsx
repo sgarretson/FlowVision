@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import AIAnalysis from './ai-analysis';
 import ClusteringView from './clustering-view';
 import AIClusters from './ai-clusters';
+import { trackEvent } from '@/utils/analytics';
+import { useToast } from '@/components/ToastProvider';
 
 type Issue = {
   id: string;
@@ -17,6 +19,7 @@ type Issue = {
 
 export default function IssuesPage() {
   const { data: session } = useSession();
+  const { showToast } = useToast();
   const router = useRouter();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,11 +112,14 @@ export default function IssuesPage() {
         setNewIssue('');
         fetchIssues(); // Refresh the list
         setMessage('Issue created successfully');
+        showToast('Issue created', 'success');
       } else {
         setMessage('Failed to create issue');
+        showToast('Failed to create issue', 'error');
       }
     } catch (error) {
       setMessage('Failed to create issue');
+      showToast('Failed to create issue', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -129,8 +135,10 @@ export default function IssuesPage() {
 
       if (res.ok) {
         fetchIssues(); // Refresh to show updated votes
+        showToast(increment ? 'Upvoted issue' : 'Downvoted issue', 'success');
       } else {
         setMessage('Failed to vote on issue');
+        showToast('Failed to vote on issue', 'error');
       }
     } catch (error) {
       setMessage('Failed to vote on issue');
@@ -189,6 +197,7 @@ export default function IssuesPage() {
         setMessage(
           `Initiative "${initiative.title}" created successfully from ${selectedIssues.size} issue(s)`
         );
+        showToast('Initiative created from selected issues', 'success');
 
         // Navigate to the new initiative after a short delay
         setTimeout(() => {
@@ -197,9 +206,11 @@ export default function IssuesPage() {
       } else {
         const error = await res.json();
         setMessage(error.error || 'Failed to create initiative from issues');
+        showToast('Failed to create initiative from issues', 'error');
       }
     } catch (error) {
       setMessage('Failed to create initiative from issues');
+      showToast('Failed to create initiative from issues', 'error');
     } finally {
       setBulkActionLoading(false);
     }
