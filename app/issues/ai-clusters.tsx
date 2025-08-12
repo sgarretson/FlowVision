@@ -37,6 +37,16 @@ export default function AIClusters({ onSelectAll }: Props) {
   if (error) return <div className="text-caption text-red-600">{error}</div>;
   if (!clusters.length) return null;
 
+  async function track(event: string, metadata?: any) {
+    try {
+      await fetch('/api/analytics/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event, metadata }),
+      });
+    } catch {}
+  }
+
   return (
     <div className="flex flex-wrap gap-2">
       {clusters.map((c) => (
@@ -46,7 +56,10 @@ export default function AIClusters({ onSelectAll }: Props) {
         >
           <span className="font-medium">{c.label}</span>
           <button
-            onClick={() => onSelectAll(c.issueIds)}
+            onClick={() => {
+              onSelectAll(c.issueIds);
+              track('issues_select_all_related', { label: c.label, count: c.issueIds.length });
+            }}
             className="underline text-indigo-700 hover:text-indigo-900"
             title={c.rationale}
           >
