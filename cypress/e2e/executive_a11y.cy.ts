@@ -9,7 +9,7 @@ describe('Executive dashboard accessibility', () => {
   it('loads executive dashboard and has no serious/critical a11y issues (continue on failure)', () => {
     cy.visit('/executive');
     cy.injectAxe();
-    cy.checkA11y(undefined, { includedImpacts: ['serious', 'critical'] }, null, true);
+    cy.checkA11y(undefined, { includedImpacts: ['serious', 'critical'] }, undefined, true);
     cy.contains('Executive');
   });
 });
