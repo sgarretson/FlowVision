@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
+import { logger } from '@/utils/logger';
 
 export interface BriefSchedule {
   userId: string;
@@ -27,7 +28,7 @@ export class ExecutiveBriefScheduler {
    * Start the scheduler - checks every hour for pending briefs
    */
   start() {
-    console.log('📅 Executive Brief Scheduler starting...');
+    logger.info('Executive Brief Scheduler starting...');
 
     // Check every hour for pending briefs
     const hourlyCheck = setInterval(
@@ -47,7 +48,7 @@ export class ExecutiveBriefScheduler {
    * Stop the scheduler
    */
   stop() {
-    console.log('📅 Executive Brief Scheduler stopping...');
+    logger.info('Executive Brief Scheduler stopping...');
     this.intervals.forEach((interval) => clearInterval(interval));
     this.intervals.clear();
   }
@@ -73,7 +74,7 @@ export class ExecutiveBriefScheduler {
         }
       }
     } catch (error) {
-      console.error('❌ Error processing pending briefs:', error);
+      logger.error('Error processing pending briefs', { error });
     }
   }
 
@@ -164,7 +165,7 @@ export class ExecutiveBriefScheduler {
    */
   private async generateAndSendBrief(userId: string, schedule: BriefSchedule) {
     try {
-      console.log(`📊 Generating brief for user ${userId}`);
+      logger.info('Generating executive brief', { userId });
 
       // Generate comprehensive brief data
       const briefData = await this.generateBriefData();
@@ -178,13 +179,13 @@ export class ExecutiveBriefScheduler {
           await this.sendSlackBrief(userId, briefData);
           break;
         default:
-          console.log(`📤 Brief generated for user ${userId} (no delivery channel)`);
+          logger.info('Brief generated (no delivery channel)', { userId });
       }
 
       // Update last sent timestamp
       await this.updateLastSent(userId, new Date());
     } catch (error) {
-      console.error(`❌ Failed to generate brief for user ${userId}:`, error);
+      logger.error('Failed to generate brief', { userId, error });
     }
   }
 
@@ -326,9 +327,9 @@ export class ExecutiveBriefScheduler {
         html,
       });
 
-      console.log(`📧 Email brief sent to ${user.email}`);
+      logger.info('Email brief sent', { to: user.email });
     } catch (error) {
-      console.error('❌ Email send failed:', error);
+      logger.error('Email send failed', { error });
     }
   }
 
@@ -336,9 +337,36 @@ export class ExecutiveBriefScheduler {
    * Send brief via Slack (placeholder)
    */
   private async sendSlackBrief(userId: string, briefData: any) {
-    // Placeholder for Slack integration
-    console.log(`📱 Slack brief would be sent for user ${userId}`);
-    // TODO: Implement Slack webhook integration
+    const webhook = process.env.SLACK_WEBHOOK_URL;
+    if (!webhook) {
+      logger.warn('Slack webhook not configured; skipping brief send', { userId });
+      return;
+    }
+
+    try {
+      const payload = {
+        text: `Executive Brief for user ${userId} - ${briefData.headline}`,
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*${briefData.headline}*\nTotal Initiatives: ${briefData.summary.totalInitiatives}\nOpen Issues: ${briefData.summary.openIssues}`,
+            },
+          },
+        ],
+      };
+
+      await fetch(webhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      logger.info('Slack brief sent', { userId });
+    } catch (error) {
+      logger.error('Slack send failed', { userId, error });
+    }
   }
 
   /**
@@ -426,7 +454,7 @@ export class ExecutiveBriefScheduler {
         data: { preferences },
       });
     } catch (error) {
-      console.error('❌ Failed to update last sent timestamp:', error);
+      logger.error('Failed to update last sent timestamp', { error });
     }
   }
 }

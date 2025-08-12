@@ -475,6 +475,7 @@ export default function IssuesPage() {
                       <div className="flex items-center pt-2">
                         <input
                           type="checkbox"
+                          data-cy="issue-checkbox"
                           checked={selectedIssues.has(issue.id)}
                           onChange={(e) => handleSelectIssue(issue.id, e.target.checked)}
                           className="rounded border-gray-300 text-primary focus:ring-primary"
