@@ -48,6 +48,21 @@ export async function GET() {
       }))
       .slice(0, 12);
 
+    // Audit log for analytics
+    try {
+      await prisma.auditLog.create({
+        data: {
+          userId: undefined,
+          action: 'ISSUE_CLUSTERIZE',
+          details: {
+            clusterCount: clusters.length,
+            labels: clusters.map((c) => c.label).slice(0, 5),
+            generatedAt: new Date().toISOString(),
+          } as any,
+        },
+      });
+    } catch {}
+
     return NextResponse.json({ clusters });
   } catch (err) {
     return NextResponse.json({ clusters: [] });
