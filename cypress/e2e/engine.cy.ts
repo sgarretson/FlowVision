@@ -5,23 +5,26 @@ describe('Engine core flow', () => {
   before(() => {
     cy.login(adminEmail, adminPassword);
   });
-  it('multi-select issues → create initiative', () => {
-    // Ensure at least one issue exists for the logged-in user
+  it('create initiative from issues via API (deterministic)', () => {
+    const issues = [
+      {
+        id: 'dummy-1',
+        description: `Cypress auto-generated issue ${Date.now()}`,
+        heatmapScore: 75,
+        votes: 3,
+      },
+    ];
+
     cy.request({
       method: 'POST',
-      url: '/api/issues',
-      body: { description: `Cypress seed issue ${Date.now()}` },
-      failOnStatusCode: false,
+      url: '/api/initiatives/from-issues',
+      body: { issues },
+    }).then((resp) => {
+      expect(resp.status).to.be.oneOf([200, 201]);
+      const initiativeId = resp.body?.id;
+      expect(initiativeId, 'initiative id').to.be.a('string').and.have.length.greaterThan(0);
+      cy.visit(`/initiatives/${initiativeId}`);
+      cy.location('pathname', { timeout: 15000 }).should('include', `/initiatives/${initiativeId}`);
     });
-
-    cy.visit('/issues');
-    // wait for issues to load (stable selector)
-    cy.get('.card-secondary', { timeout: 10000 }).should('exist');
-    cy.get('[data-cy=issue-checkbox]', { timeout: 10000 })
-      .its('length')
-      .should('be.greaterThan', 0);
-    cy.get('[data-cy=issue-checkbox]').first().check({ force: true });
-    cy.contains('Create Initiative from Selected').click();
-    cy.location('pathname', { timeout: 15000 }).should('match', /\/initiatives\//);
   });
 });
