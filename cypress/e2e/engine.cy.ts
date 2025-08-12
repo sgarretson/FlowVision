@@ -1,4 +1,10 @@
 describe('Engine core flow', () => {
+  const adminEmail = Cypress.env('ADMIN_EMAIL') || 'admin@example.com';
+  const adminPassword = Cypress.env('ADMIN_PASSWORD') || 'Admin123!';
+
+  before(() => {
+    cy.login(adminEmail, adminPassword);
+  });
   it('multi-select issues → create initiative', () => {
     cy.visit('/issues');
     // wait for issues to load

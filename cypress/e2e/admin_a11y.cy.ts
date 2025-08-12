@@ -2,7 +2,7 @@ describe('Admin pages accessibility', () => {
   const adminEmail = Cypress.env('ADMIN_EMAIL') || 'admin@example.com';
   const adminPassword = Cypress.env('ADMIN_PASSWORD') || 'Admin123!';
 
-  beforeEach(() => {
+  before(() => {
     cy.login(adminEmail, adminPassword);
   });
 
