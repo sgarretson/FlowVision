@@ -294,6 +294,110 @@ Focus on requirements that are:
     }
   }
 
+  /**
+   * Generate a cohesive initiative suggestion from multiple related issues
+   */
+  public async generateInitiativeFromIssues(
+    issues: Array<{ id: string; description: string; heatmapScore: number; votes: number }>,
+    businessContext?: any
+  ): Promise<{
+    title: string;
+    problem: string;
+    goal: string;
+    kpis: string[];
+    type: string;
+    estimatedCost: number;
+    estimatedBenefit: number;
+    estimatedHours: number;
+    reasoning?: string;
+  } | null> {
+    if (!this.isConfigured() || !this.config?.enabled) {
+      return null;
+    }
+
+    const issueDescriptions = issues.map((i) => i.description).join('\n• ');
+    const totalVotes = issues.reduce((sum, i) => sum + i.votes, 0);
+    const avgHeatmapScore = issues.reduce((sum, i) => sum + i.heatmapScore, 0) / issues.length;
+    const maxHeatmapScore = Math.max(...issues.map((i) => i.heatmapScore));
+
+    const prompt = `You are an expert business strategist helping a ${businessContext?.industry || 'business'} company with ${businessContext?.size || 'unknown'} employees create a comprehensive initiative from multiple related issues.
+
+CONTEXT:
+Company Industry: ${businessContext?.industry || 'Unknown'}
+Company Size: ${businessContext?.size || 'unknown'} employees
+Number of Issues: ${issues.length}
+Total Community Votes: ${totalVotes}
+Average Issue Severity: ${avgHeatmapScore.toFixed(1)}/100
+Highest Issue Severity: ${maxHeatmapScore}/100
+
+ISSUES TO ADDRESS:
+• ${issueDescriptions}
+
+REQUIREMENTS:
+Create a strategic initiative that addresses all these issues comprehensively. Consider:
+- Root cause analysis across all issues
+- Synergies between issue resolutions
+- Resource optimization by solving multiple problems together
+- Business impact and ROI potential
+- Implementation complexity and timeline
+
+RESPONSE FORMAT (JSON):
+{
+  "title": "Strategic initiative title (60 chars max)",
+  "problem": "Comprehensive problem statement connecting all issues",
+  "goal": "Specific, measurable goal addressing the root causes",
+  "kpis": ["KPI 1", "KPI 2", "KPI 3"],
+  "type": "operational|strategic|innovation",
+  "estimatedCost": 50000,
+  "estimatedBenefit": 200000,
+  "estimatedHours": 320,
+  "complexity": "low|medium|high",
+  "reasoning": "Brief explanation of how this initiative addresses all issues"
+}`;
+
+    try {
+      const response = await this.client!.chat.completions.create({
+        model: this.config.model || 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: this.config.maxTokens || 800,
+        temperature: this.config.temperature || 0.7,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) return null;
+
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) return null;
+
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        title: parsed.title || `Strategic Initiative for ${issues.length} Issues`,
+        problem:
+          parsed.problem ||
+          `Multiple operational issues affecting business performance: ${issueDescriptions}`,
+        goal:
+          parsed.goal ||
+          `Systematically address and resolve ${issues.length} related operational issues`,
+        kpis: Array.isArray(parsed.kpis)
+          ? parsed.kpis
+          : ['Issue Resolution Rate', 'Process Efficiency', 'Customer Satisfaction'],
+        type: parsed.type || 'operational',
+        estimatedCost:
+          typeof parsed.estimatedCost === 'number' ? parsed.estimatedCost : 25000 * issues.length,
+        estimatedBenefit:
+          typeof parsed.estimatedBenefit === 'number'
+            ? parsed.estimatedBenefit
+            : 75000 * issues.length,
+        estimatedHours:
+          typeof parsed.estimatedHours === 'number' ? parsed.estimatedHours : 40 * issues.length,
+        reasoning: parsed.reasoning,
+      };
+    } catch (err) {
+      console.error('OpenAI API error:', err);
+      return null;
+    }
+  }
+
   public getConfig(): OpenAIConfig | null {
     return this.config;
   }

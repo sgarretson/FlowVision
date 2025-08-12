@@ -23,6 +23,8 @@ export default function IssuesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'issues' | 'clusters'>('issues');
+  const [selectedIssues, setSelectedIssues] = useState<Set<string>>(new Set());
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
   useEffect(() => {
     if (!session) {
@@ -102,6 +104,71 @@ export default function IssuesPage() {
       title: `Initiative: ${issue.description.substring(0, 50)}...`,
     });
     router.push(`/initiatives?${params.toString()}`);
+  }
+
+  function handleSelectIssue(issueId: string, checked: boolean) {
+    const newSelected = new Set(selectedIssues);
+    if (checked) {
+      newSelected.add(issueId);
+    } else {
+      newSelected.delete(issueId);
+    }
+    setSelectedIssues(newSelected);
+  }
+
+  function handleSelectAll(checked: boolean) {
+    if (checked) {
+      setSelectedIssues(new Set(issues.map((issue) => issue.id)));
+    } else {
+      setSelectedIssues(new Set());
+    }
+  }
+
+  async function handleCreateInitiativeFromSelected() {
+    if (selectedIssues.size === 0) {
+      setMessage('Please select at least one issue to create an initiative');
+      return;
+    }
+
+    setBulkActionLoading(true);
+    setMessage(null);
+
+    try {
+      const selectedIssueObjects = issues.filter((issue) => selectedIssues.has(issue.id));
+
+      const res = await fetch('/api/initiatives/from-issues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          issues: selectedIssueObjects.map((issue) => ({
+            id: issue.id,
+            description: issue.description,
+            heatmapScore: issue.heatmapScore,
+            votes: issue.votes,
+          })),
+        }),
+      });
+
+      if (res.ok) {
+        const initiative = await res.json();
+        setSelectedIssues(new Set()); // Clear selection
+        setMessage(
+          `Initiative "${initiative.title}" created successfully from ${selectedIssues.size} issue(s)`
+        );
+
+        // Navigate to the new initiative after a short delay
+        setTimeout(() => {
+          router.push(`/initiatives/${initiative.id}`);
+        }, 1500);
+      } else {
+        const error = await res.json();
+        setMessage(error.error || 'Failed to create initiative from issues');
+      }
+    } catch (error) {
+      setMessage('Failed to create initiative from issues');
+    } finally {
+      setBulkActionLoading(false);
+    }
   }
 
   function getHeatmapColor(score: number): string {
@@ -299,6 +366,77 @@ export default function IssuesPage() {
             </div>
           </div>
 
+          {/* Bulk Actions Bar */}
+          {issues.length > 0 && (
+            <div className="card-secondary p-4 max-w-4xl mx-auto mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedIssues.size === issues.length && issues.length > 0}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm font-medium">
+                      {selectedIssues.size === 0
+                        ? `Select All (${issues.length})`
+                        : selectedIssues.size === issues.length
+                          ? `All Selected (${issues.length})`
+                          : `${selectedIssues.size} of ${issues.length} Selected`}
+                    </span>
+                  </label>
+
+                  {selectedIssues.size > 0 && (
+                    <button
+                      onClick={() => setSelectedIssues(new Set())}
+                      className="text-sm text-gray-500 hover:text-gray-700"
+                    >
+                      Clear Selection
+                    </button>
+                  )}
+                </div>
+
+                {selectedIssues.size > 0 && (
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm text-gray-600">
+                      {selectedIssues.size} issue{selectedIssues.size === 1 ? '' : 's'} selected
+                    </div>
+                    <button
+                      onClick={handleCreateInitiativeFromSelected}
+                      disabled={bulkActionLoading}
+                      className="btn-primary text-sm flex items-center gap-2"
+                    >
+                      {bulkActionLoading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            />
+                          </svg>
+                          Create Initiative from Selected
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Issues List */}
           <div>
             {issues.length === 0 ? (
@@ -328,9 +466,21 @@ export default function IssuesPage() {
                 {issues.map((issue) => (
                   <div
                     key={issue.id}
-                    className="card-secondary p-6 hover:shadow-card-primary transition-shadow duration-200"
+                    className={`card-secondary p-6 hover:shadow-card-primary transition-all duration-200 ${
+                      selectedIssues.has(issue.id) ? 'ring-2 ring-primary bg-blue-50' : ''
+                    }`}
                   >
                     <div className="flex items-start gap-6">
+                      {/* Selection Checkbox */}
+                      <div className="flex items-center pt-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedIssues.has(issue.id)}
+                          onChange={(e) => handleSelectIssue(issue.id, e.target.checked)}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                      </div>
+
                       {/* Voting Section */}
                       <div className="flex flex-col items-center gap-2 min-w-[80px]">
                         <button
