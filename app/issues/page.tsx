@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import AIAnalysis from './ai-analysis';
 import ClusteringView from './clustering-view';
 import AIClusters from './ai-clusters';
+import { trackEvent } from '@/utils/analytics';
 
 type Issue = {
   id: string;
@@ -109,8 +110,10 @@ export default function IssuesPage() {
         setNewIssue('');
         fetchIssues(); // Refresh the list
         setMessage('Issue created successfully');
+        trackEvent('issues_create_success');
       } else {
         setMessage('Failed to create issue');
+        trackEvent('issues_create_fail');
       }
     } catch (error) {
       setMessage('Failed to create issue');
@@ -129,6 +132,7 @@ export default function IssuesPage() {
 
       if (res.ok) {
         fetchIssues(); // Refresh to show updated votes
+        trackEvent('issues_vote', { issueId, up: increment });
       } else {
         setMessage('Failed to vote on issue');
       }
@@ -189,6 +193,10 @@ export default function IssuesPage() {
         setMessage(
           `Initiative "${initiative.title}" created successfully from ${selectedIssues.size} issue(s)`
         );
+        trackEvent('initiative_created_from_issues', {
+          count: selectedIssues.size,
+          initiativeId: initiative.id,
+        });
 
         // Navigate to the new initiative after a short delay
         setTimeout(() => {
@@ -197,6 +205,7 @@ export default function IssuesPage() {
       } else {
         const error = await res.json();
         setMessage(error.error || 'Failed to create initiative from issues');
+        trackEvent('initiative_create_from_issues_fail', { count: selectedIssues.size });
       }
     } catch (error) {
       setMessage('Failed to create initiative from issues');
