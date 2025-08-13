@@ -153,6 +153,8 @@ Remember these key project facts:
 - Current sprint details are in SYSTEMS_ENHANCEMENT_EXECUTION_PLAN.md
 - Team capacity is ~60 story points per 2-week sprint with 10% buffer
 - Sprint naming follows: Sprint X (dates) with clear goals and deliverables
+- Expert profiles available in EXPERT_PROFILES_SYSTEM.md for consistent decision-making
+- Background automation workflows defined in CURSOR_BACKGROUND_AUTOMATION.md
 
 ## Conflict Resolution Best Practices
 
@@ -220,6 +222,26 @@ Remember these key project facts:
 - **ALWAYS update** any affected documentation
 - **ALWAYS demo** completed functionality to product owner
 - **ALWAYS check** story points accuracy for future sprint planning
+
+### Expert Consultation Framework
+- **BEFORE major decisions**: Consult relevant expert profile guidance from EXPERT_PROFILES_SYSTEM.md
+- **DURING implementation**: Follow expert quality gates and decision frameworks
+- **AFTER completion**: Validate against expert quality criteria
+- **FOR conflicts**: Use expert hierarchy and escalation paths defined in profiles
+- **FOR architecture**: Technical Architect + AI Architect + Security Architect review required
+- **FOR design**: UX Strategist + UI Designer + Accessibility Specialist validation needed
+- **FOR business logic**: Product Manager + Business Analyst + Requirements Engineer approval
+
+### Background Automation Framework
+- **ALWAYS trigger** relevant background agents on file changes
+- **ALWAYS validate** agent outputs against expert profiles
+- **ALWAYS update** sprint progress automatically via agents
+- **ALWAYS escalate** critical issues immediately through automation
+- **ALWAYS maintain** automation logs for debugging and optimization
+- **BEFORE commits**: Run code quality and security agents
+- **DURING development**: Continuous testing and documentation agents active
+- **AFTER merges**: Deployment and monitoring agents execute
+- **ON schedule**: Performance and security scanning agents run
 
 ## Enforcement
 
