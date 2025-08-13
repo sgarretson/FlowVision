@@ -64,7 +64,10 @@ export default function PrioritizePage() {
         setInitiatives(data);
       }
     } catch (error) {
-      console.error('Failed to load initiatives:', error);
+      // Log error in development only
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load initiatives:', error);
+      }
     } finally {
       setLoading(false);
     }

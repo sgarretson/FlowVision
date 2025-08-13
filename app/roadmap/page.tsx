@@ -115,7 +115,10 @@ export default function RoadmapPage() {
       setRoadmapData(data);
       setError(null);
     } catch (err) {
-      console.error('Failed to fetch roadmap data:', err);
+      // Log error in development only
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to fetch roadmap data:', err);
+      }
       setError('Failed to load roadmap data');
     } finally {
       setLoading(false);
@@ -354,7 +357,10 @@ export default function RoadmapPage() {
             teamUtilization={roadmapData.teamUtilization}
             initiatives={roadmapData.initiatives}
             onTeamClick={(team) => {
-              console.log('Team clicked:', team);
+              // Debug log in development only
+              if (process.env.NODE_ENV === 'development') {
+                console.log('Team clicked:', team);
+              }
               // Could open team detail modal or navigate to team page
             }}
           />
