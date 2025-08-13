@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import AIAnalysis from './ai-analysis';
 import ClusteringView from './clustering-view';
 import AIClusters from './ai-clusters';
+import AISummary from '@/components/AISummary';
 import { trackEvent } from '@/utils/analytics';
 
 type Issue = {
@@ -14,6 +15,10 @@ type Issue = {
   votes: number;
   heatmapScore: number;
   createdAt: string;
+  aiSummary?: string | null;
+  aiConfidence?: number | null;
+  aiGeneratedAt?: string | null;
+  aiVersion?: string | null;
 };
 
 export default function IssuesPage() {
@@ -183,6 +188,8 @@ export default function IssuesPage() {
             description: issue.description,
             heatmapScore: issue.heatmapScore,
             votes: issue.votes,
+            aiSummary: issue.aiSummary,
+            aiConfidence: issue.aiConfidence,
           })),
         }),
       });
@@ -623,9 +630,30 @@ export default function IssuesPage() {
                           </div>
                         </div>
 
-                        {/* AI Analysis Section */}
+                        {/* AI Summary Section */}
                         <div className="border-t pt-4">
-                          <AIAnalysis issueDescription={issue.description} />
+                          <AISummary
+                            itemId={issue.id}
+                            itemType="issue"
+                            summary={issue.aiSummary}
+                            confidence={issue.aiConfidence}
+                            generatedAt={issue.aiGeneratedAt}
+                            version={issue.aiVersion}
+                            onSummaryGenerated={(summary) => {
+                              // Update the issue in the local state
+                              setIssues((prev) =>
+                                prev.map((i) =>
+                                  i.id === issue.id
+                                    ? {
+                                        ...i,
+                                        aiSummary: summary,
+                                        aiGeneratedAt: new Date().toISOString(),
+                                      }
+                                    : i
+                                )
+                              );
+                            }}
+                          />
                         </div>
                       </div>
                     </div>

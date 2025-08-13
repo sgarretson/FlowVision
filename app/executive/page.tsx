@@ -312,7 +312,7 @@ export default function ExecutiveDashboard() {
 
   const generateExecutiveReport = async () => {
     try {
-      // Generate and download executive summary report
+      // Generate enhanced executive summary report with server data
       const response = await fetch('/api/executive/brief', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -324,22 +324,93 @@ export default function ExecutiveDashboard() {
       });
 
       if (response.ok) {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `executive-summary-${new Date().toISOString().split('T')[0]}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const reportData = await response.json();
+        console.log('Enhanced report data received:', reportData);
+
+        // Use the enhanced data with existing PDF generation
+        await generateEnhancedPDF(reportData);
       } else {
+        console.warn('Enhanced report failed, using fallback');
         // Fallback: use existing export functionality
         await exportReport();
       }
     } catch (error) {
       console.error('Failed to generate executive report:', error);
       // Fallback: use existing export functionality
+      await exportReport();
+    }
+  };
+
+  const generateEnhancedPDF = async (reportData: any) => {
+    try {
+      const [{ jsPDF }, html2canvasModule] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas'),
+      ]);
+      const html2canvas = html2canvasModule.default;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      // Add title
+      pdf.setFontSize(20);
+      pdf.text('Executive Summary Report', 20, 30);
+
+      // Add generation date
+      pdf.setFontSize(12);
+      const dateStr = new Date(reportData.generatedAt).toLocaleDateString();
+      pdf.text(`Generated: ${dateStr}`, 20, 40);
+
+      // Add metrics
+      pdf.setFontSize(14);
+      pdf.text('Key Metrics:', 20, 55);
+      pdf.setFontSize(12);
+      pdf.text(`Total Initiatives: ${reportData.metrics.initiatives}`, 30, 65);
+      pdf.text(`Total Issues: ${reportData.metrics.issues}`, 30, 72);
+      pdf.text(`Weekly Activity: ${reportData.metrics.weeklyActivity} actions`, 30, 79);
+
+      // Add status breakdown
+      pdf.setFontSize(14);
+      pdf.text('Initiative Status Breakdown:', 20, 95);
+      pdf.setFontSize(12);
+      let yPos = 105;
+      Object.entries(reportData.metrics.byStatus || {}).forEach(([status, count]) => {
+        pdf.text(`${status}: ${count}`, 30, yPos);
+        yPos += 7;
+      });
+
+      // Add top initiatives
+      if (reportData.initiatives && reportData.initiatives.length > 0) {
+        pdf.setFontSize(14);
+        pdf.text('Recent Initiatives:', 20, yPos + 10);
+        pdf.setFontSize(10);
+        yPos += 20;
+
+        reportData.initiatives.slice(0, 5).forEach((init: any) => {
+          pdf.text(`• ${init.title} (${init.status}) - ${init.progress}%`, 25, yPos);
+          pdf.text(`  Owner: ${init.owner} | Cluster: ${init.cluster}`, 25, yPos + 4);
+          yPos += 12;
+        });
+      }
+
+      // Add recommendations
+      if (reportData.recommendations && reportData.recommendations.length > 0) {
+        pdf.setFontSize(14);
+        pdf.text('Recommendations:', 20, yPos + 10);
+        pdf.setFontSize(11);
+        yPos += 20;
+
+        reportData.recommendations.forEach((rec: string) => {
+          pdf.text(`• ${rec}`, 25, yPos);
+          yPos += 8;
+        });
+      }
+
+      // Save the PDF
+      const fileName = `executive-summary-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+      console.log('Enhanced PDF generated successfully');
+    } catch (error) {
+      console.error('Enhanced PDF generation failed:', error);
+      // Final fallback to basic export
       await exportReport();
     }
   };

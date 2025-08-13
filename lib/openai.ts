@@ -208,6 +208,265 @@ Extract and format as JSON:
     }
   }
 
+  public async generateIssueSummary(
+    description: string,
+    department?: string,
+    category?: string,
+    businessContext?: any
+  ): Promise<{
+    summary: string;
+    rootCauses: string[];
+    impact: string;
+    recommendations: string[];
+    confidence: number;
+  } | null> {
+    if (!this.isConfigured() || !this.config?.enabled) {
+      return null;
+    }
+
+    try {
+      const contextInfo = businessContext
+        ? `\nBusiness Context: ${businessContext.industry || 'Architecture & Engineering'} firm with ${businessContext.size || 'unknown'} employees.`
+        : '\nBusiness Context: Architecture & Engineering firm.';
+
+      const prompt = `
+Analyze this operational issue from an A&E firm perspective:
+
+Issue: "${description}"
+Department: ${department || 'Unknown'}
+Category: ${category || 'Operational'}
+${contextInfo}
+
+Provide a structured analysis in JSON format:
+{
+  "summary": "2-3 sentence executive summary highlighting the core problem and business impact",
+  "rootCauses": ["3-4 potential root causes in order of likelihood"],
+  "impact": "Specific impact on operations, timeline, client satisfaction, or team productivity",
+  "recommendations": ["3-4 specific, actionable recommendations to address this issue"],
+  "confidence": 85
+}
+
+Focus on practical A&E operational challenges like coordination, technical complexity, client communication, regulatory compliance, and project delivery.
+`;
+
+      const response = await this.client!.chat.completions.create({
+        model: this.config.model || 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: this.config.maxTokens || 600,
+        temperature: this.config.temperature || 0.7,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (content) {
+        try {
+          const parsed = JSON.parse(content);
+          return {
+            summary: parsed.summary || 'AI analysis generated',
+            rootCauses: Array.isArray(parsed.rootCauses) ? parsed.rootCauses : [],
+            impact: parsed.impact || 'Impact analysis pending',
+            recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations : [],
+            confidence: Math.min(Math.max(parsed.confidence || 75, 0), 100),
+          };
+        } catch {
+          // Fallback if JSON parsing fails
+          return {
+            summary: content.substring(0, 200) + '...',
+            rootCauses: ['Analysis available in summary'],
+            impact: 'Detailed analysis in summary section',
+            recommendations: ['Review full analysis for recommendations'],
+            confidence: 60,
+          };
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('OpenAI issue summary error:', error);
+      return null;
+    }
+  }
+
+  public async generateClusterSummary(
+    clusterName: string,
+    clusterDescription: string,
+    issues: Array<{
+      description: string;
+      department?: string;
+      category?: string;
+      votes: number;
+      heatmapScore: number;
+    }>,
+    businessContext?: any
+  ): Promise<{
+    consolidatedSummary: string;
+    crossIssuePatterns: string[];
+    strategicPriority: string;
+    initiativeRecommendations: string[];
+    confidence: number;
+  } | null> {
+    if (!this.isConfigured() || !this.config?.enabled) {
+      return null;
+    }
+
+    try {
+      const contextInfo = businessContext
+        ? `\nBusiness Context: ${businessContext.industry || 'Architecture & Engineering'} firm with ${businessContext.size || 'unknown'} employees.`
+        : '\nBusiness Context: Architecture & Engineering firm.';
+
+      const issuesList = issues
+        .map(
+          (issue, index) =>
+            `${index + 1}. ${issue.description} (Dept: ${issue.department || 'Unknown'}, Score: ${issue.heatmapScore}, Votes: ${issue.votes})`
+        )
+        .join('\n');
+
+      const prompt = `
+Analyze this cluster of related issues from an A&E firm:
+
+Cluster: "${clusterName}"
+Description: "${clusterDescription}"
+${contextInfo}
+
+Related Issues:
+${issuesList}
+
+Provide a strategic cluster analysis in JSON format:
+{
+  "consolidatedSummary": "Executive summary of the cluster's systemic impact on the firm",
+  "crossIssuePatterns": ["3-4 patterns you see across these issues"],
+  "strategicPriority": "HIGH/MEDIUM/LOW with justification",
+  "initiativeRecommendations": ["3-4 strategic initiatives to address this cluster"],
+  "confidence": 90
+}
+
+Focus on systemic problems, cross-departmental impacts, client effects, and strategic solutions for A&E operations.
+`;
+
+      const response = await this.client!.chat.completions.create({
+        model: this.config.model || 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: this.config.maxTokens || 700,
+        temperature: this.config.temperature || 0.7,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (content) {
+        try {
+          const parsed = JSON.parse(content);
+          return {
+            consolidatedSummary: parsed.consolidatedSummary || 'Cluster analysis generated',
+            crossIssuePatterns: Array.isArray(parsed.crossIssuePatterns)
+              ? parsed.crossIssuePatterns
+              : [],
+            strategicPriority: parsed.strategicPriority || 'MEDIUM',
+            initiativeRecommendations: Array.isArray(parsed.initiativeRecommendations)
+              ? parsed.initiativeRecommendations
+              : [],
+            confidence: Math.min(Math.max(parsed.confidence || 80, 0), 100),
+          };
+        } catch {
+          return {
+            consolidatedSummary: content.substring(0, 250) + '...',
+            crossIssuePatterns: ['Analysis available in summary'],
+            strategicPriority: 'MEDIUM - Requires review',
+            initiativeRecommendations: ['Review cluster summary for recommendations'],
+            confidence: 65,
+          };
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('OpenAI cluster summary error:', error);
+      return null;
+    }
+  }
+
+  public async generateRequirementsFromSummary(
+    summary: string,
+    initiativeTitle: string,
+    initiativeGoal: string,
+    businessContext?: any
+  ): Promise<{
+    cards: Array<{
+      title: string;
+      description: string;
+      type: 'BUSINESS' | 'FUNCTIONAL' | 'ACCEPTANCE';
+      priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+      category?: string;
+    }>;
+    confidence: number;
+  } | null> {
+    if (!this.isConfigured() || !this.config?.enabled) {
+      return null;
+    }
+
+    try {
+      const contextInfo = businessContext
+        ? `\nBusiness Context: ${businessContext.industry || 'Architecture & Engineering'} firm with ${businessContext.size || 'unknown'} employees.`
+        : '\nBusiness Context: Architecture & Engineering firm.';
+
+      const prompt = `
+Generate requirement cards for this initiative based on AI analysis:
+
+Initiative: "${initiativeTitle}"
+Goal: "${initiativeGoal}"
+AI Summary: "${summary}"
+${contextInfo}
+
+Generate 4-6 specific requirement cards in JSON format:
+{
+  "cards": [
+    {
+      "title": "Clear, specific requirement title",
+      "description": "Detailed requirement description with success criteria",
+      "type": "BUSINESS|FUNCTIONAL|ACCEPTANCE",
+      "priority": "LOW|MEDIUM|HIGH|CRITICAL",
+      "category": "Implementation|Process|Technology|Training"
+    }
+  ],
+  "confidence": 85
+}
+
+Focus on practical A&E requirements like workflow integration, staff training, client communication, compliance, and measurable success criteria.
+`;
+
+      const response = await this.client!.chat.completions.create({
+        model: this.config.model || 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: this.config.maxTokens || 800,
+        temperature: this.config.temperature || 0.7,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (content) {
+        try {
+          const parsed = JSON.parse(content);
+          return {
+            cards: Array.isArray(parsed.cards) ? parsed.cards : [],
+            confidence: Math.min(Math.max(parsed.confidence || 75, 0), 100),
+          };
+        } catch {
+          // Fallback: create basic requirements from summary
+          return {
+            cards: [
+              {
+                title: 'Implementation Planning',
+                description: 'Plan and execute the solution based on AI analysis findings',
+                type: 'BUSINESS' as const,
+                priority: 'HIGH' as const,
+                category: 'Implementation',
+              },
+            ],
+            confidence: 50,
+          };
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('OpenAI requirements generation error:', error);
+      return null;
+    }
+  }
+
   public async generateRequirementCards(
     title: string,
     problem: string,
