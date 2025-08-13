@@ -22,7 +22,26 @@ export async function GET() {
 
     const config = AIMigration.getConfig();
     const isConfigured = AIMigration.isConfigured();
-    const usageStats = await AIMigration.getPerformanceMetrics();
+    const rawUsageStats = await AIMigration.getPerformanceMetrics();
+
+    // Transform usage stats to match frontend expectations
+    let usageStats;
+    if (rawUsageStats && rawUsageStats.dailyUsage) {
+      usageStats = {
+        totalRequests: rawUsageStats.dailyUsage.totalRequests || 0,
+        totalTokens: rawUsageStats.dailyUsage.totalTokens || 0,
+        lastUsed: rawUsageStats.dailyUsage.lastUsed || null,
+        costEstimate: rawUsageStats.dailyUsage.totalCost || 0,
+      };
+    } else {
+      // Provide default usage stats structure if none available
+      usageStats = {
+        totalRequests: 0,
+        totalTokens: 0,
+        lastUsed: null,
+        costEstimate: 0,
+      };
+    }
 
     return NextResponse.json({
       isConfigured,

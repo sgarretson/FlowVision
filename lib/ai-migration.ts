@@ -46,7 +46,8 @@ export class AIMigration {
     businessContext?: any,
     userId?: string
   ): Promise<any> {
-    if (this.isOptimizedEnabled(userId)) {
+    // Temporarily force original service until optimized service is fixed
+    if (false && this.isOptimizedEnabled(userId)) {
       return optimizedOpenAIService.generateIssueSummary(
         description,
         department,

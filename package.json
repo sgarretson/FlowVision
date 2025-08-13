@@ -4,7 +4,7 @@
   "description": "",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3002",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "echo 'Linting: TypeScript check + Prettier format check' && npx tsc --noEmit && npx prettier --check . --ignore-path .gitignore",

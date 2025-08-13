@@ -98,6 +98,7 @@ export default function ClusterDetailsModal({ clusterId, onClose }: ClusterDetai
   const [activeTab, setActiveTab] = useState<'overview' | 'issues' | 'initiatives' | 'analytics'>(
     'overview'
   );
+  const [creatingInitiative, setCreatingInitiative] = useState(false);
 
   useEffect(() => {
     if (clusterId) {
@@ -124,6 +125,47 @@ export default function ClusterDetailsModal({ clusterId, onClose }: ClusterDetai
       console.error('Cluster details fetch error:', err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleCreateInitiative(clusterId: string) {
+    if (!cluster) return;
+
+    try {
+      setCreatingInitiative(true);
+      console.log('🚀 Creating initiative from cluster:', clusterId);
+
+      const response = await fetch(`/api/clusters/${clusterId}/initiatives`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `${cluster.name} Resolution Initiative`,
+          problem: `Addressing ${cluster.analytics.totalIssues} issues in ${cluster.name} cluster`,
+          goal: `Resolve systemic issues in ${cluster.category} category to improve operational efficiency`,
+          useAI: true,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        console.log('✅ Initiative created successfully:', data.initiative);
+        alert(
+          `Initiative "${data.initiative.title}" created successfully! Redirecting to view details.`
+        );
+        // Redirect to the new initiative
+        window.location.href = `/initiatives/${data.initiative.id}`;
+      } else {
+        console.error('❌ Failed to create initiative:', data);
+        alert(`Failed to create initiative: ${data.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('❌ Error creating initiative:', error);
+      alert(
+        `Error creating initiative: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    } finally {
+      setCreatingInitiative(false);
     }
   }
 
@@ -393,13 +435,23 @@ export default function ClusterDetailsModal({ clusterId, onClose }: ClusterDetai
                       <h3 className="text-lg font-medium text-gray-900">
                         Initiatives ({cluster.analytics.initiativeProgress.total})
                       </h3>
-                      <Link
-                        href={{ pathname: '/plan', query: { cluster: cluster.id } }}
-                        className="btn-primary text-sm flex items-center space-x-2"
+                      <button
+                        onClick={() => handleCreateInitiative(cluster.id)}
+                        disabled={creatingInitiative}
+                        className="btn-primary text-sm flex items-center space-x-2 disabled:opacity-50"
                       >
-                        <PlusIcon className="h-4 w-4" />
-                        <span>Create Initiative</span>
-                      </Link>
+                        {creatingInitiative ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span>Creating...</span>
+                          </>
+                        ) : (
+                          <>
+                            <PlusIcon className="h-4 w-4" />
+                            <span>Create Initiative</span>
+                          </>
+                        )}
+                      </button>
                     </div>
 
                     <div className="space-y-4">
@@ -445,7 +497,7 @@ export default function ClusterDetailsModal({ clusterId, onClose }: ClusterDetai
                           </div>
 
                           {/* Addressed Issues */}
-                          {initiative.addressedIssues.length > 0 && (
+                          {initiative.addressedIssues && initiative.addressedIssues.length > 0 && (
                             <div className="mb-3">
                               <div className="text-xs text-gray-500 mb-1">
                                 Addresses {initiative.addressedIssues.length} issues:
@@ -469,7 +521,7 @@ export default function ClusterDetailsModal({ clusterId, onClose }: ClusterDetai
                           )}
 
                           {/* Milestones */}
-                          {initiative.milestones.length > 0 && (
+                          {initiative.milestones && initiative.milestones.length > 0 && (
                             <div className="border-t border-gray-100 pt-3">
                               <div className="text-xs text-gray-500 mb-2">Recent Milestones:</div>
                               <div className="space-y-1">

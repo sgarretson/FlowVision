@@ -311,7 +311,9 @@ export default function ExecutiveDashboard() {
   };
 
   const generateExecutiveReport = async () => {
+    console.log('🚀 Generate Executive Report button clicked!');
     try {
+      console.log('📡 Fetching report data from API...');
       // Generate enhanced executive summary report with server data
       const response = await fetch('/api/executive/brief', {
         method: 'POST',
@@ -325,29 +327,32 @@ export default function ExecutiveDashboard() {
 
       if (response.ok) {
         const reportData = await response.json();
-        console.log('Enhanced report data received:', reportData);
+        console.log('✅ Enhanced report data received:', reportData);
 
         // Use the enhanced data with existing PDF generation
         await generateEnhancedPDF(reportData);
       } else {
-        console.warn('Enhanced report failed, using fallback');
-        // Fallback: use existing export functionality
-        await exportReport();
+        console.warn('⚠️ Enhanced report failed, using fallback');
+        alert('Report generation failed, please try again.');
       }
     } catch (error) {
-      console.error('Failed to generate executive report:', error);
-      // Fallback: use existing export functionality
-      await exportReport();
+      console.error('❌ Failed to generate executive report:', error);
+      alert(`Report generation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
   const generateEnhancedPDF = async (reportData: any) => {
+    console.log('📄 Starting PDF generation...');
     try {
-      const [{ jsPDF }, html2canvasModule] = await Promise.all([
+      console.log('📦 Loading PDF libraries...');
+      const [jsPDFModule, html2canvasModule] = await Promise.all([
         import('jspdf'),
         import('html2canvas'),
       ]);
+      const { jsPDF } = jsPDFModule;
       const html2canvas = html2canvasModule.default;
+      console.log('✅ Libraries loaded successfully');
+
       const pdf = new jsPDF('p', 'mm', 'a4');
 
       // Add title
@@ -407,7 +412,7 @@ export default function ExecutiveDashboard() {
       // Save the PDF
       const fileName = `executive-summary-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
-      console.log('Enhanced PDF generated successfully');
+      console.log('✅ Enhanced PDF generated successfully:', fileName);
     } catch (error) {
       console.error('Enhanced PDF generation failed:', error);
       // Final fallback to basic export
@@ -416,7 +421,9 @@ export default function ExecutiveDashboard() {
   };
 
   const exportDataCSV = async () => {
+    console.log('📊 Export CSV button clicked!');
     try {
+      console.log('📡 Fetching data from multiple APIs...');
       // Export comprehensive CSV data
       const [initiativesRes, issuesRes, clustersRes] = await Promise.all([
         fetch('/api/initiatives'),
@@ -481,13 +488,15 @@ export default function ExecutiveDashboard() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      console.log('✅ CSV export completed successfully!');
     } catch (error) {
-      console.error('Failed to export CSV:', error);
+      console.error('❌ Failed to export CSV:', error);
       alert('Failed to export data. Please try again.');
     }
   };
 
   const configureScheduledReports = () => {
+    console.log('⚙️ Configure Scheduled Reports button clicked!');
     // Open scheduling configuration modal/dialog
     alert(
       'Scheduled Reports Configuration\n\nThis feature allows you to set up automated report generation and delivery.\n\nComing soon: Configure weekly/monthly report schedules, email delivery, and custom report templates.'

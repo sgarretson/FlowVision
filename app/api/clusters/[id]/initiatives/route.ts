@@ -78,13 +78,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       completedInitiatives: cluster.initiatives.filter((i) => i.status === 'COMPLETED').length,
       totalIssues: cluster.issues.length,
       addressedIssues: new Set(
-        cluster.initiatives.flatMap((i) => i.addressedIssues.map((issue) => issue.id))
+        cluster.initiatives.flatMap((i) => (i.addressedIssues || []).map((issue) => issue.id))
       ).size,
       coveragePercentage:
         cluster.issues.length > 0
           ? Math.round(
               (new Set(
-                cluster.initiatives.flatMap((i) => i.addressedIssues.map((issue) => issue.id))
+                cluster.initiatives.flatMap((i) =>
+                  (i.addressedIssues || []).map((issue) => issue.id)
+                )
               ).size /
                 cluster.issues.length) *
                 100
@@ -101,7 +103,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     // Identify unaddressed issues
     const addressedIssueIds = new Set(
-      cluster.initiatives.flatMap((i) => i.addressedIssues.map((issue) => issue.id))
+      cluster.initiatives.flatMap((i) => (i.addressedIssues || []).map((issue) => issue.id))
     );
     const unaddressedIssues = cluster.issues.filter((issue) => !addressedIssueIds.has(issue.id));
 
