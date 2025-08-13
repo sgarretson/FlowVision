@@ -351,7 +351,7 @@ export default function TaskDetailModal({
                     <p className="text-purple-800 text-sm">{task.aiReasoning}</p>
                     {task.aiConfidence && (
                       <p className="text-purple-600 text-xs mt-2">
-                        Confidence: {(task.aiConfidence * 100).toFixed(0)}%
+                        Confidence: {task.aiConfidence}%
                       </p>
                     )}
                   </div>
