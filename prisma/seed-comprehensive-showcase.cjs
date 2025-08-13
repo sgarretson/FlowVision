@@ -2,7 +2,7 @@
 /**
  * COMPREHENSIVE SHOWCASE SEED DATA FOR FLOWVISION
  * Morrison Architecture & Engineering - Digital Transformation Journey
- * 
+ *
  * Expert Team Strategy: Complete user journeys showcasing all features
  * Scenarios: Critical failures, innovation, process improvement, quality, compliance
  * Coverage: Ideas → Issues → Clusters → Initiatives → Solutions → Tasks → Completion
@@ -19,7 +19,7 @@ async function main() {
 
   // === CLEANUP: Complete data reset ===
   console.log('🧹 Clearing existing data...');
-  
+
   await prisma.vote.deleteMany();
   await prisma.comment.deleteMany();
   await prisma.attachment.deleteMany();
@@ -65,8 +65,8 @@ async function main() {
       preferences: {
         dashboardLayout: 'executive',
         notificationPreferences: ['critical', 'strategic'],
-        aiAssistanceLevel: 'high'
-      }
+        aiAssistanceLevel: 'high',
+      },
     },
   });
 
@@ -80,8 +80,8 @@ async function main() {
       preferences: {
         dashboardLayout: 'project-focused',
         notificationPreferences: ['design', 'client', 'deadlines'],
-        aiAssistanceLevel: 'medium'
-      }
+        aiAssistanceLevel: 'medium',
+      },
     },
   });
 
@@ -95,8 +95,8 @@ async function main() {
       preferences: {
         dashboardLayout: 'operations',
         notificationPreferences: ['operations', 'deadlines', 'resources'],
-        aiAssistanceLevel: 'high'
-      }
+        aiAssistanceLevel: 'high',
+      },
     },
   });
 
@@ -110,8 +110,8 @@ async function main() {
       preferences: {
         dashboardLayout: 'business-focused',
         notificationPreferences: ['client', 'opportunities', 'strategic'],
-        aiAssistanceLevel: 'medium'
-      }
+        aiAssistanceLevel: 'medium',
+      },
     },
   });
 
@@ -125,8 +125,8 @@ async function main() {
       preferences: {
         dashboardLayout: 'technical',
         notificationPreferences: ['compliance', 'technical', 'quality'],
-        aiAssistanceLevel: 'high'
-      }
+        aiAssistanceLevel: 'high',
+      },
     },
   });
 
@@ -142,26 +142,26 @@ async function main() {
         projectDeliveryOnTime: 0.73,
         profitMarginTarget: 0.15,
         currentProfitMargin: 0.12,
-        
-        // Operational Metrics  
+
+        // Operational Metrics
         utilizationRate: 0.78,
         avgProjectDurationDays: 185,
         activeclientProjects: 28,
-        
+
         // Growth Metrics
         revenueGrowthRate: 0.08,
         newClientAcquisition: 6,
         clientRetentionRate: 0.85,
-        
+
         // Quality Metrics
         reworkPercentage: 0.14,
         codeComplianceRate: 0.96,
         safetyIncidents: 2,
-        
+
         // Innovation Metrics
         digitalToolAdoption: 0.65,
         processImprovementInitiatives: 4,
-        staffTrainingHours: 1240
+        staffTrainingHours: 1240,
       },
     },
   });
@@ -182,25 +182,25 @@ async function main() {
         'Building Code Compliance',
         'Client Presentation',
         '3D Visualization',
-        'Space Planning'
+        'Space Planning',
       ],
     },
   });
 
   const structuralEngineering = await prisma.team.create({
     data: {
-      name: 'Structural Engineering', 
+      name: 'Structural Engineering',
       department: 'Engineering',
       capacity: 240, // 6 engineers × 40 hours
       skills: [
         'Structural Analysis',
         'Steel Design',
-        'Concrete Design', 
+        'Concrete Design',
         'Foundation Design',
         'Seismic Design',
         'Load Calculations',
         'Engineering Software',
-        'Code Compliance'
+        'Code Compliance',
       ],
     },
   });
@@ -218,7 +218,7 @@ async function main() {
         'Risk Management',
         'Quality Control',
         'Vendor Management',
-        'Construction Administration'
+        'Construction Administration',
       ],
     },
   });
@@ -236,7 +236,7 @@ async function main() {
         'IT Support',
         'Marketing',
         'Compliance',
-        'Quality Assurance'
+        'Quality Assurance',
       ],
     },
   });
@@ -248,7 +248,8 @@ async function main() {
   const deltekSystem = await prisma.systemCategory.create({
     data: {
       name: 'Deltek (ERP)',
-      description: 'Enterprise resource planning for project management, accounting, and time tracking',
+      description:
+        'Enterprise resource planning for project management, accounting, and time tracking',
       type: 'TECHNOLOGY',
       industry: 'architecture',
       isDefault: true,
@@ -426,7 +427,8 @@ async function main() {
   const vrPresentationIdea = await prisma.idea.create({
     data: {
       title: 'VR Client Presentations',
-      description: 'Implement virtual reality presentations to allow clients to "walk through" designs before construction. This could significantly improve client satisfaction and reduce change orders during construction.',
+      description:
+        'Implement virtual reality presentations to allow clients to "walk through" designs before construction. This could significantly improve client satisfaction and reduce change orders during construction.',
       author: { connect: { id: designDirector.id } },
       status: 'reviewing',
       category: 'technology',
@@ -441,7 +443,8 @@ async function main() {
   const droneInspectionIdea = await prisma.idea.create({
     data: {
       title: 'Drone Construction Inspections',
-      description: 'Use drones for construction progress monitoring and site inspections. This would improve safety, reduce travel time, and provide better documentation.',
+      description:
+        'Use drones for construction progress monitoring and site inspections. This would improve safety, reduce travel time, and provide better documentation.',
       author: { connect: { id: engineeringDirector.id } },
       status: 'approved',
       category: 'process',
@@ -456,7 +459,8 @@ async function main() {
   const aiDesignIdea = await prisma.idea.create({
     data: {
       title: 'AI-Assisted Design Optimization',
-      description: 'Integrate AI tools to optimize building designs for energy efficiency, cost, and code compliance automatically during the design process.',
+      description:
+        'Integrate AI tools to optimize building designs for energy efficiency, cost, and code compliance automatically during the design process.',
       author: { connect: { id: designDirector.id } },
       status: 'approved',
       category: 'technology',
@@ -471,7 +475,8 @@ async function main() {
   const sustainabilityIdea = await prisma.idea.create({
     data: {
       title: 'Carbon Footprint Tracking',
-      description: 'Implement comprehensive carbon footprint tracking for all projects to support sustainability goals and attract environmentally conscious clients.',
+      description:
+        'Implement comprehensive carbon footprint tracking for all projects to support sustainability goals and attract environmentally conscious clients.',
       author: { connect: { id: businessDev.id } },
       status: 'idea',
       category: 'strategy',
@@ -489,161 +494,175 @@ async function main() {
   // SCENARIO A: Critical System Failure Issues
   const deltekIssue1 = await prisma.issue.create({
     data: {
-      description: 'Deltek time tracking system frequently crashes during month-end, causing payroll delays and billing inaccuracies',
+      description:
+        'Deltek time tracking system frequently crashes during month-end, causing payroll delays and billing inaccuracies',
       votes: 18,
       heatmapScore: 95,
       createdAt: new Date('2024-12-15'),
-      aiSummary: 'Critical infrastructure failure affecting core business operations with financial impact',
+      aiSummary:
+        'Critical infrastructure failure affecting core business operations with financial impact',
       aiConfidence: 92,
       aiGeneratedAt: new Date('2024-12-15T10:30:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
   const deltekIssue2 = await prisma.issue.create({
     data: {
-      description: 'Project budget reports from Deltek are inconsistent and don\'t match actual expenses, creating client billing disputes',
+      description:
+        "Project budget reports from Deltek are inconsistent and don't match actual expenses, creating client billing disputes",
       votes: 15,
       heatmapScore: 88,
       createdAt: new Date('2024-12-18'),
       aiSummary: 'Financial reporting inconsistencies impacting client relationships and cash flow',
       aiConfidence: 89,
       aiGeneratedAt: new Date('2024-12-18T14:15:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
   const deltekIssue3 = await prisma.issue.create({
     data: {
-      description: 'Deltek integration with AutoCAD is broken, preventing automatic time allocation to drawing tasks',
+      description:
+        'Deltek integration with AutoCAD is broken, preventing automatic time allocation to drawing tasks',
       votes: 12,
       heatmapScore: 76,
       createdAt: new Date('2024-12-20'),
-      aiSummary: 'System integration failure causing productivity loss and inaccurate project costing',
+      aiSummary:
+        'System integration failure causing productivity loss and inaccurate project costing',
       aiConfidence: 85,
       aiGeneratedAt: new Date('2024-12-20T09:45:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
-  // SCENARIO B: Design Process Issues  
+  // SCENARIO B: Design Process Issues
   const designIssue1 = await prisma.issue.create({
     data: {
-      description: 'Design review meetings consistently run 2+ hours over schedule due to lack of structured process',
+      description:
+        'Design review meetings consistently run 2+ hours over schedule due to lack of structured process',
       votes: 14,
       heatmapScore: 82,
       createdAt: new Date('2024-12-10'),
       aiSummary: 'Process inefficiency affecting project timelines and team productivity',
       aiConfidence: 87,
       aiGeneratedAt: new Date('2024-12-10T11:20:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
   const designIssue2 = await prisma.issue.create({
     data: {
-      description: 'Revit model coordination between disciplines is causing frequent conflicts and rework',
+      description:
+        'Revit model coordination between disciplines is causing frequent conflicts and rework',
       votes: 16,
       heatmapScore: 85,
       createdAt: new Date('2024-12-12'),
       aiSummary: 'Collaboration breakdown leading to quality issues and project delays',
       aiConfidence: 91,
       aiGeneratedAt: new Date('2024-12-12T15:30:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
   const designIssue3 = await prisma.issue.create({
     data: {
-      description: 'Client presentation materials are inconsistent in format and quality across projects',
+      description:
+        'Client presentation materials are inconsistent in format and quality across projects',
       votes: 9,
       heatmapScore: 65,
       createdAt: new Date('2024-12-14'),
       aiSummary: 'Brand inconsistency affecting professional image and client perception',
       aiConfidence: 78,
       aiGeneratedAt: new Date('2024-12-14T13:10:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
   // SCENARIO C: Client Management Issues
   const clientIssue1 = await prisma.issue.create({
     data: {
-      description: 'Clients frequently request changes late in design process, causing schedule delays and budget overruns',
+      description:
+        'Clients frequently request changes late in design process, causing schedule delays and budget overruns',
       votes: 20,
       heatmapScore: 92,
       createdAt: new Date('2024-11-28'),
       aiSummary: 'Change management failure affecting project profitability and timelines',
       aiConfidence: 94,
       aiGeneratedAt: new Date('2024-11-28T16:45:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
   const clientIssue2 = await prisma.issue.create({
     data: {
-      description: 'Client communication is fragmented across email, phone, and meetings with no central tracking',
+      description:
+        'Client communication is fragmented across email, phone, and meetings with no central tracking',
       votes: 11,
       heatmapScore: 70,
       createdAt: new Date('2024-12-05'),
       aiSummary: 'Communication breakdown leading to miscommunication and project inefficiencies',
       aiConfidence: 82,
       aiGeneratedAt: new Date('2024-12-05T10:15:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
   // SCENARIO D: Quality Control Issues
   const qualityIssue1 = await prisma.issue.create({
     data: {
-      description: 'Drawing QC process is inconsistent, leading to construction issues and change orders',
+      description:
+        'Drawing QC process is inconsistent, leading to construction issues and change orders',
       votes: 13,
       heatmapScore: 79,
       createdAt: new Date('2024-12-08'),
       aiSummary: 'Quality control gaps leading to construction problems and client dissatisfaction',
       aiConfidence: 86,
       aiGeneratedAt: new Date('2024-12-08T14:25:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
   const qualityIssue2 = await prisma.issue.create({
     data: {
-      description: 'Code compliance checking is manual and error-prone, missing important requirements',
+      description:
+        'Code compliance checking is manual and error-prone, missing important requirements',
       votes: 17,
       heatmapScore: 87,
       createdAt: new Date('2024-12-22'),
       aiSummary: 'Compliance risk due to manual process limitations and human error potential',
       aiConfidence: 90,
       aiGeneratedAt: new Date('2024-12-22T11:30:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
   // SCENARIO E: Staff and Training Issues
   const staffIssue1 = await prisma.issue.create({
     data: {
-      description: 'New staff onboarding takes 6+ months due to lack of structured training program',
+      description:
+        'New staff onboarding takes 6+ months due to lack of structured training program',
       votes: 8,
       heatmapScore: 68,
       createdAt: new Date('2024-12-03'),
       aiSummary: 'Training inefficiency affecting productivity and staff satisfaction',
       aiConfidence: 80,
       aiGeneratedAt: new Date('2024-12-03T09:15:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
   const staffIssue2 = await prisma.issue.create({
     data: {
-      description: 'Senior staff are overloaded with routine tasks, limiting time for high-value design work',
+      description:
+        'Senior staff are overloaded with routine tasks, limiting time for high-value design work',
       votes: 10,
       heatmapScore: 72,
       createdAt: new Date('2024-12-25'),
       aiSummary: 'Resource allocation inefficiency limiting senior talent utilization',
       aiConfidence: 84,
       aiGeneratedAt: new Date('2024-12-25T10:45:00Z'),
-      aiVersion: 'gpt-3.5-turbo'
+      aiVersion: 'gpt-3.5-turbo',
     },
   });
 
@@ -833,7 +852,8 @@ async function main() {
   const deltekCluster = await prisma.issueCluster.create({
     data: {
       name: 'Deltek ERP System Crisis',
-      description: 'Critical failures in our primary ERP system affecting operations, billing, and project management. Requires immediate attention to prevent business disruption.',
+      description:
+        'Critical failures in our primary ERP system affecting operations, billing, and project management. Requires immediate attention to prevent business disruption.',
       category: 'Technology Infrastructure',
       severity: 'CRITICAL',
       theme: 'System Failure Crisis',
@@ -847,36 +867,33 @@ async function main() {
           critical: 2,
           high: 1,
           medium: 0,
-          low: 0
+          low: 0,
         },
         impactAnalysis: {
           financial: 'High - Billing and payroll disruptions',
           operational: 'Critical - Core business process failures',
           strategic: 'Medium - Potential client relationship damage',
-          timeline: 'Immediate action required'
+          timeline: 'Immediate action required',
         },
         riskFactors: [
           'Financial reporting accuracy',
           'Client billing disputes',
           'Payroll processing delays',
-          'Project cost tracking failures'
-        ]
+          'Project cost tracking failures',
+        ],
       },
       createdAt: new Date('2024-12-15'),
       issues: {
-        connect: [
-          { id: deltekIssue1.id },
-          { id: deltekIssue2.id },
-          { id: deltekIssue3.id }
-        ]
-      }
+        connect: [{ id: deltekIssue1.id }, { id: deltekIssue2.id }, { id: deltekIssue3.id }],
+      },
     },
   });
 
   const designProcessCluster = await prisma.issueCluster.create({
     data: {
       name: 'Design Process Optimization',
-      description: 'Multiple inefficiencies in our design and review processes affecting project timelines, quality, and team productivity. Opportunity for significant process improvement.',
+      description:
+        'Multiple inefficiencies in our design and review processes affecting project timelines, quality, and team productivity. Opportunity for significant process improvement.',
       category: 'Process Improvement',
       severity: 'HIGH',
       theme: 'Process Efficiency',
@@ -890,36 +907,33 @@ async function main() {
           critical: 0,
           high: 2,
           medium: 1,
-          low: 0
+          low: 0,
         },
         impactAnalysis: {
           financial: 'Medium - Project timeline impacts',
           operational: 'High - Daily process inefficiencies',
           strategic: 'High - Quality and client satisfaction',
-          timeline: '30-60 days for implementation'
+          timeline: '30-60 days for implementation',
         },
         riskFactors: [
           'Project delivery delays',
           'Design quality inconsistencies',
           'Team productivity loss',
-          'Client presentation quality'
-        ]
+          'Client presentation quality',
+        ],
       },
       createdAt: new Date('2024-12-10'),
       issues: {
-        connect: [
-          { id: designIssue1.id },
-          { id: designIssue2.id },
-          { id: designIssue3.id }
-        ]
-      }
+        connect: [{ id: designIssue1.id }, { id: designIssue2.id }, { id: designIssue3.id }],
+      },
     },
   });
 
   const clientRelationshipCluster = await prisma.issueCluster.create({
     data: {
       name: 'Client Relationship Enhancement',
-      description: 'Issues related to client communication, change management, and relationship maintenance affecting project success and client satisfaction.',
+      description:
+        'Issues related to client communication, change management, and relationship maintenance affecting project success and client satisfaction.',
       category: 'Client Management',
       severity: 'HIGH',
       theme: 'Client Relations',
@@ -933,35 +947,33 @@ async function main() {
           critical: 1,
           high: 1,
           medium: 0,
-          low: 0
+          low: 0,
         },
         impactAnalysis: {
           financial: 'High - Change orders and disputes',
           operational: 'Medium - Communication overhead',
           strategic: 'Critical - Client retention and satisfaction',
-          timeline: '60-90 days for full implementation'
+          timeline: '60-90 days for full implementation',
         },
         riskFactors: [
           'Client satisfaction decline',
           'Project profitability reduction',
           'Reputation risk',
-          'Change order disputes'
-        ]
+          'Change order disputes',
+        ],
       },
       createdAt: new Date('2024-11-28'),
       issues: {
-        connect: [
-          { id: clientIssue1.id },
-          { id: clientIssue2.id }
-        ]
-      }
+        connect: [{ id: clientIssue1.id }, { id: clientIssue2.id }],
+      },
     },
   });
 
   const qualityControlCluster = await prisma.issueCluster.create({
     data: {
       name: 'Quality Assurance & Compliance',
-      description: 'Quality control gaps in drawing review and code compliance processes creating risk of construction issues and regulatory problems.',
+      description:
+        'Quality control gaps in drawing review and code compliance processes creating risk of construction issues and regulatory problems.',
       category: 'Quality Management',
       severity: 'HIGH',
       theme: 'Quality Control',
@@ -975,35 +987,33 @@ async function main() {
           critical: 0,
           high: 2,
           medium: 0,
-          low: 0
+          low: 0,
         },
         impactAnalysis: {
           financial: 'High - Construction change orders',
           operational: 'Medium - QC process improvements',
           strategic: 'High - Professional liability and reputation',
-          timeline: '45-75 days for system implementation'
+          timeline: '45-75 days for system implementation',
         },
         riskFactors: [
           'Construction errors',
           'Code compliance violations',
           'Professional liability exposure',
-          'Client satisfaction impact'
-        ]
+          'Client satisfaction impact',
+        ],
       },
       createdAt: new Date('2024-12-08'),
       issues: {
-        connect: [
-          { id: qualityIssue1.id },
-          { id: qualityIssue2.id }
-        ]
-      }
+        connect: [{ id: qualityIssue1.id }, { id: qualityIssue2.id }],
+      },
     },
   });
 
   const humanResourcesCluster = await prisma.issueCluster.create({
     data: {
       name: 'Staff Development & Efficiency',
-      description: 'Human resource challenges including training inefficiencies and suboptimal staff utilization affecting overall firm productivity.',
+      description:
+        'Human resource challenges including training inefficiencies and suboptimal staff utilization affecting overall firm productivity.',
       category: 'Human Resources',
       severity: 'MEDIUM',
       theme: 'Staff Development',
@@ -1017,28 +1027,25 @@ async function main() {
           critical: 0,
           high: 0,
           medium: 2,
-          low: 0
+          low: 0,
         },
         impactAnalysis: {
           financial: 'Medium - Productivity improvements',
           operational: 'High - Daily efficiency gains',
           strategic: 'Medium - Long-term staff development',
-          timeline: '90-120 days for comprehensive program'
+          timeline: '90-120 days for comprehensive program',
         },
         riskFactors: [
           'Slow staff ramp-up',
           'Senior staff utilization',
           'Knowledge retention',
-          'Training effectiveness'
-        ]
+          'Training effectiveness',
+        ],
       },
       createdAt: new Date('2024-12-03'),
       issues: {
-        connect: [
-          { id: staffIssue1.id },
-          { id: staffIssue2.id }
-        ]
-      }
+        connect: [{ id: staffIssue1.id }, { id: staffIssue2.id }],
+      },
     },
   });
 
@@ -1055,14 +1062,15 @@ async function main() {
   const deltekInitiative = await prisma.initiative.create({
     data: {
       title: 'Emergency Deltek ERP System Stabilization',
-      problem: 'Critical failures in Deltek ERP system causing business disruption, billing inaccuracies, and operational inefficiencies that threaten our financial operations and client relationships.',
+      problem:
+        'Critical failures in Deltek ERP system causing business disruption, billing inaccuracies, and operational inefficiencies that threaten our financial operations and client relationships.',
       goal: 'Stabilize Deltek system operations, resolve integration issues, and implement monitoring to prevent future failures while maintaining business continuity.',
       kpis: [
         'System uptime >99.5%',
         'Billing accuracy >98%',
         'Time tracking reliability >95%',
         'Integration functionality restored',
-        'Zero payroll delays'
+        'Zero payroll delays',
       ],
       requirements: [
         'Comprehensive system audit and diagnostics',
@@ -1070,7 +1078,7 @@ async function main() {
         'Data integrity validation and cleanup',
         'Monitoring system implementation',
         'Staff training on new procedures',
-        'Backup process documentation'
+        'Backup process documentation',
       ],
       acceptanceCriteria: [
         'All system crashes resolved with root cause analysis',
@@ -1078,7 +1086,7 @@ async function main() {
         'AutoCAD integration fully functional and tested',
         'Monitoring alerts configured for early warning',
         'Staff trained on emergency procedures',
-        'Performance benchmarks established and met'
+        'Performance benchmarks established and met',
       ],
       owner: { connect: { id: principal.id } },
       timelineStart: new Date('2025-01-15'),
@@ -1095,23 +1103,19 @@ async function main() {
       type: 'Technology',
       cluster: { connect: { id: deltekCluster.id } },
       addressedIssues: {
-        connect: [
-          { id: deltekIssue1.id },
-          { id: deltekIssue2.id },
-          { id: deltekIssue3.id }
-        ]
+        connect: [{ id: deltekIssue1.id }, { id: deltekIssue2.id }, { id: deltekIssue3.id }],
       },
       crossImpact: {
         departments: ['Finance', 'Operations', 'All Projects'],
         affectedTeams: ['Project Management', 'Design', 'Engineering', 'Administration'],
         clientImpact: 'High - Improved billing accuracy and project tracking',
-        businessContinuity: 'Critical - Ensures core operations stability'
+        businessContinuity: 'Critical - Ensures core operations stability',
       },
       clusterMetrics: {
         issuesAddressed: 3,
         severityReduction: 'Critical to Low',
         riskMitigation: 95,
-        businessImpact: 'Immediate financial and operational improvements'
+        businessImpact: 'Immediate financial and operational improvements',
       },
       createdAt: new Date('2024-12-23'),
       updatedAt: new Date('2025-01-12'),
@@ -1122,14 +1126,15 @@ async function main() {
   const designInitiative = await prisma.initiative.create({
     data: {
       title: 'Design Process Excellence Program',
-      problem: 'Inefficient design review processes, coordination issues, and inconsistent deliverables are affecting project timelines, quality, and client satisfaction.',
+      problem:
+        'Inefficient design review processes, coordination issues, and inconsistent deliverables are affecting project timelines, quality, and client satisfaction.',
       goal: 'Implement streamlined design processes, improve collaboration tools, and establish consistent quality standards to enhance productivity and project outcomes.',
       kpis: [
         'Design review meeting efficiency +50%',
         'Model coordination conflicts -75%',
         'Presentation consistency score >90%',
         'Design rework reduction -40%',
-        'Client satisfaction score >8.5'
+        'Client satisfaction score >8.5',
       ],
       requirements: [
         'Structured design review process implementation',
@@ -1137,7 +1142,7 @@ async function main() {
         'Presentation template standardization',
         'Quality control checkpoints integration',
         'Team collaboration tools upgrade',
-        'Performance monitoring dashboard'
+        'Performance monitoring dashboard',
       ],
       acceptanceCriteria: [
         'Design review meetings consistently under 2 hours',
@@ -1145,7 +1150,7 @@ async function main() {
         'All presentations use approved templates',
         'Quality checkpoints integrated in workflow',
         'Team collaboration metrics improved',
-        'Client feedback scores demonstrate improvement'
+        'Client feedback scores demonstrate improvement',
       ],
       owner: { connect: { id: designDirector.id } },
       timelineStart: new Date('2025-02-01'),
@@ -1162,23 +1167,19 @@ async function main() {
       type: 'Process Improvement',
       cluster: { connect: { id: designProcessCluster.id } },
       addressedIssues: {
-        connect: [
-          { id: designIssue1.id },
-          { id: designIssue2.id },
-          { id: designIssue3.id }
-        ]
+        connect: [{ id: designIssue1.id }, { id: designIssue2.id }, { id: designIssue3.id }],
       },
       crossImpact: {
         departments: ['Design', 'Engineering', 'Project Management'],
         affectedTeams: ['Architectural Design', 'Structural Engineering'],
         clientImpact: 'High - Improved design quality and presentation consistency',
-        businessContinuity: 'Medium - Enhanced operational efficiency'
+        businessContinuity: 'Medium - Enhanced operational efficiency',
       },
       clusterMetrics: {
         issuesAddressed: 3,
         severityReduction: 'High to Low',
         riskMitigation: 80,
-        businessImpact: 'Improved productivity and client satisfaction'
+        businessImpact: 'Improved productivity and client satisfaction',
       },
       createdAt: new Date('2024-12-28'),
       updatedAt: new Date('2025-01-10'),
@@ -1189,14 +1190,15 @@ async function main() {
   const clientInitiative = await prisma.initiative.create({
     data: {
       title: 'Client Relationship Excellence Initiative',
-      problem: 'Client change management issues and fragmented communication are causing project delays, budget overruns, and relationship strain affecting firm profitability and reputation.',
+      problem:
+        'Client change management issues and fragmented communication are causing project delays, budget overruns, and relationship strain affecting firm profitability and reputation.',
       goal: 'Implement comprehensive client management system with structured change processes and unified communication to improve client satisfaction and project profitability.',
       kpis: [
         'Late change requests -60%',
         'Client satisfaction score >9.0',
         'Change order disputes -80%',
         'Communication response time <4 hours',
-        'Project profitability +15%'
+        'Project profitability +15%',
       ],
       requirements: [
         'Client communication portal implementation',
@@ -1204,7 +1206,7 @@ async function main() {
         'Client education program development',
         'Project milestone communication automation',
         'Client feedback collection system',
-        'Relationship management training'
+        'Relationship management training',
       ],
       acceptanceCriteria: [
         'All client communication centralized in portal',
@@ -1212,7 +1214,7 @@ async function main() {
         'Client education materials created and deployed',
         'Automated milestone notifications implemented',
         'Feedback collection system operational',
-        'Team trained on new communication protocols'
+        'Team trained on new communication protocols',
       ],
       owner: { connect: { id: businessDev.id } },
       timelineStart: new Date('2025-02-15'),
@@ -1229,22 +1231,19 @@ async function main() {
       type: 'Strategic',
       cluster: { connect: { id: clientRelationshipCluster.id } },
       addressedIssues: {
-        connect: [
-          { id: clientIssue1.id },
-          { id: clientIssue2.id }
-        ]
+        connect: [{ id: clientIssue1.id }, { id: clientIssue2.id }],
       },
       crossImpact: {
         departments: ['Business Development', 'Project Management', 'Design'],
         affectedTeams: ['All Client-Facing Teams'],
         clientImpact: 'Critical - Direct improvement to client experience',
-        businessContinuity: 'High - Improved client retention and profitability'
+        businessContinuity: 'High - Improved client retention and profitability',
       },
       clusterMetrics: {
         issuesAddressed: 2,
         severityReduction: 'High to Low',
         riskMitigation: 85,
-        businessImpact: 'Improved client relationships and project profitability'
+        businessImpact: 'Improved client relationships and project profitability',
       },
       createdAt: new Date('2025-01-02'),
       updatedAt: new Date('2025-01-08'),
@@ -1255,14 +1254,15 @@ async function main() {
   const vrInitiative = await prisma.initiative.create({
     data: {
       title: 'Virtual Reality Client Experience Platform',
-      problem: 'Traditional 2D presentations limit client understanding of design concepts, leading to miscommunication, change orders, and reduced client satisfaction during the design process.',
+      problem:
+        'Traditional 2D presentations limit client understanding of design concepts, leading to miscommunication, change orders, and reduced client satisfaction during the design process.',
       goal: 'Implement VR technology for immersive client presentations to improve design communication, reduce change orders, and differentiate our services in the market.',
       kpis: [
         'Client design approval speed +40%',
         'Change orders during construction -30%',
         'Client satisfaction score >9.2',
         'Competitive advantage measurable in proposals',
-        'ROI positive within 18 months'
+        'ROI positive within 18 months',
       ],
       requirements: [
         'VR hardware procurement and setup',
@@ -1270,7 +1270,7 @@ async function main() {
         'Staff training on VR presentation techniques',
         'Client experience protocols development',
         'VR presentation room configuration',
-        'Marketing materials highlighting VR capability'
+        'Marketing materials highlighting VR capability',
       ],
       acceptanceCriteria: [
         'VR system operational for client presentations',
@@ -1278,7 +1278,7 @@ async function main() {
         'Client experience protocols documented',
         'VR capability integrated into marketing materials',
         'Measurable improvement in client satisfaction',
-        'ROI tracking system implemented'
+        'ROI tracking system implemented',
       ],
       owner: { connect: { id: designDirector.id } },
       timelineStart: new Date('2025-03-01'),
@@ -1294,13 +1294,13 @@ async function main() {
       phase: 'planning',
       type: 'Technology',
       ideas: {
-        connect: [{ id: vrPresentationIdea.id }]
+        connect: [{ id: vrPresentationIdea.id }],
       },
       crossImpact: {
         departments: ['Design', 'Business Development', 'Marketing'],
         affectedTeams: ['Architectural Design', 'Business Operations'],
         clientImpact: 'High - Revolutionary client experience improvement',
-        businessContinuity: 'Medium - Competitive differentiation'
+        businessContinuity: 'Medium - Competitive differentiation',
       },
       createdAt: new Date('2025-01-05'),
       updatedAt: new Date('2025-01-05'),
@@ -1311,14 +1311,15 @@ async function main() {
   const qualityInitiative = await prisma.initiative.create({
     data: {
       title: 'Automated Quality Assurance System',
-      problem: 'Manual quality control processes are inconsistent and error-prone, leading to construction issues, code compliance risks, and potential professional liability exposure.',
+      problem:
+        'Manual quality control processes are inconsistent and error-prone, leading to construction issues, code compliance risks, and potential professional liability exposure.',
       goal: 'Implement automated quality control systems with AI-assisted code compliance checking to ensure consistent quality and reduce construction-related issues.',
       kpis: [
         'QC consistency score >95%',
         'Code compliance errors -80%',
         'Construction change orders -50%',
         'QC process time -60%',
-        'Professional liability risk reduction'
+        'Professional liability risk reduction',
       ],
       requirements: [
         'Automated drawing QC software implementation',
@@ -1326,7 +1327,7 @@ async function main() {
         'Quality control workflow integration',
         'Staff training on new QC procedures',
         'Quality metrics dashboard development',
-        'Construction feedback loop establishment'
+        'Construction feedback loop establishment',
       ],
       acceptanceCriteria: [
         'Automated QC system operational for all projects',
@@ -1334,7 +1335,7 @@ async function main() {
         'Quality metrics dashboard providing real-time insights',
         'All design staff trained on new QC procedures',
         'Construction feedback system capturing QC effectiveness',
-        'Measurable reduction in construction issues'
+        'Measurable reduction in construction issues',
       ],
       owner: { connect: { id: engineeringDirector.id } },
       timelineStart: new Date('2025-04-01'),
@@ -1351,22 +1352,19 @@ async function main() {
       type: 'Quality',
       cluster: { connect: { id: qualityControlCluster.id } },
       addressedIssues: {
-        connect: [
-          { id: qualityIssue1.id },
-          { id: qualityIssue2.id }
-        ]
+        connect: [{ id: qualityIssue1.id }, { id: qualityIssue2.id }],
       },
       crossImpact: {
         departments: ['Engineering', 'Design', 'Quality Assurance'],
         affectedTeams: ['Structural Engineering', 'Architectural Design'],
         clientImpact: 'High - Improved design quality and construction outcomes',
-        businessContinuity: 'High - Risk reduction and quality improvement'
+        businessContinuity: 'High - Risk reduction and quality improvement',
       },
       clusterMetrics: {
         issuesAddressed: 2,
         severityReduction: 'High to Low',
         riskMitigation: 90,
-        businessImpact: 'Quality improvement and risk reduction'
+        businessImpact: 'Quality improvement and risk reduction',
       },
       createdAt: new Date('2025-01-08'),
       updatedAt: new Date('2025-01-08'),
@@ -1381,7 +1379,8 @@ async function main() {
     data: {
       initiative: { connect: { id: deltekInitiative.id } },
       title: 'Emergency System Stabilization',
-      description: 'Immediate technical intervention to resolve critical system failures and restore operational stability',
+      description:
+        'Immediate technical intervention to resolve critical system failures and restore operational stability',
       type: 'TECHNOLOGY',
       priority: 10,
       status: 'IN_PROGRESS',
@@ -1395,7 +1394,8 @@ async function main() {
       assignedTo: { connect: { id: projectDirector.id } },
       isAIGenerated: true,
       aiConfidence: 92,
-      aiReasoning: 'Critical system failures require immediate technical intervention with experienced team',
+      aiReasoning:
+        'Critical system failures require immediate technical intervention with experienced team',
       progress: 25,
       tags: ['emergency', 'system-repair', 'critical'],
       notes: 'Vendor support engaged, initial diagnostics completed',
@@ -1406,7 +1406,8 @@ async function main() {
     data: {
       initiative: { connect: { id: deltekInitiative.id } },
       title: 'Integration Architecture Rebuild',
-      description: 'Redesign and rebuild integration connections between Deltek and other systems for reliability',
+      description:
+        'Redesign and rebuild integration connections between Deltek and other systems for reliability',
       type: 'TECHNOLOGY',
       priority: 9,
       status: 'PLANNED',
@@ -1417,7 +1418,8 @@ async function main() {
       assignedTo: { connect: { id: engineeringDirector.id } },
       isAIGenerated: true,
       aiConfidence: 88,
-      aiReasoning: 'Integration failures suggest architectural issues requiring comprehensive rebuild',
+      aiReasoning:
+        'Integration failures suggest architectural issues requiring comprehensive rebuild',
       progress: 10,
       tags: ['integration', 'architecture', 'rebuild'],
       notes: 'Architecture review scheduled, vendor consultation planned',
@@ -1428,7 +1430,8 @@ async function main() {
     data: {
       initiative: { connect: { id: deltekInitiative.id } },
       title: 'Monitoring and Alerting System',
-      description: 'Implement comprehensive monitoring with proactive alerting to prevent future failures',
+      description:
+        'Implement comprehensive monitoring with proactive alerting to prevent future failures',
       type: 'TECHNOLOGY',
       priority: 8,
       status: 'PLANNED',
@@ -1451,7 +1454,8 @@ async function main() {
     data: {
       initiative: { connect: { id: designInitiative.id } },
       title: 'Structured Design Review Framework',
-      description: 'Implement standardized design review process with defined roles, timelines, and decision criteria',
+      description:
+        'Implement standardized design review process with defined roles, timelines, and decision criteria',
       type: 'PROCESS',
       priority: 9,
       status: 'PLANNED',
@@ -1473,7 +1477,8 @@ async function main() {
     data: {
       initiative: { connect: { id: designInitiative.id } },
       title: 'Advanced Revit Collaboration Platform',
-      description: 'Upgrade Revit collaboration infrastructure with enhanced coordination tools and protocols',
+      description:
+        'Upgrade Revit collaboration infrastructure with enhanced coordination tools and protocols',
       type: 'TECHNOLOGY',
       priority: 8,
       status: 'PLANNED',
@@ -1484,7 +1489,8 @@ async function main() {
       assignedTo: { connect: { id: engineeringDirector.id } },
       isAIGenerated: true,
       aiConfidence: 87,
-      aiReasoning: 'Technical solution needed to address model coordination and collaboration issues',
+      aiReasoning:
+        'Technical solution needed to address model coordination and collaboration issues',
       progress: 10,
       tags: ['revit', 'collaboration', 'coordination'],
       notes: 'Software evaluation completed, implementation plan in development',
@@ -1500,7 +1506,8 @@ async function main() {
       {
         solutionId: deltekSolution1.id,
         title: 'System Diagnostic and Root Cause Analysis',
-        description: 'Comprehensive analysis of system failures to identify root causes and patterns',
+        description:
+          'Comprehensive analysis of system failures to identify root causes and patterns',
         assignedToId: projectDirector.id,
         status: 'COMPLETED',
         priority: 10,
@@ -1589,7 +1596,8 @@ async function main() {
       {
         solutionId: deltekSolution2.id,
         title: 'Integration Architecture Assessment',
-        description: 'Evaluate current integration architecture and identify improvement opportunities',
+        description:
+          'Evaluate current integration architecture and identify improvement opportunities',
         assignedToId: engineeringDirector.id,
         status: 'TODO',
         priority: 10,
@@ -1749,7 +1757,8 @@ async function main() {
         initiativeId: deltekInitiative.id,
         type: 'BUSINESS',
         title: 'System Uptime Requirement',
-        description: 'Deltek system must maintain 99.5% uptime during business hours with no unplanned outages exceeding 15 minutes',
+        description:
+          'Deltek system must maintain 99.5% uptime during business hours with no unplanned outages exceeding 15 minutes',
         priority: 'CRITICAL',
         status: 'APPROVED',
         category: 'Performance',
@@ -1766,7 +1775,8 @@ async function main() {
         initiativeId: deltekInitiative.id,
         type: 'FUNCTIONAL',
         title: 'Integration Reliability',
-        description: 'All system integrations (AutoCAD, Office 365, external tools) must function consistently with error rate <1%',
+        description:
+          'All system integrations (AutoCAD, Office 365, external tools) must function consistently with error rate <1%',
         priority: 'HIGH',
         status: 'APPROVED',
         category: 'Integration',
@@ -1783,7 +1793,8 @@ async function main() {
         initiativeId: deltekInitiative.id,
         type: 'ACCEPTANCE',
         title: 'Billing Accuracy Validation',
-        description: 'System must generate accurate billing reports with 98% accuracy validated against manual checks',
+        description:
+          'System must generate accurate billing reports with 98% accuracy validated against manual checks',
         priority: 'CRITICAL',
         status: 'REVIEW',
         category: 'Financial',
@@ -1805,7 +1816,8 @@ async function main() {
         initiativeId: designInitiative.id,
         type: 'BUSINESS',
         title: 'Meeting Efficiency Target',
-        description: 'Design review meetings must consistently complete within 90 minutes with all required decisions made',
+        description:
+          'Design review meetings must consistently complete within 90 minutes with all required decisions made',
         priority: 'HIGH',
         status: 'APPROVED',
         category: 'Process Efficiency',
@@ -1822,7 +1834,8 @@ async function main() {
         initiativeId: designInitiative.id,
         type: 'FUNCTIONAL',
         title: 'Model Coordination Standards',
-        description: 'Revit models must maintain coordination with <5 conflicts per discipline per project milestone',
+        description:
+          'Revit models must maintain coordination with <5 conflicts per discipline per project milestone',
         priority: 'HIGH',
         status: 'APPROVED',
         category: 'Quality Standards',
@@ -1908,31 +1921,36 @@ async function main() {
   await prisma.comment.createMany({
     data: [
       {
-        content: 'This is becoming a critical business risk. We need to escalate to emergency status and engage vendor support immediately.',
+        content:
+          'This is becoming a critical business risk. We need to escalate to emergency status and engage vendor support immediately.',
         authorId: principal.id,
         issueId: deltekIssue1.id,
         createdAt: new Date('2024-12-15T11:30:00Z'),
       },
       {
-        content: 'Agreed. I\'ve already contacted Deltek support and they\'re providing emergency response. We should also prepare backup procedures.',
+        content:
+          "Agreed. I've already contacted Deltek support and they're providing emergency response. We should also prepare backup procedures.",
         authorId: projectDirector.id,
         issueId: deltekIssue1.id,
         createdAt: new Date('2024-12-15T12:15:00Z'),
       },
       {
-        content: 'The integration issues might be related to the recent Windows update. We should check system compatibility.',
+        content:
+          'The integration issues might be related to the recent Windows update. We should check system compatibility.',
         authorId: engineeringDirector.id,
         issueId: deltekIssue3.id,
         createdAt: new Date('2024-12-20T10:30:00Z'),
       },
       {
-        content: 'This affects our ability to demonstrate design intent to clients. We should prioritize this for our upcoming presentations.',
+        content:
+          'This affects our ability to demonstrate design intent to clients. We should prioritize this for our upcoming presentations.',
         authorId: designDirector.id,
         issueId: designIssue3.id,
         createdAt: new Date('2024-12-14T15:45:00Z'),
       },
       {
-        content: 'We need to quantify the impact on client satisfaction. I\'ll pull together some data from recent client feedback.',
+        content:
+          "We need to quantify the impact on client satisfaction. I'll pull together some data from recent client feedback.",
         authorId: businessDev.id,
         issueId: clientIssue1.id,
         createdAt: new Date('2024-11-29T09:15:00Z'),
@@ -1944,25 +1962,29 @@ async function main() {
   await prisma.comment.createMany({
     data: [
       {
-        content: 'Emergency initiative approved. All necessary resources will be made available. This is our top priority.',
+        content:
+          'Emergency initiative approved. All necessary resources will be made available. This is our top priority.',
         authorId: principal.id,
         initiativeId: deltekInitiative.id,
         createdAt: new Date('2024-12-23T14:00:00Z'),
       },
       {
-        content: 'Initial diagnostics complete. Root cause identified as database corruption combined with memory leaks. Recovery plan in progress.',
+        content:
+          'Initial diagnostics complete. Root cause identified as database corruption combined with memory leaks. Recovery plan in progress.',
         authorId: projectDirector.id,
         initiativeId: deltekInitiative.id,
         createdAt: new Date('2025-01-18T16:30:00Z'),
       },
       {
-        content: 'The structured review process will significantly improve our project delivery. I recommend we pilot this on the Henderson project first.',
+        content:
+          'The structured review process will significantly improve our project delivery. I recommend we pilot this on the Henderson project first.',
         authorId: designDirector.id,
         initiativeId: designInitiative.id,
         createdAt: new Date('2025-01-05T11:20:00Z'),
       },
       {
-        content: 'VR technology could be a game-changer for client presentations. We should coordinate this with our upcoming marketing initiatives.',
+        content:
+          'VR technology could be a game-changer for client presentations. We should coordinate this with our upcoming marketing initiatives.',
         authorId: businessDev.id,
         initiativeId: vrInitiative.id,
         createdAt: new Date('2025-01-06T10:45:00Z'),
@@ -1974,19 +1996,22 @@ async function main() {
   await prisma.comment.createMany({
     data: [
       {
-        content: 'VR presentations could really set us apart from competitors. The ROI potential is significant if we can reduce change orders.',
+        content:
+          'VR presentations could really set us apart from competitors. The ROI potential is significant if we can reduce change orders.',
         authorId: businessDev.id,
         ideaId: vrPresentationIdea.id,
         createdAt: new Date('2024-12-01T14:30:00Z'),
       },
       {
-        content: 'I agree this is innovative, but we need to consider the learning curve for our design team. Training will be essential.',
+        content:
+          'I agree this is innovative, but we need to consider the learning curve for our design team. Training will be essential.',
         authorId: projectDirector.id,
         ideaId: vrPresentationIdea.id,
         createdAt: new Date('2024-12-03T09:15:00Z'),
       },
       {
-        content: 'Drone inspections are already being used successfully by other firms. We should move quickly to implement this.',
+        content:
+          'Drone inspections are already being used successfully by other firms. We should move quickly to implement this.',
         authorId: engineeringDirector.id,
         ideaId: droneInspectionIdea.id,
         createdAt: new Date('2024-12-05T11:45:00Z'),
@@ -2005,15 +2030,15 @@ async function main() {
       { userId: projectDirector.id, issueId: deltekIssue1.id, type: 'up' },
       { userId: businessDev.id, issueId: deltekIssue1.id, type: 'up' },
       { userId: engineeringDirector.id, issueId: deltekIssue1.id, type: 'up' },
-      
+
       { userId: principal.id, issueId: clientIssue1.id, type: 'up' },
       { userId: businessDev.id, issueId: clientIssue1.id, type: 'up' },
       { userId: projectDirector.id, issueId: clientIssue1.id, type: 'up' },
-      
+
       { userId: designDirector.id, issueId: designIssue2.id, type: 'up' },
       { userId: engineeringDirector.id, issueId: designIssue2.id, type: 'up' },
       { userId: projectDirector.id, issueId: designIssue2.id, type: 'up' },
-      
+
       { userId: engineeringDirector.id, issueId: qualityIssue2.id, type: 'up' },
       { userId: principal.id, issueId: qualityIssue2.id, type: 'up' },
       { userId: designDirector.id, issueId: qualityIssue2.id, type: 'up' },
@@ -2026,11 +2051,11 @@ async function main() {
       { userId: principal.id, ideaId: vrPresentationIdea.id, type: 'up' },
       { userId: businessDev.id, ideaId: vrPresentationIdea.id, type: 'up' },
       { userId: projectDirector.id, ideaId: vrPresentationIdea.id, type: 'up' },
-      
+
       { userId: engineeringDirector.id, ideaId: droneInspectionIdea.id, type: 'up' },
       { userId: principal.id, ideaId: droneInspectionIdea.id, type: 'up' },
       { userId: designDirector.id, ideaId: droneInspectionIdea.id, type: 'up' },
-      
+
       { userId: designDirector.id, ideaId: aiDesignIdea.id, type: 'up' },
       { userId: engineeringDirector.id, ideaId: aiDesignIdea.id, type: 'up' },
     ],
@@ -2048,7 +2073,7 @@ async function main() {
           initiativeId: deltekInitiative.id,
           severity: 'CRITICAL',
           reason: 'Business-critical system failures requiring immediate intervention',
-          impactAssessment: 'High financial and operational risk'
+          impactAssessment: 'High financial and operational risk',
         },
         timestamp: new Date('2024-12-23T14:00:00Z'),
       },
@@ -2059,7 +2084,7 @@ async function main() {
           initiativeId: deltekInitiative.id,
           findingsCount: 8,
           severity: 'CRITICAL',
-          rootCauses: ['Database corruption', 'Memory leaks', 'Integration failures']
+          rootCauses: ['Database corruption', 'Memory leaks', 'Integration failures'],
         },
         timestamp: new Date('2025-01-19T17:30:00Z'),
       },
@@ -2070,7 +2095,7 @@ async function main() {
           clusterId: designProcessCluster.id,
           issuesAnalyzed: 3,
           confidence: 89,
-          aiRecommendations: 5
+          aiRecommendations: 5,
         },
         timestamp: new Date('2024-12-28T10:15:00Z'),
       },
@@ -2081,7 +2106,7 @@ async function main() {
           ideaId: vrPresentationIdea.id,
           category: 'Technology Enhancement',
           estimatedROI: 90,
-          implementationCost: 75000
+          implementationCost: 75000,
         },
         timestamp: new Date('2024-12-20T11:30:00Z'),
       },
@@ -2092,7 +2117,7 @@ async function main() {
           initiativeId: qualityInitiative.id,
           focus: 'Automated QC and code compliance',
           riskReduction: 90,
-          estimatedSavings: 200000
+          estimatedSavings: 200000,
         },
         timestamp: new Date('2025-01-08T09:45:00Z'),
       },
