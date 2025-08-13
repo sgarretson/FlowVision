@@ -310,6 +310,119 @@ export default function ExecutiveDashboard() {
     }
   };
 
+  const generateExecutiveReport = async () => {
+    try {
+      // Generate and download executive summary report
+      const response = await fetch('/api/executive/brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          includeCharts: true,
+          includeRecommendations: true,
+          format: 'pdf',
+        }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `executive-summary-${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        // Fallback: use existing export functionality
+        await exportReport();
+      }
+    } catch (error) {
+      console.error('Failed to generate executive report:', error);
+      // Fallback: use existing export functionality
+      await exportReport();
+    }
+  };
+
+  const exportDataCSV = async () => {
+    try {
+      // Export comprehensive CSV data
+      const [initiativesRes, issuesRes, clustersRes] = await Promise.all([
+        fetch('/api/initiatives'),
+        fetch('/api/issues'),
+        fetch('/api/ai/cluster-issues'),
+      ]);
+
+      const [initiatives, issues, clusters] = await Promise.all([
+        initiativesRes.json(),
+        issuesRes.json(),
+        clustersRes.ok ? clustersRes.json() : { clusters: [] },
+      ]);
+
+      // Create CSV content
+      const csvData = {
+        initiatives: initiatives.map((init: any) => ({
+          id: init.id,
+          title: init.title,
+          status: init.status,
+          progress: init.progress,
+          priority: init.priorityScore,
+          roi: init.roi,
+          difficulty: init.difficulty,
+          budget: init.budget,
+          owner: init.owner?.name || 'Unknown',
+        })),
+        issues: issues.map((issue: any) => ({
+          id: issue.id,
+          description: issue.description,
+          votes: issue.votes,
+          heatmapScore: issue.heatmapScore,
+          department: issue.department,
+          category: issue.category,
+        })),
+        clusters:
+          clusters.clusters?.map((cluster: any) => ({
+            id: cluster.id,
+            name: cluster.name,
+            category: cluster.category,
+            severity: cluster.severity,
+            issueCount: cluster.issueCount,
+          })) || [],
+      };
+
+      // Convert to CSV and download
+      const csvContent = Object.entries(csvData)
+        .map(([type, data]) => {
+          if (data.length === 0) return `${type.toUpperCase()}\nNo data available\n\n`;
+
+          const headers = Object.keys(data[0]).join(',');
+          const rows = data.map((item: any) => Object.values(item).join(','));
+          return `${type.toUpperCase()}\n${headers}\n${rows.join('\n')}\n\n`;
+        })
+        .join('');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `flowvision-data-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export CSV:', error);
+      alert('Failed to export data. Please try again.');
+    }
+  };
+
+  const configureScheduledReports = () => {
+    // Open scheduling configuration modal/dialog
+    alert(
+      'Scheduled Reports Configuration\n\nThis feature allows you to set up automated report generation and delivery.\n\nComing soon: Configure weekly/monthly report schedules, email delivery, and custom report templates.'
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -373,6 +486,7 @@ export default function ExecutiveDashboard() {
             {[
               { id: 'overview', name: 'Overview', icon: ChartBarIcon },
               { id: 'insights', name: 'AI Insights', icon: LightBulbIcon },
+              { id: 'reports', name: 'Reports', icon: DocumentArrowDownIcon },
               { id: 'forecasting', name: 'ROI Forecasting', icon: ArrowTrendingUpIcon },
               { id: 'alerts', name: 'Alerts', icon: ExclamationTriangleIcon },
               { id: 'utilization', name: 'Team Utilization', icon: UsersIcon },
@@ -617,6 +731,104 @@ export default function ExecutiveDashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'reports' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Efficiency Intelligence</h2>
+                <p className="text-gray-600 mt-1">
+                  Transform your operational data into actionable insights
+                </p>
+              </div>
+              <div className="text-sm text-gray-500">
+                Updated {lastUpdated.toLocaleTimeString()}
+              </div>
+            </div>
+
+            {/* Report Generation Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Executive Summary */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white rounded-lg shadow-sm border p-6"
+              >
+                <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mb-4 mx-auto">
+                  <DocumentArrowDownIcon className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+                  Executive Summary
+                </h3>
+                <p className="text-gray-600 text-center text-sm mb-4">
+                  Weekly efficiency report for leadership
+                </p>
+                <button onClick={generateExecutiveReport} className="w-full btn-primary">
+                  Generate Report
+                </button>
+              </motion.div>
+
+              {/* Data Export */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-lg shadow-sm border p-6"
+              >
+                <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4 mx-auto">
+                  <ArrowTrendingUpIcon className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+                  Data Export
+                </h3>
+                <p className="text-gray-600 text-center text-sm mb-4">
+                  Export raw data for external analysis
+                </p>
+                <button onClick={exportDataCSV} className="w-full btn-secondary">
+                  Export CSV
+                </button>
+              </motion.div>
+
+              {/* Scheduled Reports */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white rounded-lg shadow-sm border p-6"
+              >
+                <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg mb-4 mx-auto">
+                  <CalendarIcon className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+                  Scheduled Reports
+                </h3>
+                <p className="text-gray-600 text-center text-sm mb-4">
+                  Setup automated reporting schedules
+                </p>
+                <button onClick={configureScheduledReports} className="w-full btn-secondary">
+                  Configure
+                </button>
+              </motion.div>
+            </div>
+
+            {/* Recent Reports */}
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">Recent Reports</h3>
+              </div>
+              <div className="p-6">
+                <div className="text-center py-12">
+                  <DocumentArrowDownIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">
+                    No reports generated yet
+                  </h4>
+                  <p className="text-gray-600">Generate your first report to get started</p>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}

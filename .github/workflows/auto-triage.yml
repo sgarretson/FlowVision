@@ -26,8 +26,8 @@ jobs:
             const issue = context.payload.issue;
             if (!issue) return;
             // If milestone title matches P0, add to project #1
-            const { data: milestones } = await github.rest.issues.getIssue({ owner, repo, issue_number: issue.number });
-            const ms = milestones.milestone;
+            const { data: issueData } = await github.rest.issues.get({ owner, repo, issue_number: issue.number });
+            const ms = issueData.milestone;
             if (ms && ms.title === 'Executive Issue-to-Initiative P0') {
               await github.graphql(`
                 mutation($project:ID!,$content:ID!){
