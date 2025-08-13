@@ -52,28 +52,30 @@ interface TimelineViewProps {
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
     case 'done':
-      return 'bg-green-500';
+    case 'completed':
+      return 'bg-green-500 hover:bg-green-600';
     case 'in progress':
-      return 'bg-blue-500';
+    case 'active':
+      return 'bg-blue-500 hover:bg-blue-600';
     case 'prioritize':
-      return 'bg-yellow-500';
+      return 'bg-orange-500 hover:bg-orange-600';
     case 'define':
-      return 'bg-gray-500';
+      return 'bg-gray-500 hover:bg-gray-600';
     default:
-      return 'bg-gray-400';
+      return 'bg-gray-400 hover:bg-gray-500';
   }
 };
 
 const getPhaseColor = (phase: string | null) => {
   switch (phase) {
     case 'completed':
-      return 'border-green-400';
+      return 'border-green-500 bg-green-50 hover:bg-green-100';
     case 'development':
-      return 'border-blue-400';
+      return 'border-blue-500 bg-blue-50 hover:bg-blue-100';
     case 'planning':
-      return 'border-yellow-400';
+      return 'border-orange-500 bg-orange-50 hover:bg-orange-100';
     default:
-      return 'border-gray-400';
+      return 'border-gray-400 bg-gray-50 hover:bg-gray-100';
   }
 };
 
@@ -152,11 +154,11 @@ export default function TimelineView({ initiatives, onInitiativeClick }: Timelin
   }, [initiatives]);
 
   return (
-    <div className="bg-white rounded-lg card-primary">
+    <div className="card-elevated hover:shadow-card-elevated-hover transition-all duration-300">
       {/* Header Controls */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-gray-100">
         <div className="flex items-center justify-between">
-          <h3 className="text-h3">Timeline View</h3>
+          <h3 className="text-h3 text-gray-900 font-semibold">Timeline View</h3>
           <div className="flex items-center space-x-4">
             <div className="flex bg-gray-100 rounded-lg p-1">
               <button
@@ -245,9 +247,9 @@ export default function TimelineView({ initiatives, onInitiativeClick }: Timelin
                     return (
                       <div
                         key={initiative.id}
-                        className={`absolute h-6 rounded-md cursor-pointer transition-all duration-200 transform ${
+                        className={`absolute h-8 rounded-lg cursor-pointer transition-all duration-300 transform shadow-card-subtle hover:shadow-card-standard ${
                           isHovered ? 'scale-105 z-20' : 'z-10'
-                        } ${getPhaseColor(initiative.phase)} border-2`}
+                        } ${getPhaseColor(initiative.phase)} border-2 backdrop-blur-sm`}
                         style={{
                           left: `${position.left}%`,
                           width: `${position.width}%`,
