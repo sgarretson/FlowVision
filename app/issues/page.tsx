@@ -8,6 +8,7 @@ import ClusteringView from './clustering-view';
 import AIClusters from './ai-clusters';
 import AISummary from '@/components/AISummary';
 import { trackEvent } from '@/utils/analytics';
+import { useToast } from '@/components/ToastProvider';
 
 type Issue = {
   id: string;
@@ -23,6 +24,7 @@ type Issue = {
 
 export default function IssuesPage() {
   const { data: session } = useSession();
+  const { showToast } = useToast();
   const router = useRouter();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,12 +118,15 @@ export default function IssuesPage() {
         fetchIssues(); // Refresh the list
         setMessage('Issue created successfully');
         trackEvent('issues_create_success');
+        showToast('Issue created', 'success');
       } else {
         setMessage('Failed to create issue');
         trackEvent('issues_create_fail');
+        showToast('Failed to create issue', 'error');
       }
     } catch (error) {
       setMessage('Failed to create issue');
+      showToast('Failed to create issue', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -138,8 +143,10 @@ export default function IssuesPage() {
       if (res.ok) {
         fetchIssues(); // Refresh to show updated votes
         trackEvent('issues_vote', { issueId, up: increment });
+        showToast(increment ? 'Upvoted issue' : 'Downvoted issue', 'success');
       } else {
         setMessage('Failed to vote on issue');
+        showToast('Failed to vote on issue', 'error');
       }
     } catch (error) {
       setMessage('Failed to vote on issue');
@@ -204,6 +211,7 @@ export default function IssuesPage() {
           count: selectedIssues.size,
           initiativeId: initiative.id,
         });
+        showToast('Initiative created from selected issues', 'success');
 
         // Navigate to the new initiative after a short delay
         setTimeout(() => {
@@ -213,9 +221,11 @@ export default function IssuesPage() {
         const error = await res.json();
         setMessage(error.error || 'Failed to create initiative from issues');
         trackEvent('initiative_create_from_issues_fail', { count: selectedIssues.size });
+        showToast('Failed to create initiative from issues', 'error');
       }
     } catch (error) {
       setMessage('Failed to create initiative from issues');
+      showToast('Failed to create initiative from issues', 'error');
     } finally {
       setBulkActionLoading(false);
     }

@@ -6,6 +6,7 @@ import RequirementCard from './RequirementCard';
 import RequirementCardModal from './RequirementCardModal';
 import RequirementCardViewModal from './RequirementCardViewModal';
 import RequirementCardCommentModal from './RequirementCardCommentModal';
+import { useToast } from '@/components/ToastProvider';
 
 interface RequirementCardData {
   id: string;
@@ -46,6 +47,7 @@ export default function RequirementCardsBoard({
   const [viewingCard, setViewingCard] = useState<RequirementCardData | null>(null);
   const [commentingCard, setCommentingCard] = useState<RequirementCardData | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const { showToast } = useToast();
 
   useEffect(() => {
     loadCards();
@@ -83,9 +85,11 @@ export default function RequirementCardsBoard({
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to create card');
+        showToast('Failed to create card', 'error');
       }
     } catch (error) {
       setError('Failed to create card');
+      showToast('Failed to create card', 'error');
     }
   };
 
@@ -133,9 +137,11 @@ export default function RequirementCardsBoard({
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to update card');
+        showToast('Failed to update card', 'error');
       }
     } catch (error) {
       setError('Failed to update card');
+      showToast('Failed to update card', 'error');
     }
   };
 
@@ -149,11 +155,14 @@ export default function RequirementCardsBoard({
 
       if (response.ok) {
         setCards(cards.filter((c) => c.id !== cardId));
+        showToast('Card deleted', 'success');
       } else {
         setError('Failed to delete card');
+        showToast('Failed to delete card', 'error');
       }
     } catch (error) {
       setError('Failed to delete card');
+      showToast('Failed to delete card', 'error');
     }
   };
 
@@ -175,9 +184,11 @@ export default function RequirementCardsBoard({
         }
       } else {
         setError('Failed to update card status');
+        showToast('Failed to update card status', 'error');
       }
     } catch (error) {
       setError('Failed to update card status');
+      showToast('Failed to update card status', 'error');
     }
   };
 
