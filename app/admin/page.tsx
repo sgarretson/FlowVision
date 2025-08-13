@@ -162,25 +162,60 @@ export default function AdminDashboard() {
       {/* System Stats */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-          <div className="card-secondary p-6 text-center">
-            <div className="text-3xl font-bold text-primary mb-2">{stats.totalUsers}</div>
-            <div className="text-caption">Total Users</div>
+          <div className="card-interactive group">
+            <div className="p-6 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <div className="w-6 h-6 bg-blue-600 rounded-lg"></div>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-primary mb-2">{stats.totalUsers}</div>
+              <div className="text-sm font-medium text-gray-600">Total Users</div>
+            </div>
           </div>
-          <div className="card-secondary p-6 text-center">
-            <div className="text-3xl font-bold text-success mb-2">{stats.totalInitiatives}</div>
-            <div className="text-caption">Total Initiatives</div>
+          <div className="card-interactive group">
+            <div className="p-6 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                  <div className="w-6 h-6 bg-green-600 rounded-lg"></div>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-success mb-2">{stats.totalInitiatives}</div>
+              <div className="text-sm font-medium text-gray-600">Total Initiatives</div>
+            </div>
           </div>
-          <div className="card-secondary p-6 text-center">
-            <div className="text-3xl font-bold text-warning mb-2">{stats.activeInitiatives}</div>
-            <div className="text-caption">Active Initiatives</div>
+          <div className="card-interactive group">
+            <div className="p-6 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <div className="w-6 h-6 bg-orange-600 rounded-lg"></div>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-warning mb-2">{stats.activeInitiatives}</div>
+              <div className="text-sm font-medium text-gray-600">Active Initiatives</div>
+            </div>
           </div>
-          <div className="card-secondary p-6 text-center">
-            <div className="text-3xl font-bold text-gray-600 mb-2">{stats.totalIssues}</div>
-            <div className="text-caption">Total Issues</div>
+          <div className="card-interactive group">
+            <div className="p-6 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                  <div className="w-6 h-6 bg-gray-600 rounded-lg"></div>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-gray-600 mb-2">{stats.totalIssues}</div>
+              <div className="text-sm font-medium text-gray-600">Total Issues</div>
+            </div>
           </div>
-          <div className="card-secondary p-6 text-center">
-            <div className="text-3xl font-bold text-danger mb-2">{stats.criticalIssues}</div>
-            <div className="text-caption">Critical Issues</div>
+          <div className="card-interactive group">
+            <div className="p-6 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                  <div className="w-6 h-6 bg-red-600 rounded-lg"></div>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-danger mb-2">{stats.criticalIssues}</div>
+              <div className="text-sm font-medium text-gray-600">Critical Issues</div>
+            </div>
           </div>
         </div>
       )}
