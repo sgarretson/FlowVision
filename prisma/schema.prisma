@@ -19,6 +19,7 @@ model User {
   image         String?
   emailVerified DateTime?
   preferences   Json?
+  aiTier        String         @default("basic") // basic, premium, enterprise
   businessProfile BusinessProfile?
   initiatives   Initiative[]   @relation("UserInitiatives")
   comments      Comment[]
@@ -31,6 +32,10 @@ model User {
   approvedRequirementCards RequirementCard[] @relation("ApprovedRequirementCards")
   accounts      Account[]
   sessions      Session[]
+  aiUsageLogs   AIUsageLog[]
+  aiQuota       AIUserQuota?
+  aiConfigurations AIConfiguration[]
+  aiFeedback    AIQualityFeedback[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -331,4 +336,108 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// AI Optimization Models
+model AIUsageLog {
+  id           String   @id @default(cuid())
+  requestId    String
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  operation    String
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  totalTokens  Int      @default(0)
+  cost         Float    @default(0)
+  latency      Int      @default(0)
+  cacheHit     Boolean  @default(false)
+  modelUsed    String   @default("gpt-3.5-turbo")
+  quality      Int      @default(100)
+  timestamp    DateTime @default(now())
+  metadata     Json?
+  feedback     AIQualityFeedback[]
+
+  @@index([userId, timestamp])
+  @@index([operation, timestamp])
+  @@index([modelUsed, timestamp])
+}
+
+model AIUserQuota {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier               String   @default("basic")
+  dailyTokenLimit    Int      @default(10000)
+  monthlyTokenLimit  Int      @default(250000)
+  dailyUsedTokens    Int      @default(0)
+  monthlyUsedTokens  Int      @default(0)
+  dailyCost          Float    @default(0)
+  monthlyCost        Float    @default(0)
+  lastResetDaily     DateTime @default(now())
+  lastResetMonthly   DateTime @default(now())
+  isBlocked          Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model AIPerformanceMetric {
+  id            String   @id @default(cuid())
+  operation     String
+  model         String
+  avgLatency    Int      @default(0)
+  avgCost       Float    @default(0)
+  avgQuality    Int      @default(100)
+  successRate   Float    @default(1.0)
+  cacheHitRate  Float    @default(0.0)
+  requestCount  Int      @default(0)
+  totalTokens   Int      @default(0)
+  date          DateTime
+  createdAt     DateTime @default(now())
+
+  @@unique([operation, model, date])
+  @@index([date])
+}
+
+model AICacheEntry {
+  id         String   @id @default(cuid())
+  cacheKey   String   @unique
+  operation  String
+  prompt     String
+  response   Json
+  quality    Int      @default(100)
+  hitCount   Int      @default(0)
+  modelUsed  String
+  tokenCount Int      @default(0)
+  cost       Float    @default(0)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastUsed   DateTime @default(now())
+
+  @@index([operation])
+  @@index([expiresAt])
+}
+
+model AIConfiguration {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  description String?
+  isActive    Boolean  @default(true)
+  updatedBy   String
+  updatedUser User     @relation(fields: [updatedBy], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AIQualityFeedback {
+  id             String        @id @default(cuid())
+  usageLogId     String
+  usageLog       AIUsageLog    @relation(fields: [usageLogId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating         Int           // 1-5 scale (validation handled in application)
+  feedback       String?
+  isHelpful      Boolean?
+  reportedIssues String[]
+  createdAt      DateTime      @default(now())
 }

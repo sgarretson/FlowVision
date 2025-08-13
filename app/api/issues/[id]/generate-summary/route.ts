@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { openAIService } from '@/lib/openai';
+import AIMigration from '@/lib/ai-migration';
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -28,8 +28,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: 'Issue not found' }, { status: 404 });
     }
 
-    // Check if OpenAI is configured
-    if (!openAIService.isConfigured()) {
+    // Check if AI service is configured
+    if (!AIMigration.isConfigured()) {
       return NextResponse.json(
         {
           error: 'AI analysis not available - OpenAI not configured',
@@ -52,12 +52,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         }
       : undefined;
 
-    // Generate AI summary
-    const aiAnalysis = await openAIService.generateIssueSummary(
+    // Generate AI summary using optimized service with user context
+    const aiAnalysis = await AIMigration.generateIssueSummary(
       issue.description,
       issue.department || undefined,
       issue.category || undefined,
-      businessContext
+      businessContext,
+      user.id
     );
 
     if (!aiAnalysis) {
