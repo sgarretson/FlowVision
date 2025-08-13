@@ -661,6 +661,33 @@ RESPONSE FORMAT (JSON):
     return this.config;
   }
 
+  public async generateCompletion(
+    prompt: string,
+    options: {
+      model?: string;
+      maxTokens?: number;
+      temperature?: number;
+    } = {}
+  ): Promise<string | null> {
+    if (!this.isConfigured()) {
+      throw new Error('OpenAI service not configured');
+    }
+
+    try {
+      const completion = await this.client!.chat.completions.create({
+        model: options.model || this.config!.model || 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: options.maxTokens || this.config!.maxTokens || 1000,
+        temperature: options.temperature ?? (this.config!.temperature || 0.7),
+      });
+
+      return completion.choices[0]?.message?.content || null;
+    } catch (error) {
+      console.error('OpenAI completion error:', error);
+      throw error;
+    }
+  }
+
   public async getUsageEstimate(): Promise<AIUsageStats | null> {
     try {
       // Derive rough usage from audit logs (OPENAI_* actions)
