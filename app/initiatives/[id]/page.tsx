@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import RequirementCardsBoard from '@/components/RequirementCardsBoard';
+import SolutionsBoard from '@/components/SolutionsBoard';
 
 type Initiative = {
   id: string;
@@ -282,6 +283,18 @@ export default function InitiativeDetailPage() {
               initiativeId={params.id}
               onGenerateWithAI={generateRequirementsWithAI}
               aiLoading={aiLoading}
+            />
+          </div>
+
+          {/* Solutions & Implementation Section */}
+          <div id="solutions-section">
+            <SolutionsBoard
+              initiativeId={params.id}
+              onGenerateWithAI={() => {
+                // TODO: Implement AI solution generation
+                console.log('AI solution generation not yet implemented');
+              }}
+              aiLoading={false}
             />
           </div>
 

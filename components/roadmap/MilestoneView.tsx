@@ -66,28 +66,28 @@ interface MilestoneViewProps {
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
     case 'completed':
-      return 'bg-green-100 text-green-800';
+      return 'bg-green-100 text-green-800 border-green-200';
     case 'in_progress':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-blue-100 text-blue-800 border-blue-200';
     case 'delayed':
-      return 'bg-red-100 text-red-800';
+      return 'bg-red-100 text-red-800 border-red-200';
     case 'pending':
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-gray-100 text-gray-800 border-gray-200';
   }
 };
 
 const getPriorityColor = (dueDate: string, status: string) => {
-  if (status === 'completed') return 'border-green-400';
+  if (status === 'completed') return 'border-green-500 bg-green-50/50';
 
   const due = new Date(dueDate);
   const now = new Date();
   const daysDiff = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (daysDiff < 0) return 'border-red-400'; // Overdue
-  if (daysDiff <= 7) return 'border-orange-400'; // Due soon
-  if (daysDiff <= 30) return 'border-yellow-400'; // Due this month
-  return 'border-gray-300'; // Future
+  if (daysDiff < 0) return 'border-red-500 bg-red-50/50'; // Overdue
+  if (daysDiff <= 7) return 'border-orange-500 bg-orange-50/50'; // Due soon
+  if (daysDiff <= 30) return 'border-yellow-500 bg-yellow-50/50'; // Due this month
+  return 'border-gray-300 bg-gray-50/50'; // Future
 };
 
 const getMilestoneIcon = (status: string) => {

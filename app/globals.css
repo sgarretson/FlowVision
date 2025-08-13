@@ -157,6 +157,51 @@
     @apply card-primary p-6;
   }
 
+  /* Modern Interactive Card System */
+  .card-interactive {
+    @apply card-standard cursor-pointer select-none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-interactive:hover {
+    @apply shadow-card-standard-hover;
+    transform: translateY(-1px);
+  }
+
+  .card-interactive:active {
+    transform: translateY(0);
+    transition-duration: 0.1s;
+  }
+
+  /* Enhanced Loading States */
+  .skeleton-modern {
+    @apply animate-shimmer bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded;
+    background-size: 200% 100%;
+  }
+
+  /* Modern Status Badges */
+  .status-badge-modern {
+    @apply px-3 py-1.5 text-xs font-medium rounded-full;
+    backdrop-filter: blur(8px);
+  }
+
+  /* Icon Container Styles */
+  .icon-container {
+    @apply flex items-center justify-center rounded-lg transition-colors duration-200;
+  }
+
+  .icon-container-business {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .icon-container-functional {
+    @apply bg-purple-100 text-purple-700;
+  }
+
+  .icon-container-acceptance {
+    @apply bg-green-100 text-green-700;
+  }
+
   .form-header {
     @apply text-h2 mb-6 text-center;
   }

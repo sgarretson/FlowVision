@@ -111,16 +111,28 @@ export default function RequirementCardModal({
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+        aria-hidden="true"
+      />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="w-full max-w-2xl bg-white rounded-lg shadow-xl">
+        <Dialog.Panel
+          className="w-full max-w-2xl bg-white rounded-xl shadow-card-elevated animate-scale-in border border-white/20"
+          style={{
+            backdropFilter: 'blur(10px)',
+            background: 'rgba(255, 255, 255, 0.98)',
+          }}
+        >
           <div className="flex items-center justify-between p-6 border-b">
             <Dialog.Title className="text-lg font-semibold text-gray-900">
               {card ? 'Edit Requirement Card' : 'Create Requirement Card'}
             </Dialog.Title>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-              <XMarkIcon className="w-6 h-6" />
+            <button
+              onClick={onClose}
+              className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200 hover:scale-105"
+            >
+              <XMarkIcon className="w-5 h-5" />
             </button>
           </div>
 
@@ -221,9 +233,18 @@ export default function RequirementCardModal({
               <button
                 type="submit"
                 disabled={saving || !formData.title.trim() || !formData.description.trim()}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? 'Saving...' : card ? 'Update Card' : 'Create Card'}
+                {saving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Saving...
+                  </>
+                ) : card ? (
+                  'Update Card'
+                ) : (
+                  'Create Card'
+                )}
               </button>
             </div>
           </form>

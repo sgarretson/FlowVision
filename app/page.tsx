@@ -151,12 +151,12 @@ export default function DashboardPage() {
 
       {/* Hero Metric */}
       <div className="text-center">
-        <div className="card-primary p-8 max-w-md mx-auto">
-          <div className="text-6xl font-bold text-primary mb-2">
+        <div className="card-elevated p-8 max-w-md mx-auto group hover:shadow-card-elevated-hover transition-all duration-300">
+          <div className="text-6xl font-bold text-primary mb-3 group-hover:scale-105 transition-transform duration-200">
             {initiatives.filter((i) => i.status === 'ACTIVE' || i.status === 'In Progress').length}
           </div>
-          <div className="text-h3 text-gray-600 mb-4">Active Initiatives</div>
-          <div className="text-caption">
+          <div className="text-h3 text-gray-700 mb-4 font-semibold">Active Initiatives</div>
+          <div className="text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg">
             {initiatives.length > 0
               ? `${Math.round((initiatives.filter((i) => i.status === 'ACTIVE' || i.status === 'In Progress').length / initiatives.length) * 100)}% of total initiatives`
               : 'Start by identifying issues or creating your first initiative'}
@@ -166,17 +166,38 @@ export default function DashboardPage() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="card-secondary p-6 text-center">
-          <div className="text-3xl font-bold text-gray-900 mb-2">{initiatives.length}</div>
-          <div className="text-caption">Total Initiatives</div>
+        <div className="card-interactive group">
+          <div className="p-6 text-center">
+            <div className="flex items-center justify-center mb-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <div className="w-6 h-6 bg-blue-600 rounded-lg"></div>
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-gray-900 mb-2">{initiatives.length}</div>
+            <div className="text-sm font-medium text-gray-600">Total Initiatives</div>
+          </div>
         </div>
-        <div className="card-secondary p-6 text-center">
-          <div className="text-3xl font-bold text-warning mb-2">{issueStats.total}</div>
-          <div className="text-caption">Issues Identified</div>
+        <div className="card-interactive group">
+          <div className="p-6 text-center">
+            <div className="flex items-center justify-center mb-3">
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                <div className="w-6 h-6 bg-orange-600 rounded-lg"></div>
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-gray-900 mb-2">{issueStats.total}</div>
+            <div className="text-sm font-medium text-gray-600">Issues Identified</div>
+          </div>
         </div>
-        <div className="card-secondary p-6 text-center">
-          <div className="text-3xl font-bold text-danger mb-2">{issueStats.critical}</div>
-          <div className="text-caption">Critical Issues</div>
+        <div className="card-interactive group">
+          <div className="p-6 text-center">
+            <div className="flex items-center justify-center mb-3">
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                <div className="w-6 h-6 bg-red-600 rounded-lg"></div>
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-gray-900 mb-2">{issueStats.critical}</div>
+            <div className="text-sm font-medium text-gray-600">Critical Issues</div>
+          </div>
         </div>
       </div>
 

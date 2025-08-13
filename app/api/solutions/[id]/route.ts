@@ -6,10 +6,11 @@ import { z } from 'zod';
 // Validation schema for updates
 const UpdateSolutionSchema = z.object({
   title: z.string().min(1).max(200).optional(),
-  description: z.string().min(1).optional(),
+  description: z.string().optional(),
   type: z.enum(['TECHNOLOGY', 'PROCESS', 'TRAINING', 'POLICY']).optional(),
-  status: z.enum(['DRAFT', 'PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
+  status: z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
   priority: z.number().int().min(0).optional(),
+  progress: z.number().int().min(0).max(100).optional(),
   estimatedCost: z.number().positive().optional(),
   estimatedHours: z.number().int().positive().optional(),
   actualCost: z.number().positive().optional(),
@@ -17,10 +18,7 @@ const UpdateSolutionSchema = z.object({
   plannedStartDate: z.string().datetime().optional(),
   plannedEndDate: z.string().datetime().optional(),
   actualStartDate: z.string().datetime().optional(),
-  actualEndDate: z.string().datetime().optional(),
   assignedToId: z.string().cuid().optional(),
-  progress: z.number().int().min(0).max(100).optional(),
-  isValidated: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
   notes: z.string().optional(),
 });
@@ -54,7 +52,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
           },
         },
         tasks: {
-          orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
           include: {
             assignedTo: {
               select: {
@@ -64,19 +61,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
               },
             },
           },
+          orderBy: [{ priority: 'desc' }, { status: 'asc' }, { createdAt: 'asc' }],
         },
-        dependencies: {
+        _count: {
           select: {
-            id: true,
-            title: true,
-            status: true,
-          },
-        },
-        dependents: {
-          select: {
-            id: true,
-            title: true,
-            status: true,
+            tasks: true,
           },
         },
       },
@@ -91,57 +80,60 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Calculate task statistics
-    const taskStats = {
-      total: solution.tasks.length,
-      completed: solution.tasks.filter((t) => t.status === 'COMPLETED').length,
-      inProgress: solution.tasks.filter((t) => t.status === 'IN_PROGRESS').length,
-      todo: solution.tasks.filter((t) => t.status === 'TODO').length,
+    // Calculate solution statistics
+    const stats = {
+      totalTasks: solution.tasks.length,
+      tasksByStatus: solution.tasks.reduce(
+        (acc, task) => {
+          acc[task.status] = (acc[task.status] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
       totalEstimatedHours: solution.tasks.reduce((sum, t) => sum + (t.estimatedHours || 0), 0),
       totalActualHours: solution.tasks.reduce((sum, t) => sum + (t.actualHours || 0), 0),
-      averageProgress:
+      averageTaskProgress:
         solution.tasks.length > 0
           ? Math.round(
               solution.tasks.reduce((sum, t) => sum + t.progress, 0) / solution.tasks.length
             )
           : 0,
+      overdueTasks: solution.tasks.filter(
+        (t) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'COMPLETED'
+      ).length,
     };
 
     // Calculate time tracking
     const timeTracking = {
-      estimatedDuration:
-        solution.plannedStartDate && solution.plannedEndDate
-          ? Math.ceil(
-              (new Date(solution.plannedEndDate).getTime() -
-                new Date(solution.plannedStartDate).getTime()) /
-                (1000 * 60 * 60 * 24)
-            )
-          : null,
-      actualDuration:
-        solution.actualStartDate && solution.actualEndDate
-          ? Math.ceil(
-              (new Date(solution.actualEndDate).getTime() -
-                new Date(solution.actualStartDate).getTime()) /
-                (1000 * 60 * 60 * 24)
-            )
-          : null,
+      isOverdue:
+        solution.plannedEndDate &&
+        new Date(solution.plannedEndDate) < new Date() &&
+        solution.status !== 'COMPLETED',
       daysRemaining: solution.plannedEndDate
         ? Math.ceil(
             (new Date(solution.plannedEndDate).getTime() - new Date().getTime()) /
               (1000 * 60 * 60 * 24)
           )
         : null,
+      hoursVariance:
+        solution.estimatedHours && solution.actualHours
+          ? solution.actualHours - solution.estimatedHours
+          : null,
+      efficiency:
+        solution.estimatedHours && solution.actualHours && solution.estimatedHours > 0
+          ? Math.round((solution.estimatedHours / solution.actualHours) * 100)
+          : null,
     };
 
-    const solutionWithStats = {
+    const solutionWithDetails = {
       ...solution,
-      taskStats,
+      stats,
       timeTracking,
     };
 
     return NextResponse.json({
       success: true,
-      solution: solutionWithStats,
+      solution: solutionWithDetails,
     });
   } catch (error) {
     console.error('Error fetching solution:', error);
@@ -197,58 +189,32 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Validate dates if provided
-    const plannedStartDate = validatedData.plannedStartDate
-      ? new Date(validatedData.plannedStartDate)
-      : undefined;
-    const plannedEndDate = validatedData.plannedEndDate
-      ? new Date(validatedData.plannedEndDate)
-      : undefined;
-    const actualStartDate = validatedData.actualStartDate
-      ? new Date(validatedData.actualStartDate)
-      : undefined;
-    const actualEndDate = validatedData.actualEndDate
-      ? new Date(validatedData.actualEndDate)
-      : undefined;
+    if (validatedData.plannedStartDate && validatedData.plannedEndDate) {
+      const startDate = new Date(validatedData.plannedStartDate);
+      const endDate = new Date(validatedData.plannedEndDate);
 
-    if (plannedStartDate && plannedEndDate && plannedStartDate >= plannedEndDate) {
-      return NextResponse.json(
-        { error: 'Planned end date must be after start date' },
-        { status: 400 }
-      );
-    }
-
-    if (actualStartDate && actualEndDate && actualStartDate >= actualEndDate) {
-      return NextResponse.json(
-        { error: 'Actual end date must be after start date' },
-        { status: 400 }
-      );
+      if (startDate >= endDate) {
+        return NextResponse.json(
+          { error: 'Planned end date must be after start date' },
+          { status: 400 }
+        );
+      }
     }
 
     // Prepare update data
     const updateData: any = { ...validatedData };
-    if (validatedData.plannedStartDate) updateData.plannedStartDate = plannedStartDate;
-    if (validatedData.plannedEndDate) updateData.plannedEndDate = plannedEndDate;
-    if (validatedData.actualStartDate) updateData.actualStartDate = actualStartDate;
-    if (validatedData.actualEndDate) updateData.actualEndDate = actualEndDate;
-
-    // Handle validation fields
-    if (validatedData.isValidated !== undefined) {
-      updateData.validatedBy = validatedData.isValidated ? user.id : null;
-      updateData.validatedAt = validatedData.isValidated ? new Date() : null;
+    if (validatedData.plannedStartDate) {
+      updateData.plannedStartDate = new Date(validatedData.plannedStartDate);
+    }
+    if (validatedData.plannedEndDate) {
+      updateData.plannedEndDate = new Date(validatedData.plannedEndDate);
+    }
+    if (validatedData.actualStartDate) {
+      updateData.actualStartDate = new Date(validatedData.actualStartDate);
     }
 
-    // Auto-set actual start date when moving to IN_PROGRESS
-    if (
-      validatedData.status === 'IN_PROGRESS' &&
-      !existingSolution.actualStartDate &&
-      !actualStartDate
-    ) {
-      updateData.actualStartDate = new Date();
-    }
-
-    // Auto-set actual end date when moving to COMPLETED
-    if (validatedData.status === 'COMPLETED' && !existingSolution.actualEndDate && !actualEndDate) {
-      updateData.actualEndDate = new Date();
+    // Auto-set completion date when moving to COMPLETED
+    if (validatedData.status === 'COMPLETED' && existingSolution.status !== 'COMPLETED') {
       updateData.progress = 100;
     }
 
@@ -330,26 +296,20 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       );
     }
 
-    // Check if solution has tasks
-    if (solution._count.tasks > 0) {
-      return NextResponse.json(
-        {
-          error: 'Cannot delete solution with existing tasks',
-          taskCount: solution._count.tasks,
-          message: 'Please delete all tasks first or use cascade deletion if intended',
-        },
-        { status: 409 }
-      );
-    }
+    // Delete all tasks first (cascade should handle this, but being explicit)
+    await prisma.solutionTask.deleteMany({
+      where: { solutionId: params.id },
+    });
 
-    // Delete the solution (tasks will be deleted via cascade)
+    // Delete the solution
     await prisma.initiativeSolution.delete({
       where: { id: params.id },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Solution deleted successfully',
+      message: `Solution deleted successfully${solution._count.tasks > 0 ? ` along with ${solution._count.tasks} tasks` : ''}`,
+      deletedTasksCount: solution._count.tasks,
     });
   } catch (error) {
     console.error('Error deleting solution:', error);

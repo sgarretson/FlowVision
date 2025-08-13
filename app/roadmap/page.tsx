@@ -217,40 +217,82 @@ export default function RoadmapPage() {
 
         {/* Metrics Overview */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-          <div className="card-secondary p-4">
-            <div className="text-sm font-medium text-gray-600">Total Initiatives</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {roadmapData.metrics.totalInitiatives}
+          <div className="card-interactive group">
+            <div className="p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 bg-gray-600 rounded"></div>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-gray-900 mb-1">
+                {roadmapData.metrics.totalInitiatives}
+              </div>
+              <div className="text-xs font-medium text-gray-600">Total Initiatives</div>
             </div>
           </div>
-          <div className="card-secondary p-4">
-            <div className="text-sm font-medium text-gray-600">Active</div>
-            <div className="text-2xl font-bold text-blue-600">
-              {roadmapData.metrics.activeInitiatives}
+          <div className="card-interactive group">
+            <div className="p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 bg-blue-600 rounded"></div>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-blue-600 mb-1">
+                {roadmapData.metrics.activeInitiatives}
+              </div>
+              <div className="text-xs font-medium text-gray-600">Active</div>
             </div>
           </div>
-          <div className="card-secondary p-4">
-            <div className="text-sm font-medium text-gray-600">Completed</div>
-            <div className="text-2xl font-bold text-green-600">
-              {roadmapData.metrics.completedInitiatives}
+          <div className="card-interactive group">
+            <div className="p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 bg-green-600 rounded"></div>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-green-600 mb-1">
+                {roadmapData.metrics.completedInitiatives}
+              </div>
+              <div className="text-xs font-medium text-gray-600">Completed</div>
             </div>
           </div>
-          <div className="card-secondary p-4">
-            <div className="text-sm font-medium text-gray-600">Overdue Milestones</div>
-            <div className="text-2xl font-bold text-red-600">
-              {roadmapData.metrics.overdueMilestones}
+          <div className="card-interactive group">
+            <div className="p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 bg-red-600 rounded"></div>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-red-600 mb-1">
+                {roadmapData.metrics.overdueMilestones}
+              </div>
+              <div className="text-xs font-medium text-gray-600">Overdue Milestones</div>
             </div>
           </div>
-          <div className="card-secondary p-4">
-            <div className="text-sm font-medium text-gray-600">Total Budget</div>
-            <div className="text-2xl font-bold text-gray-900">
-              ${roadmapData.metrics.totalBudget.toLocaleString()}
+          <div className="card-interactive group">
+            <div className="p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 bg-purple-600 rounded"></div>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-gray-900 mb-1">
+                ${roadmapData.metrics.totalBudget.toLocaleString()}
+              </div>
+              <div className="text-xs font-medium text-gray-600">Total Budget</div>
             </div>
           </div>
-          <div className="card-secondary p-4">
-            <div className="text-sm font-medium text-gray-600">Total Hours</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {roadmapData.metrics.totalHours.toLocaleString()}h
+          <div className="card-interactive group">
+            <div className="p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 bg-indigo-600 rounded"></div>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-gray-900 mb-1">
+                {roadmapData.metrics.totalHours.toLocaleString()}h
+              </div>
+              <div className="text-xs font-medium text-gray-600">Total Hours</div>
             </div>
           </div>
         </div>
