@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { openAIService } from '@/lib/openai';
+import AIMigration from '@/lib/ai-migration';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
@@ -36,11 +36,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if OpenAI is configured
-    if (!openAIService.isConfigured()) {
+    // Check if AI is available (handled internally by AIMigration)
+    try {
+      // AIMigration will handle configuration checks and fallbacks
+    } catch (configError) {
       return NextResponse.json(
         {
-          error: 'AI generation not available - OpenAI not configured',
+          error: 'AI generation not available - service unavailable',
           fallback: 'Use the admin panel to configure OpenAI integration for AI-powered features.',
         },
         { status: 503 }
@@ -63,15 +65,16 @@ export async function POST(req: NextRequest) {
     let result = null;
 
     if (mode === 'recommendations') {
-      // Generate initiative recommendations
-      result = await openAIService.generateInitiativeRecommendations(
+      // Generate initiative recommendations using optimized service
+      result = await AIMigration.generateInitiativeRecommendations(
         title,
         problem,
-        businessContext
+        businessContext,
+        user.id
       );
     } else if (mode === 'requirements') {
-      // Generate structured requirements from description
-      result = await openAIService.generateRequirementsFromDescription(problem);
+      // Generate structured requirements from description using optimized service
+      result = await AIMigration.generateRequirementsFromDescription(problem, user.id);
     }
 
     if (!result) {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { openAIService } from '@/lib/openai';
+import AIMigration from '@/lib/ai-migration';
 
 // Force dynamic server-side rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -432,7 +432,7 @@ async function generateAIExecutiveSummary(
     `;
 
     // Use the existing generateIssueInsights method as a template but create direct API call
-    if (!openAIService.isConfigured()) {
+    if (!AIMigration.isConfigured()) {
       throw new Error('OpenAI not configured');
     }
 

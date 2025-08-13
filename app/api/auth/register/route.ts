@@ -13,6 +13,15 @@ const registerSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+    // Enhanced logging for debugging
+    console.log('Registration attempt with body:', {
+      hasEmail: !!body.email,
+      hasPassword: !!body.password,
+      hasName: !!body.name,
+      receivedFields: Object.keys(body || {}),
+    });
+
     const { email, password, name, role } = registerSchema.parse(body);
 
     // Check if user already exists

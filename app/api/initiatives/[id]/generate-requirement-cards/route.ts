@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { openAIService } from '@/lib/openai';
+import AIMigration from '@/lib/ai-migration';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
@@ -33,11 +33,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Check if OpenAI is configured
-    if (!openAIService.isConfigured()) {
+    // Check if AI is available (handled internally by AIMigration)
+    if (!AIMigration.isConfigured()) {
       return NextResponse.json(
         {
-          error: 'AI generation not available - OpenAI not configured',
+          error: 'AI generation not available - service unavailable',
           fallback: 'Use the admin panel to configure OpenAI integration for AI-powered features.',
         },
         { status: 503 }
@@ -57,12 +57,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         }
       : undefined;
 
-    // Generate requirement cards with AI
-    const result = await openAIService.generateRequirementCards(
+    // Generate requirement cards with AI using optimized migration service
+    const result = await AIMigration.generateRequirementCards(
       initiative.title,
       initiative.problem,
       initiative.goal,
-      businessContext
+      businessContext,
+      user.id
     );
 
     if (!result || !result.cards) {
