@@ -26,22 +26,26 @@ export default function FormModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
       <div
-        className={`bg-white rounded-xl shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto`}
+        className={`bg-white rounded-xl shadow-card-elevated w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto animate-scale-in border border-white/20`}
+        style={{
+          backdropFilter: 'blur(10px)',
+          background: 'rgba(255, 255, 255, 0.95)',
+        }}
       >
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-h2 text-gray-900">{title}</h2>
+        {/* Modern Modal Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <h2 className="text-h2 text-gray-900 font-semibold">{title}</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200 hover:scale-105"
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Modal Content */}
+        {/* Modern Modal Content */}
         <div className="p-6">{children}</div>
       </div>
     </div>
