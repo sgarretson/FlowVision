@@ -15,7 +15,7 @@
     "cypress:open": "cypress open",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "node prisma/seed-ae-enhanced.cjs",
+    "prisma:seed": "node prisma/seed-comprehensive-showcase.cjs",
     "prepare": "husky"
   },
   "keywords": [],
