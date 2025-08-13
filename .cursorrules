@@ -106,6 +106,8 @@ If you encounter:
 - **ALWAYS track** AI usage and costs in audit logs
 - **ALWAYS indicate** AI-generated content with clear attribution
 - **NEVER expose** OpenAI API keys in client-side code
+- **ALWAYS use null-safe operations** for optional AI fields (`|| []` fallbacks)
+- **ALWAYS provide proper context** for AI recommendations (systems, processes, people)
 
 ### Security
 - **ALWAYS validate user permissions** in API routes
@@ -145,6 +147,9 @@ Remember these key project facts:
 - Keep 'facebook-ad-campaign' and 'Google_PPC' folders local only
 - Main branch requires PR workflow with reviews
 - All major features need comprehensive testing
+- Systems Enhancement is major release - use proper GitHub project management
+- Always include addressedIssues in initiative queries to prevent undefined errors
+- Use proper null checking for all optional array fields in frontend components
 
 ## Conflict Resolution Best Practices
 
@@ -167,6 +172,29 @@ Remember these key project facts:
 - **Function implementations**: Choose the more complete version
 - **Configuration files**: Merge security and functionality features
 - **Type definitions**: Combine interfaces, avoid duplicates
+
+## Systems Enhancement Project Rules
+
+### Feature Development Protocol
+- **ALWAYS use GitHub Projects** for milestone and task tracking
+- **ALWAYS create detailed issues** before starting development
+- **ALWAYS link commits to issues** using `#issue-number` in commit messages
+- **ALWAYS update project status** when moving between development phases
+- **ALWAYS coordinate with team** before modifying shared components
+
+### Database Schema Changes
+- **ALWAYS create migration scripts** for schema changes
+- **ALWAYS test migrations** with existing seed data
+- **ALWAYS update TypeScript types** when schema changes
+- **ALWAYS validate relationships** between new and existing entities
+- **ALWAYS backup production data** before schema migrations
+
+### API Design Standards
+- **ALWAYS follow RESTful conventions** for new endpoints
+- **ALWAYS include proper error responses** with status codes
+- **ALWAYS validate request payloads** using Zod or similar
+- **ALWAYS include response type definitions** in TypeScript
+- **ALWAYS test API endpoints** with both valid and invalid data
 
 ## Enforcement
 
