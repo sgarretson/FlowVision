@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/rbac';
-import { openAIService } from '@/lib/openai';
+import AIMigration from '@/lib/ai-migration';
 
 interface CreateClusterInitiativeRequest {
   title: string;
@@ -222,10 +222,14 @@ Generate a detailed initiative in JSON format:
   "resourceRequirements": ["Required resources"]
 }`;
 
-        const aiResponse = await openAIService.generateIssueInsights(aiPrompt, {
-          industry: 'business',
-          size: 'SMB',
-        });
+        const aiResponse = await AIMigration.generateIssueInsights(
+          aiPrompt,
+          {
+            industry: 'business',
+            size: 'SMB',
+          },
+          user.id
+        );
 
         try {
           // If AI response is available, try to parse it, otherwise use fallback

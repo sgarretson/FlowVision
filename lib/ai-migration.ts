@@ -165,6 +165,20 @@ export class AIMigration {
     }
   }
 
+  static async generateRequirementCards(
+    title: string,
+    problem: string,
+    goal: string,
+    businessContext?: any,
+    userId?: string
+  ): Promise<any> {
+    if (this.isOptimizedEnabled(userId)) {
+      return optimizedOpenAIService.generateRequirementCards(title, problem, goal, businessContext);
+    } else {
+      return openAIService.generateRequirementCards(title, problem, goal, businessContext);
+    }
+  }
+
   // Service management methods
   static isConfigured(): boolean {
     return openAIService.isConfigured() || optimizedOpenAIService.isConfigured();

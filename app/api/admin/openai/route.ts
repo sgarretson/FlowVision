@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { openAIService } from '@/lib/openai';
+import AIMigration from '@/lib/ai-migration';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/admin/openai - Get current OpenAI configuration and status
@@ -20,9 +20,9 @@ export async function GET() {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const config = openAIService.getConfig();
-    const isConfigured = openAIService.isConfigured();
-    const usageStats = await openAIService.getUsageEstimate();
+    const config = AIMigration.getConfig();
+    const isConfigured = AIMigration.isConfigured();
+    const usageStats = await AIMigration.getPerformanceMetrics();
 
     return NextResponse.json({
       isConfigured,
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     const { apiKey, model, maxTokens, temperature, enabled } = body;
 
     // Validate inputs
-    const existing = openAIService.getConfig();
+    const existing = AIMigration.getConfig();
     const effectiveApiKey = apiKey && typeof apiKey === 'string' ? apiKey : existing?.apiKey;
     if (!effectiveApiKey || !effectiveApiKey.startsWith('sk-')) {
       return NextResponse.json({ error: 'Valid OpenAI API key required' }, { status: 400 });
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Configure OpenAI service
-    openAIService.configure({
+    AIMigration.configure({
       apiKey: effectiveApiKey,
       model: model || 'gpt-3.5-turbo',
       maxTokens: maxTokens || 500,
@@ -135,7 +135,7 @@ export async function PUT(req: NextRequest) {
 
     // Temporarily configure for testing if new key provided
     if (apiKey) {
-      openAIService.configure({
+      AIMigration.configure({
         apiKey,
         model: model || 'gpt-3.5-turbo',
         maxTokens: 10,
@@ -144,7 +144,7 @@ export async function PUT(req: NextRequest) {
       });
     }
 
-    const testResult = await openAIService.testConnection();
+    const testResult = await AIMigration.testConnection();
 
     // Log the test
     await prisma.auditLog.create({

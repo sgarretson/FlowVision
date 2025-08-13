@@ -606,6 +606,17 @@ export class OptimizedOpenAIService {
     });
   }
 
+  public async generateRequirementCards(
+    title: string,
+    problem: string,
+    goal: string,
+    businessContext?: any
+  ): Promise<{ cards: any[]; confidence: number } | null> {
+    // Delegate to generateRequirementsFromSummary with proper format
+    const summary = `${problem}\n\nGoal: ${goal}`;
+    return this.generateRequirementsFromSummary(summary, title, goal, businessContext, 'system');
+  }
+
   // Configuration methods
   public configure(config: OptimizedAIConfig): void {
     this.config = config;

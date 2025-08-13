@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { openAIService } from '@/lib/openai';
+import AIMigration from '@/lib/ai-migration';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
@@ -26,11 +26,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Issue description is required' }, { status: 400 });
     }
 
-    // Check if OpenAI is configured
-    if (!openAIService.isConfigured()) {
+    // Check if AI is available (handled internally by AIMigration)
+    try {
+      // AIMigration will handle configuration checks and fallbacks
+    } catch (configError) {
       return NextResponse.json(
         {
-          error: 'AI analysis not available - OpenAI not configured',
+          error: 'AI analysis not available - service unavailable',
           fallback: 'Use the admin panel to configure OpenAI integration for AI-powered insights.',
         },
         { status: 503 }
@@ -50,8 +52,8 @@ export async function POST(req: NextRequest) {
         }
       : undefined;
 
-    // Generate AI insights
-    const insights = await openAIService.generateIssueInsights(description, businessContext);
+    // Generate AI insights using optimized migration service
+    const insights = await AIMigration.generateIssueInsights(description, businessContext, user.id);
 
     if (!insights) {
       return NextResponse.json(
