@@ -74,11 +74,20 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         }
       : undefined;
 
+    // Transform database nulls to undefined for OpenAI service
+    const transformedIssues = cluster.issues.map((issue) => ({
+      description: issue.description,
+      department: issue.department ?? undefined,
+      category: issue.category ?? undefined,
+      votes: issue.votes,
+      heatmapScore: issue.heatmapScore,
+    }));
+
     // Generate AI cluster summary
     const aiAnalysis = await openAIService.generateClusterSummary(
       cluster.name,
       cluster.description,
-      cluster.issues,
+      transformedIssues,
       businessContext
     );
 
