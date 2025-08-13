@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { ExclamationTriangleIcon, ChartBarIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 import ClusterDetailsModal from '@/components/ClusterDetailsModal';
 
 interface Issue {
@@ -42,6 +44,7 @@ interface ClusteringData {
 }
 
 export default function ClusteringView() {
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [clusteringData, setClusteringData] = useState<ClusteringData | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<string | null>(null);
@@ -49,14 +52,28 @@ export default function ClusteringView() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!session) {
+      setError('Please log in to view AI clustering data');
+      setLoading(false);
+      return;
+    }
     loadClusteringData();
-  }, []);
+  }, [session]);
 
   async function loadClusteringData() {
     try {
       setLoading(true);
       setError(null);
       const response = await fetch('/api/ai/cluster-issues');
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          setError('Authentication required. Please log in.');
+          return;
+        }
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {

@@ -9,9 +9,21 @@ export async function GET() {
   if (!session?.user?.email) return NextResponse.json([], { status: 200 });
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
   if (!user) return NextResponse.json([], { status: 200 });
+
+  // Admin users can see all initiatives, others see only their own
+  const whereClause = user.role === 'ADMIN' ? {} : { ownerId: user.id };
+
   const initiatives = await prisma.initiative.findMany({
-    where: { ownerId: user.id },
+    where: whereClause,
     orderBy: { orderIndex: 'asc' },
+    include: {
+      owner: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
   });
   return NextResponse.json(initiatives);
 }

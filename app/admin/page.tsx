@@ -61,7 +61,10 @@ export default function AdminDashboard() {
         setStats(statsData);
       }
     } catch (err) {
-      console.error('Failed to load admin data:', err);
+      // Log error in development only
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load admin data:', err);
+      }
       setError('Failed to load admin data');
     } finally {
       setLoading(false);
@@ -85,7 +88,10 @@ export default function AdminDashboard() {
         alert(error.error || 'Failed to delete user');
       }
     } catch (err) {
-      console.error('Delete user error:', err);
+      // Log error in development only
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Delete user error:', err);
+      }
       alert('Failed to delete user');
     }
   }

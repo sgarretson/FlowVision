@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import AIAnalysis from './ai-analysis';
 import ClusteringView from './clustering-view';
 import AIClusters from './ai-clusters';
+import AISummary from '@/components/AISummary';
 import { trackEvent } from '@/utils/analytics';
 import { useToast } from '@/components/ToastProvider';
 
@@ -15,6 +16,10 @@ type Issue = {
   votes: number;
   heatmapScore: number;
   createdAt: string;
+  aiSummary?: string | null;
+  aiConfidence?: number | null;
+  aiGeneratedAt?: string | null;
+  aiVersion?: string | null;
 };
 
 export default function IssuesPage() {
@@ -112,9 +117,11 @@ export default function IssuesPage() {
         setNewIssue('');
         fetchIssues(); // Refresh the list
         setMessage('Issue created successfully');
+        trackEvent('issues_create_success');
         showToast('Issue created', 'success');
       } else {
         setMessage('Failed to create issue');
+        trackEvent('issues_create_fail');
         showToast('Failed to create issue', 'error');
       }
     } catch (error) {
@@ -135,6 +142,7 @@ export default function IssuesPage() {
 
       if (res.ok) {
         fetchIssues(); // Refresh to show updated votes
+        trackEvent('issues_vote', { issueId, up: increment });
         showToast(increment ? 'Upvoted issue' : 'Downvoted issue', 'success');
       } else {
         setMessage('Failed to vote on issue');
@@ -187,6 +195,8 @@ export default function IssuesPage() {
             description: issue.description,
             heatmapScore: issue.heatmapScore,
             votes: issue.votes,
+            aiSummary: issue.aiSummary,
+            aiConfidence: issue.aiConfidence,
           })),
         }),
       });
@@ -197,6 +207,10 @@ export default function IssuesPage() {
         setMessage(
           `Initiative "${initiative.title}" created successfully from ${selectedIssues.size} issue(s)`
         );
+        trackEvent('initiative_created_from_issues', {
+          count: selectedIssues.size,
+          initiativeId: initiative.id,
+        });
         showToast('Initiative created from selected issues', 'success');
 
         // Navigate to the new initiative after a short delay
@@ -206,6 +220,7 @@ export default function IssuesPage() {
       } else {
         const error = await res.json();
         setMessage(error.error || 'Failed to create initiative from issues');
+        trackEvent('initiative_create_from_issues_fail', { count: selectedIssues.size });
         showToast('Failed to create initiative from issues', 'error');
       }
     } catch (error) {
@@ -625,9 +640,30 @@ export default function IssuesPage() {
                           </div>
                         </div>
 
-                        {/* AI Analysis Section */}
+                        {/* AI Summary Section */}
                         <div className="border-t pt-4">
-                          <AIAnalysis issueDescription={issue.description} />
+                          <AISummary
+                            itemId={issue.id}
+                            itemType="issue"
+                            summary={issue.aiSummary}
+                            confidence={issue.aiConfidence}
+                            generatedAt={issue.aiGeneratedAt}
+                            version={issue.aiVersion}
+                            onSummaryGenerated={(summary) => {
+                              // Update the issue in the local state
+                              setIssues((prev) =>
+                                prev.map((i) =>
+                                  i.id === issue.id
+                                    ? {
+                                        ...i,
+                                        aiSummary: summary,
+                                        aiGeneratedAt: new Date().toISOString(),
+                                      }
+                                    : i
+                                )
+                              );
+                            }}
+                          />
                         </div>
                       </div>
                     </div>

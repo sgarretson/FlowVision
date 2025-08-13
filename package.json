@@ -7,7 +7,7 @@
     "dev": "next dev -p 3002",
     "build": "next build",
     "start": "next start",
-    "lint": "echo 'Skipping lint - ESLint v9 compatibility issues'",
+    "lint": "echo 'Linting: TypeScript check + Prettier format check' && npx tsc --noEmit && npx prettier --check . --ignore-path .gitignore",
     "type-check": "tsc --noEmit",
     "test": "jest --passWithNoTests --testPathIgnorePatterns=tests/auth.test.ts --testPathIgnorePatterns=tests/initiatives.test.ts --testPathIgnorePatterns=tests/api.test.ts",
     "test:watch": "jest --watch",
@@ -15,7 +15,7 @@
     "cypress:open": "cypress open",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "node prisma/seed.cjs",
+    "prisma:seed": "node prisma/seed-ae-enhanced.cjs",
     "prepare": "husky"
   },
   "keywords": [],

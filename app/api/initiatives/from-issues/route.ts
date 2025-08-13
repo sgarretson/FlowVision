@@ -10,6 +10,8 @@ type IssueInput = {
   description: string;
   heatmapScore: number;
   votes: number;
+  aiSummary?: string | null;
+  aiConfidence?: number | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -38,18 +40,32 @@ export async function POST(req: NextRequest) {
       where: { userId: user.id },
     });
 
+    // Collect AI summaries from issues for enhanced context
+    const issuesWithAI = issues.filter((issue) => issue.aiSummary);
+    const aiSummariesContext =
+      issuesWithAI.length > 0
+        ? `\n\nAI Analysis Summary:\n${issuesWithAI
+            .map(
+              (issue, i) =>
+                `Issue ${i + 1} AI Analysis: ${issue.aiSummary} (Confidence: ${issue.aiConfidence}%)`
+            )
+            .join('\n')}`
+        : '';
+
     // Generate comprehensive initiative using centralized OpenAI service
     const aiGeneratedInitiative =
       (await openAIService.generateInitiativeFromIssues(issues, {
         industry: profile?.industry || 'Unknown',
         size: profile?.size || 0,
         metrics: (profile?.metrics as any) || {},
+        aiContext: aiSummariesContext, // Pass AI summaries as additional context
       })) ||
       // Fallback to local generator if AI is disabled/unavailable
       (await generateInitiativeFromIssues(issues, {
         industry: profile?.industry || 'Unknown',
         size: profile?.size || 0,
         metrics: (profile?.metrics as any) || {},
+        aiContext: aiSummariesContext,
       }));
 
     // Calculate scores
@@ -91,6 +107,51 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Generate AI-powered requirement cards if we have AI summaries
+    if (issuesWithAI.length > 0 && openAIService.isConfigured()) {
+      try {
+        const combinedSummary = issuesWithAI.map((issue) => issue.aiSummary).join(' ');
+        const requirementAnalysis = await openAIService.generateRequirementsFromSummary(
+          combinedSummary,
+          initiative.title,
+          initiative.goal,
+          {
+            industry: profile?.industry || 'Architecture & Engineering',
+            size: profile?.size || 0,
+            metrics: (profile?.metrics as any) || {},
+          }
+        );
+
+        if (requirementAnalysis && requirementAnalysis.cards.length > 0) {
+          // Create AI-generated requirement cards
+          await Promise.all(
+            requirementAnalysis.cards.map((card, index) =>
+              prisma.requirementCard.create({
+                data: {
+                  initiativeId: initiative.id,
+                  title: card.title,
+                  description: card.description,
+                  type: card.type,
+                  priority: card.priority,
+                  category: card.category || 'AI Generated',
+                  status: 'DRAFT',
+                  createdById: user.id,
+                  orderIndex: index,
+                  aiGenerated: true,
+                  sourceType: 'issue',
+                  sourceId: issues[0].id, // Reference first issue as source
+                  aiConfidence: requirementAnalysis.confidence,
+                },
+              })
+            )
+          );
+        }
+      } catch (aiError) {
+        console.warn('Failed to generate AI requirement cards:', aiError);
+        // Continue without requirements - this is not a critical failure
+      }
+    }
+
     // Create audit log
     await prisma.auditLog.create({
       data: {
@@ -104,8 +165,10 @@ export async function POST(req: NextRequest) {
             description: i.description,
             heatmapScore: i.heatmapScore,
             votes: i.votes,
+            hasAISummary: !!i.aiSummary,
           })),
           issueCount: issues.length,
+          aiSummaryCount: issuesWithAI.length,
           timestamp: new Date().toISOString(),
         },
       },
@@ -120,7 +183,7 @@ export async function POST(req: NextRequest) {
 
 async function generateInitiativeFromIssues(
   issues: IssueInput[],
-  businessContext: { industry: string; size: number; metrics: any }
+  businessContext: { industry: string; size: number; metrics: any; aiContext?: string }
 ) {
   const issueDescriptions = issues.map((i) => i.description).join('\n• ');
   const totalVotes = issues.reduce((sum, i) => sum + i.votes, 0);

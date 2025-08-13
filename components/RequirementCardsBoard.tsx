@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { trackEvent } from '@/utils/analytics';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { PlusIcon, SparklesIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import RequirementCard from './RequirementCard';
@@ -245,6 +246,16 @@ export default function RequirementCardsBoard({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    // Analytics
+    trackEvent('requirements_export_csv', {
+      initiativeId,
+      count: filteredCards.length,
+      statuses: ['DRAFT', 'REVIEW', 'APPROVED', 'REJECTED'].reduce((acc: any, s) => {
+        acc[s] = cardsByStatus[s as keyof typeof cardsByStatus].length;
+        return acc;
+      }, {}),
+    });
   };
 
   const handleDragEnd = async (result: DropResult) => {

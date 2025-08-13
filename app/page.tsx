@@ -44,12 +44,12 @@ export default function DashboardPage() {
 
       if (issuesRes.ok) {
         const issuesData = await issuesRes.json();
-        setIssues(issuesData.slice(0, 5)); // Top 5 issues
+        setIssues(issuesData); // Get ALL issues for accurate statistics
       }
 
       if (initiativesRes.ok) {
         const initiativesData = await initiativesRes.json();
-        setInitiatives(initiativesData.slice(0, 5)); // Recent 5 initiatives
+        setInitiatives(initiativesData); // Get ALL initiatives for accurate statistics
       }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -67,12 +67,19 @@ export default function DashboardPage() {
 
   function getStatusColor(status: string): string {
     switch (status) {
+      case 'COMPLETED':
       case 'Done':
         return 'bg-green-100 text-green-800';
+      case 'ACTIVE':
       case 'In Progress':
         return 'bg-blue-100 text-blue-800';
+      case 'APPROVED':
       case 'Prioritize':
         return 'bg-orange-100 text-orange-800';
+      case 'DRAFT':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'PLANNING':
+        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -146,12 +153,12 @@ export default function DashboardPage() {
       <div className="text-center">
         <div className="card-primary p-8 max-w-md mx-auto">
           <div className="text-6xl font-bold text-primary mb-2">
-            {initiatives.filter((i) => i.status === 'In Progress').length}
+            {initiatives.filter((i) => i.status === 'ACTIVE' || i.status === 'In Progress').length}
           </div>
           <div className="text-h3 text-gray-600 mb-4">Active Initiatives</div>
           <div className="text-caption">
             {initiatives.length > 0
-              ? `${Math.round((initiatives.filter((i) => i.status === 'In Progress').length / initiatives.length) * 100)}% of total initiatives`
+              ? `${Math.round((initiatives.filter((i) => i.status === 'ACTIVE' || i.status === 'In Progress').length / initiatives.length) * 100)}% of total initiatives`
               : 'Start by identifying issues or creating your first initiative'}
           </div>
         </div>

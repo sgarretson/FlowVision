@@ -64,6 +64,9 @@ If you encounter:
 - **GitHub sync issues**: Create new feature branch from latest main
 - **CI/CD failures**: Fix issues locally, never bypass checks
 - **Merge conflicts**: Resolve locally with `git rebase main`
+- **TypeScript null/undefined errors**: Transform Prisma nulls to undefined using `?? undefined`
+- **Stuck interactive rebase**: Remove `.git/*.swp` files and set `git config core.editor "cat"`
+- **Merge conflict markers in files**: Manually resolve all `<<<<<<<`, `=======`, `>>>>>>>` markers
 
 ## Repository Hygiene
 
@@ -93,6 +96,16 @@ If you encounter:
 - **ALWAYS validate input** before database queries
 - **ALWAYS handle Prisma errors** with try/catch blocks
 - **ALWAYS test schema changes** with seed data
+- **ALWAYS transform** database `null` to `undefined` for external APIs using `?? undefined`
+
+### AI/LLM Integration
+- **ALWAYS validate** AI service configuration before use (`isConfigured()`)
+- **ALWAYS include** confidence scores for AI-generated content
+- **ALWAYS provide** fallback when AI services are unavailable
+- **ALWAYS sanitize** AI responses before database storage
+- **ALWAYS track** AI usage and costs in audit logs
+- **ALWAYS indicate** AI-generated content with clear attribution
+- **NEVER expose** OpenAI API keys in client-side code
 
 ### Security
 - **ALWAYS validate user permissions** in API routes
@@ -132,6 +145,28 @@ Remember these key project facts:
 - Keep 'facebook-ad-campaign' and 'Google_PPC' folders local only
 - Main branch requires PR workflow with reviews
 - All major features need comprehensive testing
+
+## Conflict Resolution Best Practices
+
+### Merge Conflict Prevention
+- **ALWAYS rebase** feature branches regularly with main
+- **KEEP branches** small and focused (single responsibility)
+- **COMMUNICATE** with team before large refactoring
+- **TEST locally** before pushing any merge resolution
+
+### When Conflicts Occur
+1. **STOP** and assess the scope of conflicts
+2. **BACKUP** current work with `git stash` if needed
+3. **RESOLVE** conflicts in order: simple to complex
+4. **TEST thoroughly** after each resolution
+5. **COMMIT** with descriptive merge commit message
+6. **VERIFY** CI/CD passes before requesting reviews
+
+### Common Conflict Patterns
+- **Import statements**: Usually safe to combine both imports
+- **Function implementations**: Choose the more complete version
+- **Configuration files**: Merge security and functionality features
+- **Type definitions**: Combine interfaces, avoid duplicates
 
 ## Enforcement
 
