@@ -237,7 +237,7 @@ class GitHubMonitor {
 
     // Repository info
     const repoInfo = this.execCommand(
-      'gh repo view --json name,owner,description,isPrivate,defaultBranch,openIssuesCount,stargazerCount',
+      'gh repo view --json name,owner,description,isPrivate,defaultBranchRef,stargazerCount,visibility',
       'Get repository information'
     );
     if (repoInfo.success) {
@@ -245,10 +245,9 @@ class GitHubMonitor {
         const repo = JSON.parse(repoInfo.output);
         this.log(`Repository: ${repo.owner.login}/${repo.name}`);
         this.log(`Description: ${repo.description || 'No description'}`);
-        this.log(`Default branch: ${repo.defaultBranch}`);
-        this.log(`Open issues: ${repo.openIssuesCount}`);
+        this.log(`Default branch: ${repo.defaultBranchRef?.name || 'main'}`);
         this.log(`Stars: ${repo.stargazerCount}`);
-        this.log(`Private: ${repo.isPrivate ? 'Yes' : 'No'}`);
+        this.log(`Visibility: ${repo.visibility || (repo.isPrivate ? 'private' : 'public')}`);
       } catch (error) {
         this.log(`Error parsing repository info: ${error.message}`, 'ERROR');
       }

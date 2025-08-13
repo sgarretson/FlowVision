@@ -143,9 +143,9 @@ class Logger {
               component: entry.context.component || 'SYSTEM',
               requestId: entry.context.requestId || 'unknown',
               environment: entry.environment,
-              ...entry.context,
+              context: entry.context,
               timestamp: entry.timestamp,
-            },
+            } as any, // Type assertion for Prisma JSON field
             timestamp: new Date(entry.timestamp),
           },
         });
