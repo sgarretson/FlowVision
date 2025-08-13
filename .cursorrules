@@ -150,6 +150,9 @@ Remember these key project facts:
 - Systems Enhancement is major release - use proper GitHub project management
 - Always include addressedIssues in initiative queries to prevent undefined errors
 - Use proper null checking for all optional array fields in frontend components
+- Current sprint details are in SYSTEMS_ENHANCEMENT_EXECUTION_PLAN.md
+- Team capacity is ~60 story points per 2-week sprint with 10% buffer
+- Sprint naming follows: Sprint X (dates) with clear goals and deliverables
 
 ## Conflict Resolution Best Practices
 
@@ -175,12 +178,20 @@ Remember these key project facts:
 
 ## Systems Enhancement Project Rules
 
+### Sprint Planning & Execution Framework
+- **ALWAYS reference** SYSTEMS_ENHANCEMENT_EXECUTION_PLAN.md for current sprint details
+- **ALWAYS update** completion status in the execution plan when stories are done
+- **ALWAYS validate** story acceptance criteria before marking complete
+- **ALWAYS conduct** sprint retrospectives and update velocity metrics
+- **ALWAYS adjust** future sprint planning based on actual capacity
+
 ### Feature Development Protocol
 - **ALWAYS use GitHub Projects** for milestone and task tracking
 - **ALWAYS create detailed issues** before starting development
 - **ALWAYS link commits to issues** using `#issue-number` in commit messages
 - **ALWAYS update project status** when moving between development phases
 - **ALWAYS coordinate with team** before modifying shared components
+- **ALWAYS create feature branch** following pattern: `feature/sprint-X-story-Y-description`
 
 ### Database Schema Changes
 - **ALWAYS create migration scripts** for schema changes
@@ -195,6 +206,20 @@ Remember these key project facts:
 - **ALWAYS validate request payloads** using Zod or similar
 - **ALWAYS include response type definitions** in TypeScript
 - **ALWAYS test API endpoints** with both valid and invalid data
+
+### Sprint Progress Tracking
+- **BEFORE starting** a story: Update status to "IN PROGRESS" in execution plan
+- **DURING development**: Update GitHub issue with progress comments
+- **WHEN blocked**: Document blockers in both GitHub issue and execution plan
+- **UPON completion**: Mark story as ✅ in execution plan and close GitHub issue
+- **AT sprint end**: Update velocity metrics and conduct retrospective
+
+### Story Completion Validation
+- **ALWAYS verify** all acceptance criteria are met before marking complete
+- **ALWAYS run** full test suite before story completion
+- **ALWAYS update** any affected documentation
+- **ALWAYS demo** completed functionality to product owner
+- **ALWAYS check** story points accuracy for future sprint planning
 
 ## Enforcement
 
