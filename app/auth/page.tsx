@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function AuthPage() {
-  const [email, setEmail] = useState('admin@flowvision.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('david.morrison@morrisonae.com');
+  const [password, setPassword] = useState('Admin123!');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { data: session } = useSession();
@@ -19,6 +19,45 @@ export default function AuthPage() {
       router.push('/');
     }
   }, [session, router]);
+
+  // Demo users from Morrison A&E
+  const demoUsers = [
+    {
+      email: 'david.morrison@morrisonae.com',
+      name: 'David Morrison',
+      role: 'Principal/CEO',
+      description: 'Strategic oversight and executive decision-making',
+    },
+    {
+      email: 'sarah.chen@morrisonae.com',
+      name: 'Sarah Chen',
+      role: 'Design Director',
+      description: 'Creative leadership and design process management',
+    },
+    {
+      email: 'mike.rodriguez@morrisonae.com',
+      name: 'Mike Rodriguez',
+      role: 'Project Director',
+      description: 'Operations delivery and project coordination',
+    },
+    {
+      email: 'jennifer.kim@morrisonae.com',
+      name: 'Jennifer Kim',
+      role: 'Business Development Director',
+      description: 'Growth strategy and client relationship management',
+    },
+    {
+      email: 'alex.thompson@morrisonae.com',
+      name: 'Alex Thompson',
+      role: 'Engineering Director',
+      description: 'Technical systems and compliance oversight',
+    },
+  ];
+
+  const handleDemoLogin = (demoEmail: string) => {
+    setEmail(demoEmail);
+    setPassword('Admin123!');
+  };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -122,16 +161,55 @@ export default function AuthPage() {
             </div>
           </div>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">Demo Credentials</h4>
-            <div className="text-sm text-blue-700 space-y-1">
-              <div>
-                <strong>Admin:</strong> admin@example.com / Admin123!
-              </div>
-              <div>
-                <strong>Leader:</strong> Create account or contact admin
-              </div>
+          {/* Morrison A&E Demo Team */}
+          <div className="mt-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-medium text-blue-900">Morrison A&E Demo Team</h4>
+              <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                Click to login
+              </span>
+            </div>
+            <div className="space-y-2">
+              {demoUsers.map((user) => (
+                <button
+                  key={user.email}
+                  onClick={() => handleDemoLogin(user.email)}
+                  className="w-full text-left p-3 bg-white border border-blue-200 rounded-md hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 group"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 text-sm group-hover:text-blue-900">
+                        {user.name}
+                      </div>
+                      <div className="text-xs text-blue-700 font-medium mt-0.5">{user.role}</div>
+                      <div className="text-xs text-gray-600 mt-1 leading-relaxed">
+                        {user.description}
+                      </div>
+                    </div>
+                    <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <svg
+                        className="w-4 h-4 text-blue-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 pt-3 border-t border-blue-200">
+              <p className="text-xs text-blue-600 text-center">
+                All demo accounts use password:{' '}
+                <span className="font-mono bg-blue-100 px-1 rounded">Admin123!</span>
+              </p>
             </div>
           </div>
         </div>
