@@ -85,7 +85,7 @@ interface ExecutiveInsight {
   impact: 'high' | 'medium' | 'low';
   actionRequired: boolean;
   recommendation?: string; // Legacy support
-  confidence?: number; // Legacy support
+  confidence?: number | { score: number }; // Legacy support - can be number or object
 
   // Enhanced Context (optional for backward compatibility)
   context?: {
@@ -1012,7 +1012,14 @@ export default function InsightsDashboard() {
                     <div className="ml-4 text-right min-w-[120px]">
                       <div className="text-sm text-gray-500">AI Confidence</div>
                       <div className="text-2xl font-bold text-gray-900">
-                        {insight.confidenceReasoning?.score || insight.confidence || 0}%
+                        {insight.confidenceReasoning?.score ||
+                          (typeof insight.confidence === 'number'
+                            ? insight.confidence
+                            : typeof insight.confidence === 'object'
+                              ? (insight.confidence as any)?.score
+                              : 0) ||
+                          0}
+                        %
                       </div>
 
                       {/* Confidence Reasoning */}
