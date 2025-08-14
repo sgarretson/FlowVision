@@ -247,7 +247,7 @@ export default function AdminDashboard() {
         </button>
 
         <Link
-          href="/logs"
+          href="/admin/analytics/legacy"
           className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow group"
         >
           <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">

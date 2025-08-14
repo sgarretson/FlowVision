@@ -31,12 +31,6 @@ export function Header() {
 
   const navSections = [
     {
-      title: 'Executive',
-      href: '/executive',
-      description: 'AI Dashboard',
-      active: pathname === '/executive',
-    },
-    {
       title: 'Identify',
       href: '/issues',
       description: 'Discover problems',
@@ -56,10 +50,10 @@ export function Header() {
       active: pathname === '/track' || pathname === '/roadmap',
     },
     {
-      title: 'Analyze',
-      href: '/logs',
-      description: 'Review insights',
-      active: pathname === '/logs' || pathname === '/profile',
+      title: 'Insights',
+      href: '/insights',
+      description: 'AI Intelligence',
+      active: pathname === '/insights' || pathname === '/executive',
     },
   ];
 
