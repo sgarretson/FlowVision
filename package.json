@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "echo 'Linting: TypeScript check + Prettier format check' && npx tsc --noEmit && npx prettier --check . --ignore-path .gitignore",
     "type-check": "tsc --noEmit",
