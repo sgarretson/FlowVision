@@ -1,166 +1,277 @@
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
 import { openAIService } from '@/lib/openai';
 import { optimizedOpenAIService } from '@/lib/optimized-openai-service';
 
+const prisma = new PrismaClient();
+
 export interface DatabaseAIConfig {
-  id: string;
-  key: string;
   apiKey: string;
   model: string;
   maxTokens: number;
   temperature: number;
   enabled: boolean;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  userId?: string;
 }
 
-/**
- * AI Configuration Loader - manages loading AI configuration from database
- */
 export class AIConfigLoader {
-  private static lastLoadTime = 0;
-  private static CONFIG_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private static instance: AIConfigLoader;
+  private config: DatabaseAIConfig | null = null;
+  private loaded = false;
+
+  private constructor() {}
+
+  public static getInstance(): AIConfigLoader {
+    if (!AIConfigLoader.instance) {
+      AIConfigLoader.instance = new AIConfigLoader();
+    }
+    return AIConfigLoader.instance;
+  }
 
   /**
-   * Load AI configuration from database and configure services
+   * Load AI configuration from database with environment fallback
    */
-  static async loadAndConfigureFromDatabase(): Promise<boolean> {
+  public async loadConfig(): Promise<DatabaseAIConfig | null> {
+    if (this.loaded && this.config) {
+      return this.config;
+    }
+
     try {
-      // Cache check - avoid hitting database too frequently
-      const now = Date.now();
-      if (now - this.lastLoadTime < this.CONFIG_CACHE_DURATION) {
-        return openAIService.isConfigured();
+      // Try to load from database first
+      const dbConfig = await this.loadFromDatabase();
+      if (dbConfig) {
+        this.config = dbConfig;
+        this.loaded = true;
+        this.applyConfiguration(dbConfig);
+        return dbConfig;
       }
 
-      // Get the most recent AI configuration from database
-      const aiConfig = await prisma.aIConfiguration.findFirst({
-        where: {
-          enabled: true,
+      // Fallback to environment variables
+      const envConfig = this.loadFromEnvironment();
+      if (envConfig) {
+        this.config = envConfig;
+        this.loaded = true;
+        this.applyConfiguration(envConfig);
+        return envConfig;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Failed to load AI configuration:', error);
+
+      // Emergency fallback to environment
+      const envConfig = this.loadFromEnvironment();
+      if (envConfig) {
+        this.config = envConfig;
+        this.applyConfiguration(envConfig);
+        return envConfig;
+      }
+
+      return null;
+    }
+  }
+
+  /**
+   * Save configuration to database
+   */
+  public async saveConfig(config: DatabaseAIConfig, userId: string): Promise<boolean> {
+    try {
+      // Validate configuration
+      if (!config.apiKey || !config.apiKey.startsWith('sk-')) {
+        throw new Error('Invalid OpenAI API key');
+      }
+
+      if (!config.model || typeof config.model !== 'string') {
+        throw new Error('Invalid model specified');
+      }
+
+      // Save to database
+      await prisma.aIConfiguration.upsert({
+        where: { key: 'openai_config' },
+        update: {
+          value: {
+            apiKey: config.apiKey,
+            model: config.model,
+            maxTokens: config.maxTokens,
+            temperature: config.temperature,
+            enabled: config.enabled,
+          },
+          updatedBy: userId,
+          updatedAt: new Date(),
         },
-        orderBy: {
-          updatedAt: 'desc',
+        create: {
+          key: 'openai_config',
+          value: {
+            apiKey: config.apiKey,
+            model: config.model,
+            maxTokens: config.maxTokens,
+            temperature: config.temperature,
+            enabled: config.enabled,
+          },
+          description: 'OpenAI API Configuration',
+          updatedBy: userId,
         },
       });
 
-      if (aiConfig && aiConfig.apiKey && aiConfig.apiKey !== 'sk-your-openai-api-key-here') {
-        console.log('Loading AI configuration from database...');
+      // Update in-memory config
+      this.config = { ...config, userId };
+      this.applyConfiguration(config);
 
-        const config = {
-          apiKey: aiConfig.apiKey,
-          model: aiConfig.model,
-          maxTokens: aiConfig.maxTokens,
-          temperature: aiConfig.temperature,
-          enabled: aiConfig.enabled,
-        };
-
-        // Configure both services
-        openAIService.configure(config);
-        optimizedOpenAIService.configure(config);
-
-        this.lastLoadTime = now;
-
-        console.log('✅ AI configuration loaded successfully from database');
-        return true;
-      } else {
-        console.log('No valid AI configuration found in database, checking environment...');
-
-        // Fallback to environment variables
-        const envApiKey = process.env.OPENAI_API_KEY;
-        if (envApiKey) {
-          const envConfig = {
-            apiKey: envApiKey,
-            model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
-            maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS || '500'),
-            temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
-            enabled: process.env.OPENAI_ENABLED !== 'false',
-          };
-
-          openAIService.configure(envConfig);
-          optimizedOpenAIService.configure(envConfig);
-
-          console.log('✅ AI configuration loaded from environment variables');
-          return true;
-        }
-
-        console.log('❌ No AI configuration available');
-        return false;
-      }
+      console.log('✅ AI configuration saved to database');
+      return true;
     } catch (error) {
-      console.error('❌ Failed to load AI configuration from database:', error);
+      console.error('❌ Failed to save AI configuration:', error);
       return false;
     }
   }
 
   /**
-   * Check if AI is configured (checks database if not already configured)
+   * Test the current configuration
    */
-  static async isConfigured(): Promise<boolean> {
-    // First check if already configured in memory
-    if (openAIService.isConfigured()) {
-      return true;
-    }
-
-    // If not configured, try loading from database
-    return await this.loadAndConfigureFromDatabase();
-  }
-
-  /**
-   * Force reload configuration from database
-   */
-  static async forceReload(): Promise<boolean> {
-    this.lastLoadTime = 0; // Reset cache
-    return await this.loadAndConfigureFromDatabase();
-  }
-
-  /**
-   * Get current configuration status
-   */
-  static async getConfigurationStatus(): Promise<{
-    configured: boolean;
-    source: 'database' | 'environment' | 'none';
-    hasApiKey: boolean;
+  public async testConfiguration(testConfig?: Partial<DatabaseAIConfig>): Promise<{
+    success: boolean;
+    error?: string;
     model?: string;
   }> {
+    const configToTest = testConfig
+      ? ({ ...this.config, ...testConfig } as DatabaseAIConfig)
+      : this.config;
+
+    if (!configToTest) {
+      return { success: false, error: 'No configuration available' };
+    }
+
     try {
-      // Check database first
-      const aiConfig = await prisma.aIConfiguration.findFirst({
-        where: { enabled: true },
-        orderBy: { updatedAt: 'desc' },
+      // Temporarily configure the service for testing
+      const tempConfig = {
+        apiKey: configToTest.apiKey,
+        model: configToTest.model,
+        maxTokens: 10, // Minimal for testing
+        temperature: configToTest.temperature,
+        enabled: true,
+      };
+
+      openAIService.configure(tempConfig);
+
+      const result = await openAIService.testConnection();
+      return result;
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Test failed' };
+    }
+  }
+
+  /**
+   * Get current configuration
+   */
+  public getConfig(): DatabaseAIConfig | null {
+    return this.config;
+  }
+
+  /**
+   * Check if AI is configured
+   */
+  public isConfigured(): boolean {
+    return !!(this.config?.apiKey && this.config.enabled);
+  }
+
+  /**
+   * Force reload configuration
+   */
+  public async reloadConfig(): Promise<DatabaseAIConfig | null> {
+    this.loaded = false;
+    this.config = null;
+    return this.loadConfig();
+  }
+
+  /**
+   * Load configuration from database
+   */
+  private async loadFromDatabase(): Promise<DatabaseAIConfig | null> {
+    try {
+      const dbConfig = await prisma.aIConfiguration.findUnique({
+        where: { key: 'openai_config' },
+        include: { updatedUser: { select: { id: true, name: true } } },
       });
 
-      if (aiConfig && aiConfig.apiKey) {
-        return {
-          configured: true,
-          source: 'database',
-          hasApiKey: true,
-          model: aiConfig.model,
-        };
+      if (!dbConfig || !dbConfig.isActive) {
+        return null;
       }
 
-      // Check environment
-      const envApiKey = process.env.OPENAI_API_KEY;
-      if (envApiKey) {
-        return {
-          configured: true,
-          source: 'environment',
-          hasApiKey: true,
-          model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
-        };
+      const configValue = dbConfig.value as any;
+
+      if (!configValue.apiKey || !configValue.model) {
+        console.warn('⚠️ Incomplete AI configuration in database');
+        return null;
       }
 
       return {
-        configured: false,
-        source: 'none',
-        hasApiKey: false,
+        apiKey: configValue.apiKey,
+        model: configValue.model,
+        maxTokens: configValue.maxTokens || 500,
+        temperature: configValue.temperature || 0.7,
+        enabled: configValue.enabled !== false,
+        userId: dbConfig.updatedBy,
       };
     } catch (error) {
-      console.error('Failed to get configuration status:', error);
-      return {
-        configured: false,
-        source: 'none',
-        hasApiKey: false,
-      };
+      console.error('Failed to load config from database:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Load configuration from environment variables
+   */
+  private loadFromEnvironment(): DatabaseAIConfig | null {
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey || apiKey === 'sk-your-openai-api-key-here') {
+      return null;
+    }
+
+    return {
+      apiKey,
+      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+      maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS || '500'),
+      temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
+      enabled: process.env.OPENAI_ENABLED !== 'false',
+    };
+  }
+
+  /**
+   * Apply configuration to AI services
+   */
+  private applyConfiguration(config: DatabaseAIConfig): void {
+    try {
+      // Configure both services
+      openAIService.configure({
+        apiKey: config.apiKey,
+        model: config.model,
+        maxTokens: config.maxTokens,
+        temperature: config.temperature,
+        enabled: config.enabled,
+      });
+
+      optimizedOpenAIService.configure({
+        apiKey: config.apiKey,
+        model: config.model,
+        maxTokens: config.maxTokens,
+        temperature: config.temperature,
+        enabled: config.enabled,
+        cacheTTL: 3600000, // 1 hour
+      });
+
+      console.log(`🤖 AI services configured with model: ${config.model}`);
+    } catch (error) {
+      console.error('Failed to apply AI configuration:', error);
     }
   }
 }
+
+// Singleton instance
+export const aiConfigLoader = AIConfigLoader.getInstance();
+
+// Initialize configuration on module load
+aiConfigLoader.loadConfig().catch((error) => {
+  console.error('Failed to initialize AI configuration:', error);
+});
+
+export default aiConfigLoader;

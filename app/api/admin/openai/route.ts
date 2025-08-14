@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import AIMigration from '@/lib/ai-migration';
+import { aiConfigLoader } from '@/lib/ai-config-loader';
 import { prisma } from '@/lib/prisma';
-import { AIConfigLoader } from '@/lib/ai-config-loader';
 
 // GET /api/admin/openai - Get current OpenAI configuration and status
 export async function GET() {
@@ -21,7 +21,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const config = AIMigration.getConfig();
+    const config = await AIMigration.getConfig();
     const isConfigured = await AIMigration.isConfigured();
     const rawUsageStats = await AIMigration.getPerformanceMetrics();
 
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     const { apiKey, model, maxTokens, temperature, enabled } = body;
 
     // Validate inputs
-    const existing = AIMigration.getConfig();
+    const existing = await AIMigration.getConfig();
     const effectiveApiKey = apiKey && typeof apiKey === 'string' ? apiKey : existing?.apiKey;
     if (!effectiveApiKey || !effectiveApiKey.startsWith('sk-')) {
       return NextResponse.json({ error: 'Valid OpenAI API key required' }, { status: 400 });
@@ -101,35 +101,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Temperature must be between 0 and 2' }, { status: 400 });
     }
 
-    // Save configuration to database
-    const configData = {
-      key: 'default', // Primary configuration key
-      apiKey: effectiveApiKey,
-      model: model || 'gpt-3.5-turbo',
-      maxTokens: maxTokens || 500,
-      temperature: temperature || 0.7,
-      enabled: enabled !== false,
-      userId: user.id,
-    };
+    // Configure and save OpenAI service to database
+    const configSuccess = await AIMigration.configure(
+      {
+        apiKey: effectiveApiKey,
+        model: model || 'gpt-3.5-turbo',
+        maxTokens: maxTokens || 500,
+        temperature: temperature || 0.7,
+        enabled: enabled !== false,
+      },
+      user.id
+    );
 
-    // Upsert configuration in database
-    await prisma.aIConfiguration.upsert({
-      where: { key: 'default' },
-      update: configData,
-      create: configData,
-    });
-
-    // Configure OpenAI service in memory
-    AIMigration.configure({
-      apiKey: effectiveApiKey,
-      model: model || 'gpt-3.5-turbo',
-      maxTokens: maxTokens || 500,
-      temperature: temperature || 0.7,
-      enabled: enabled !== false,
-    });
-
-    // Force reload from database to ensure consistency
-    await AIConfigLoader.forceReload();
+    if (!configSuccess) {
+      return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 });
+    }
 
     // Log the configuration change
     await prisma.auditLog.create({
@@ -174,18 +160,21 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const { apiKey, model } = body;
 
-    // Temporarily configure for testing if new key provided
+    // Test connection with provided key or existing config
+    let testResult;
     if (apiKey) {
-      AIMigration.configure({
+      // Test with temporary configuration
+      testResult = await aiConfigLoader.testConfiguration({
         apiKey,
         model: model || 'gpt-3.5-turbo',
         maxTokens: 10,
         temperature: 0.7,
         enabled: true,
       });
+    } else {
+      // Test existing configuration
+      testResult = await AIMigration.testConnection();
     }
-
-    const testResult = await AIMigration.testConnection();
 
     // Log the test
     await prisma.auditLog.create({

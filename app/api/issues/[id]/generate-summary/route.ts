@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import AIMigration from '@/lib/ai-migration';
+import { getUserFriendlyAIError } from '@/lib/ai-error-handler';
+import { aiServiceMonitor } from '@/lib/ai-service-monitor';
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -29,7 +31,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     // Check if AI service is configured
-    if (!(await AIMigration.isConfigured())) {
+    if (!AIMigration.isConfigured()) {
       return NextResponse.json(
         {
           error: 'AI analysis not available - OpenAI not configured',
@@ -53,6 +55,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       : undefined;
 
     // Generate AI summary using optimized service with user context
+    const startTime = Date.now();
     const aiAnalysis = await AIMigration.generateIssueSummary(
       issue.description,
       issue.department || undefined,
@@ -61,11 +64,19 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       user.id
     );
 
+    // Record operation metrics
+    const responseTime = Date.now() - startTime;
+    aiServiceMonitor.recordOperation(
+      !!aiAnalysis,
+      responseTime,
+      aiAnalysis ? undefined : 'GENERATION_FAILED'
+    );
+
     if (!aiAnalysis) {
       return NextResponse.json(
         {
           error: 'Failed to generate AI summary',
-          fallback: 'AI service temporarily unavailable. Please try again later.',
+          fallback: getUserFriendlyAIError(new Error('AI generation failed')),
         },
         { status: 500 }
       );

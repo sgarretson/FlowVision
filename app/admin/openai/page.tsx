@@ -88,7 +88,6 @@ export default function OpenAISettings() {
     try {
       setSaving(true);
       setError(null);
-      setSuccess(null);
 
       const response = await fetch('/api/admin/openai', {
         method: 'POST',
@@ -103,10 +102,9 @@ export default function OpenAISettings() {
       });
 
       if (response.ok) {
-        setSuccess('OpenAI configuration saved successfully! AI features are now active.');
+        setSuccess('OpenAI configuration saved successfully');
         await loadOpenAIConfig();
         setApiKey(''); // Clear the API key field for security
-        setTestResult(null); // Clear any previous test results
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to save configuration');
@@ -128,7 +126,6 @@ export default function OpenAISettings() {
     try {
       setTesting(true);
       setError(null);
-      setSuccess(null);
       setTestResult(null);
 
       const response = await fetch('/api/admin/openai', {
@@ -143,9 +140,6 @@ export default function OpenAISettings() {
       if (response.ok) {
         const result = await response.json();
         setTestResult(result);
-        if (result.success) {
-          setSuccess('Connection test successful! Your API key is working.');
-        }
       } else {
         const errorData = await response.json();
         setTestResult({

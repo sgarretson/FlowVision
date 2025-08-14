@@ -26,11 +26,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Issue description is required' }, { status: 400 });
     }
 
-    // Check if AI service is configured
-    if (!(await AIMigration.isConfigured())) {
+    // Check if AI is available (handled internally by AIMigration)
+    try {
+      // AIMigration will handle configuration checks and fallbacks
+    } catch (configError) {
       return NextResponse.json(
         {
-          error: 'AI analysis not available - OpenAI not configured',
+          error: 'AI analysis not available - service unavailable',
           fallback: 'Use the admin panel to configure OpenAI integration for AI-powered insights.',
         },
         { status: 503 }

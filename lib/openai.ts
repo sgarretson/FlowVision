@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { executeAIOperation, getUserFriendlyAIError, AIServiceError } from './ai-error-handler';
 
 export interface OpenAIConfig {
   apiKey: string;
@@ -249,12 +250,14 @@ Provide a structured analysis in JSON format:
 Focus on practical A&E operational challenges like coordination, technical complexity, client communication, regulatory compliance, and project delivery.
 `;
 
-      const response = await this.client!.chat.completions.create({
-        model: this.config.model || 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: this.config.maxTokens || 600,
-        temperature: this.config.temperature || 0.7,
-      });
+      const response = await executeAIOperation(async () => {
+        return await this.client!.chat.completions.create({
+          model: this.config.model || 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: this.config.maxTokens || 600,
+          temperature: this.config.temperature || 0.7,
+        });
+      }, 'Generate Issue Summary');
 
       const content = response.choices[0]?.message?.content;
       if (content) {

@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 
-export function Header() {
+interface HeaderProps {}
+
+const Header: React.FC<HeaderProps> = React.memo(() => {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,33 +31,38 @@ export function Header() {
     };
   }, [userMenuOpen]);
 
-  const navSections = [
-    {
-      title: 'Identify',
-      href: '/issues',
-      description: 'Discover problems',
-      active: pathname === '/issues',
-    },
-    {
-      title: 'Plan',
-      href: '/initiatives',
-      description: 'Create solutions',
-      active:
-        pathname?.startsWith('/initiatives') || pathname === '/prioritize' || pathname === '/ideas',
-    },
-    {
-      title: 'Execute',
-      href: '/track',
-      description: 'Track progress',
-      active: pathname === '/track' || pathname === '/roadmap',
-    },
-    {
-      title: 'Insights',
-      href: '/insights',
-      description: 'AI Intelligence',
-      active: pathname === '/insights' || pathname === '/executive',
-    },
-  ];
+  const navSections = useMemo(
+    () => [
+      {
+        title: 'Identify',
+        href: '/issues',
+        description: 'Discover problems',
+        active: pathname === '/issues',
+      },
+      {
+        title: 'Plan',
+        href: '/initiatives',
+        description: 'Create solutions',
+        active:
+          pathname?.startsWith('/initiatives') ||
+          pathname === '/prioritize' ||
+          pathname === '/ideas',
+      },
+      {
+        title: 'Execute',
+        href: '/track',
+        description: 'Track progress',
+        active: pathname === '/track' || pathname === '/roadmap',
+      },
+      {
+        title: 'Insights',
+        href: '/insights',
+        description: 'AI Intelligence',
+        active: pathname === '/insights' || pathname === '/executive',
+      },
+    ],
+    [pathname]
+  );
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -311,4 +318,8 @@ export function Header() {
       </div>
     </header>
   );
-}
+});
+
+Header.displayName = 'Header';
+
+export { Header };

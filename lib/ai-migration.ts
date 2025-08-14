@@ -1,7 +1,8 @@
 // AI Migration utility for gradual rollout of optimized service
 import { openAIService } from '@/lib/openai';
 import { optimizedOpenAIService } from '@/lib/optimized-openai-service';
-import { AIConfigLoader } from '@/lib/ai-config-loader';
+import { aiConfigLoader } from '@/lib/ai-config-loader';
+import { executeAIOperation, AIServiceError } from '@/lib/ai-error-handler';
 
 export class AIMigration {
   // Feature flag for gradual rollout
@@ -39,7 +40,7 @@ export class AIMigration {
     return Math.abs(hash) % 100;
   }
 
-  // Wrapper methods that route to appropriate service
+  // Wrapper methods that route to appropriate service with error handling
   static async generateIssueSummary(
     description: string,
     department?: string,
@@ -47,24 +48,42 @@ export class AIMigration {
     businessContext?: any,
     userId?: string
   ): Promise<any> {
-    // Temporarily force original service until optimized service is fixed
-    if (false && this.isOptimizedEnabled(userId)) {
-      return optimizedOpenAIService.generateIssueSummary(
-        description,
-        department,
-        category,
-        businessContext,
-        userId || 'anonymous'
-      );
-    } else {
-      // Fallback to original service with format conversion
-      const result = await openAIService.generateIssueSummary(
-        description,
-        department,
-        category,
-        businessContext
-      );
-      return result;
+    try {
+      // Ensure configuration is loaded before proceeding
+      await aiConfigLoader.loadConfig();
+
+      // Check if AI services are configured
+      const isConfigured = await this.isConfigured();
+      if (!isConfigured) {
+        throw new AIServiceError('AI services not configured', 'NOT_CONFIGURED');
+      }
+
+      // Use executeAIOperation for robust error handling
+      return await executeAIOperation(async () => {
+        // Temporarily force original service until optimized service is fixed
+        if (false && this.isOptimizedEnabled(userId)) {
+          return optimizedOpenAIService.generateIssueSummary(
+            description,
+            department,
+            category,
+            businessContext,
+            userId || 'anonymous'
+          );
+        } else {
+          // Use original service with format conversion
+          const result = await openAIService.generateIssueSummary(
+            description,
+            department,
+            category,
+            businessContext
+          );
+          return result;
+        }
+      }, 'AIMigration.generateIssueSummary');
+    } catch (error) {
+      console.error('AIMigration.generateIssueSummary failed:', error);
+      // Return null to indicate failure - calling code should handle gracefully
+      return null;
     }
   }
 
@@ -181,18 +200,16 @@ export class AIMigration {
     }
   }
 
-  // Service management methods
+  // Service management methods with database integration
   static async isConfigured(): Promise<boolean> {
-    // First check if already configured in memory
-    if (openAIService.isConfigured() || optimizedOpenAIService.isConfigured()) {
-      return true;
-    }
-
-    // If not configured, try loading from database
-    return await AIConfigLoader.isConfigured();
+    const config = await aiConfigLoader.loadConfig();
+    return config !== null && config.enabled;
   }
 
   static async testConnection(): Promise<{ success: boolean; error?: string; model?: string }> {
+    // Ensure configuration is loaded first
+    await aiConfigLoader.loadConfig();
+
     // Test both services and return the active one
     if (optimizedOpenAIService.isConfigured()) {
       return optimizedOpenAIService.testConnection();
@@ -200,16 +217,24 @@ export class AIMigration {
     return openAIService.testConnection();
   }
 
-  static getConfig(): any {
-    if (optimizedOpenAIService.isConfigured()) {
-      return optimizedOpenAIService.getConfig();
-    }
-    return openAIService.getConfig();
+  static async getConfig(): Promise<any> {
+    return aiConfigLoader.getConfig();
   }
 
-  static configure(config: any): void {
-    openAIService.configure(config);
-    optimizedOpenAIService.configure(config);
+  static async configure(config: any, userId?: string): Promise<boolean> {
+    if (userId) {
+      return aiConfigLoader.saveConfig(config, userId);
+    } else {
+      // Fallback to direct service configuration (temporary)
+      openAIService.configure(config);
+      optimizedOpenAIService.configure(config);
+      return true;
+    }
+  }
+
+  static async reloadConfig(): Promise<boolean> {
+    const config = await aiConfigLoader.reloadConfig();
+    return config !== null;
   }
 
   // Performance monitoring
