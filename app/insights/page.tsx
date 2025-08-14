@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import CorrelationDashboard from '@/components/CorrelationDashboard';
+import IntelligenceDashboard from '@/components/IntelligenceDashboard';
 import {
   ArrowTrendingUpIcon,
   ExclamationTriangleIcon,
@@ -13,6 +14,7 @@ import {
   CalendarIcon,
   UsersIcon,
   ArrowPathIcon,
+  CpuChipIcon,
 } from '@heroicons/react/24/outline';
 import AlertSettingsModal from '@/components/AlertSettingsModal';
 import {
@@ -615,6 +617,7 @@ export default function InsightsDashboard() {
               { id: 'overview', name: 'Overview', icon: ChartBarIcon },
               { id: 'insights', name: 'AI Insights', icon: LightBulbIcon },
               { id: 'correlations', name: 'Correlations', icon: ArrowPathIcon },
+              { id: 'intelligence', name: 'AI Intelligence', icon: CpuChipIcon },
               { id: 'reports', name: 'Reports', icon: DocumentArrowDownIcon },
               { id: 'forecasting', name: 'ROI Forecasting', icon: ArrowTrendingUpIcon },
               { id: 'alerts', name: 'Alerts', icon: ExclamationTriangleIcon },
@@ -1151,6 +1154,22 @@ export default function InsightsDashboard() {
                 </div>
               )}
             </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'intelligence' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">AI Intelligence Center</h2>
+                <p className="text-gray-600 mt-1">
+                  Predictive analytics, automated decision-making, and real-time intelligent
+                  monitoring
+                </p>
+              </div>
+            </div>
+
+            <IntelligenceDashboard />
           </motion.div>
         )}
 
