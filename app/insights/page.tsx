@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import CorrelationDashboard from '@/components/CorrelationDashboard';
 import {
   ArrowTrendingUpIcon,
   ExclamationTriangleIcon,
@@ -11,6 +12,7 @@ import {
   DocumentArrowDownIcon,
   CalendarIcon,
   UsersIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import AlertSettingsModal from '@/components/AlertSettingsModal';
 import {
@@ -612,6 +614,7 @@ export default function InsightsDashboard() {
             {[
               { id: 'overview', name: 'Overview', icon: ChartBarIcon },
               { id: 'insights', name: 'AI Insights', icon: LightBulbIcon },
+              { id: 'correlations', name: 'Correlations', icon: ArrowPathIcon },
               { id: 'reports', name: 'Reports', icon: DocumentArrowDownIcon },
               { id: 'forecasting', name: 'ROI Forecasting', icon: ArrowTrendingUpIcon },
               { id: 'alerts', name: 'Alerts', icon: ExclamationTriangleIcon },
@@ -1076,6 +1079,77 @@ export default function InsightsDashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'correlations' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Cross-System Correlation Analysis
+                </h2>
+                <p className="text-gray-600 mt-1">
+                  Real-time pattern detection and relationship analysis across initiatives, issues,
+                  and clusters
+                </p>
+              </div>
+            </div>
+
+            {/* Multiple correlation views for different entities */}
+            <div className="space-y-8">
+              {/* Cluster-based correlations */}
+              {insights.length > 0 &&
+                insights[0]?.context?.relatedIssues?.length &&
+                insights[0].context.relatedIssues.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Issue Cluster Correlations
+                    </h3>
+                    <CorrelationDashboard
+                      entityId={
+                        insights[0].context.relatedIssues[0]?.clusterId || 'default-cluster'
+                      }
+                      entityType="cluster"
+                      className="mb-6"
+                    />
+                  </div>
+                )}
+
+              {/* Initiative-based correlations */}
+              {insights.length > 0 &&
+                insights[0]?.context?.relatedInitiatives?.length &&
+                insights[0].context.relatedInitiatives.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Initiative Correlations
+                    </h3>
+                    <CorrelationDashboard
+                      entityId={
+                        insights[0].context.relatedInitiatives[0]?.id || 'default-initiative'
+                      }
+                      entityType="initiative"
+                      className="mb-6"
+                    />
+                  </div>
+                )}
+
+              {/* Fallback when no specific entities are available */}
+              {(!insights.length ||
+                (!insights[0]?.context?.relatedIssues?.length &&
+                  !insights[0]?.context?.relatedInitiatives?.length)) && (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <ArrowPathIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Correlations</h3>
+                  <p className="text-gray-600">
+                    Correlation analysis requires active initiatives or issue clusters to analyze
+                    relationships.
+                    <br />
+                    Create some initiatives or report issues to see cross-system patterns.
+                  </p>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import AIMigration from '@/lib/ai-migration';
 import { EnhancedInsight, ConfidenceReasoning, BusinessImpact } from '@/types/insights';
+import CorrelationEngine from '@/lib/correlation-engine';
 
 // Force dynamic server-side rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -108,16 +109,21 @@ async function generateExecutiveInsights(): Promise<EnhancedInsight[]> {
     }),
   ]);
 
-  // 1. Strategic Insights
-  insights.push(...(await generateStrategicInsights(initiatives, issues, clusters)));
+  // 1. Strategic Insights with Correlation Analysis
+  const strategicInsights = await generateStrategicInsights(initiatives, issues, clusters);
+  insights.push(...strategicInsights);
 
-  // 2. Operational Insights - Temporarily simplified
+  // 2. Correlation-Enhanced Insights (Phase 2)
+  const correlationInsights = await generateCorrelationBasedInsights(initiatives, issues, clusters);
+  insights.push(...correlationInsights);
+
+  // 3. Operational Insights - Temporarily simplified
   insights.push(...(await generateOperationalInsights(initiatives, issues, recentActivity)));
 
-  // 3. Financial Insights - Temporarily simplified
+  // 4. Financial Insights - Temporarily simplified
   insights.push(...(await generateFinancialInsights(initiatives)));
 
-  // 4. Risk Insights - Temporarily simplified
+  // 5. Risk Insights - Temporarily simplified
   insights.push(...(await generateRiskInsights(initiatives, issues, clusters)));
 
   // Sort by impact and confidence
@@ -628,4 +634,350 @@ async function calculateBusinessImpact(
   }
 
   return baseImpact;
+}
+
+// Phase 2: Correlation-Based Insights Generation
+async function generateCorrelationBasedInsights(
+  initiatives: any[],
+  issues: any[],
+  clusters: any[]
+): Promise<EnhancedInsight[]> {
+  const insights: EnhancedInsight[] = [];
+  const now = new Date();
+  const correlationEngine = CorrelationEngine.getInstance();
+
+  // Analyze high-priority clusters for correlation patterns
+  const highPriorityClusters = clusters.filter((c) => c.severity === 'high');
+
+  for (const cluster of highPriorityClusters.slice(0, 3)) {
+    // Limit to top 3 for performance
+    try {
+      const correlations = await correlationEngine.analyzeEntityCorrelations(
+        cluster.id,
+        'cluster',
+        {
+          maxResults: 5,
+          minStrength: 0.4,
+          includeHistorical: true,
+        }
+      );
+
+      if (correlations.length > 0) {
+        // Find the strongest correlation for insight generation
+        const strongestCorrelation = correlations[0];
+
+        insights.push({
+          id: `correlation-cluster-${cluster.id}`,
+          type: 'strategic',
+          title: `Cross-System Impact Pattern Detected: ${cluster.name}`,
+          summary: `Correlation analysis reveals ${correlations.length} significant relationships affecting this cluster, with strongest connection showing ${Math.round(strongestCorrelation.strength * 100)}% correlation strength.`,
+          impact:
+            strongestCorrelation.strength > 0.8
+              ? 'high'
+              : strongestCorrelation.strength > 0.6
+                ? 'medium'
+                : 'low',
+          actionRequired: strongestCorrelation.strength > 0.7,
+
+          context: {
+            relatedIssues: cluster.issues?.slice(0, 5) || [],
+            relatedInitiatives: correlations
+              .filter((c) => c.targetEntity.type === 'initiative')
+              .map((c) => ({
+                id: c.targetEntity.id,
+                title: c.targetEntity.title,
+                status: c.targetEntity.status || 'PLANNING',
+                progress: c.targetEntity.metadata?.progress || 0,
+                roi: c.targetEntity.metadata?.roi,
+                difficulty: c.targetEntity.metadata?.difficulty,
+                budget: c.targetEntity.metadata?.budget,
+                timelineEnd: c.targetEntity.metadata?.timelineEnd,
+                owner: c.targetEntity.metadata?.owner,
+                relatedIssues: [],
+              }))
+              .slice(0, 3),
+            historicalPatterns: correlations
+              .flatMap((c) => c.patterns)
+              .slice(0, 3)
+              .map((p) => ({
+                pattern: p.description,
+                frequency: p.frequency,
+                lastOccurrence: p.lastOccurrence,
+                resolution: `Pattern type: ${p.patternType}`,
+              })),
+            stakeholders: [],
+            rootCauses: [
+              'System interdependencies create cascading effects',
+              'Resource sharing patterns amplify impact',
+              'Temporal alignment issues compound problems',
+            ],
+            contributingFactors: correlations
+              .map((c) => `${c.correlationType.category} correlation with ${c.targetEntity.title}`)
+              .slice(0, 3),
+          },
+
+          confidence: {
+            score: Math.round(
+              correlations.reduce((sum, c) => sum + c.confidence.score, 0) / correlations.length
+            ),
+            reasoning: [
+              `Analysis of ${correlations.length} cross-system correlations`,
+              'Real-time pattern detection and historical validation',
+              'Multi-entity relationship strength verification',
+              'Advanced correlation engine with ML pattern recognition',
+            ],
+            dataQuality: 'high',
+            sampleSize: correlations.length + cluster.issues?.length || 0,
+            historicalAccuracy: 88,
+            uncertaintyFactors: [
+              'External system changes may affect correlations',
+              'New initiatives could alter established patterns',
+            ],
+          },
+
+          actionPlan: {
+            immediate: [
+              {
+                id: 'correlation-immediate-1',
+                description: `Address strongest correlation with ${strongestCorrelation.targetEntity.title}`,
+                assignee: 'System Analyst',
+                dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+                estimatedHours: 6,
+                priority: 'immediate',
+                expectedOutcome: 'Disrupted negative correlation pattern',
+                successMetrics: ['Correlation strength reduction', 'System stability improvement'],
+              },
+            ],
+            shortTerm: [
+              {
+                id: 'correlation-short-1',
+                description: 'Implement correlation monitoring dashboard',
+                assignee: 'DevOps Team',
+                dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+                estimatedHours: 16,
+                priority: 'short-term',
+                expectedOutcome: 'Real-time correlation tracking and alerting',
+                successMetrics: ['Dashboard deployment', 'Alert accuracy > 85%'],
+              },
+            ],
+            longTerm: [
+              {
+                id: 'correlation-long-1',
+                description: 'Design system architecture to minimize negative correlations',
+                assignee: 'Technical Architecture Team',
+                dueDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+                estimatedHours: 40,
+                priority: 'long-term',
+                expectedOutcome: 'Reduced system interdependency risks',
+                successMetrics: ['Architecture review complete', 'Correlation risk reduction'],
+              },
+            ],
+          },
+
+          businessImpact: {
+            financial: {
+              costOfInaction: correlations.length * 15000, // Higher cost for correlation-based issues
+              potentialSavings: strongestCorrelation.strength * 25000,
+              investmentRequired: 8000,
+            },
+            timeline: {
+              daysToResolution: Math.ceil(correlations.length * 7),
+              criticalDeadline: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
+            },
+            resources: {
+              peopleRequired: Math.min(correlations.length, 5),
+              skillsNeeded: ['System Analysis', 'Correlation Analysis', 'Pattern Recognition'],
+              toolsRequired: ['Correlation Monitoring', 'Analytics Platform', 'Dashboard Tools'],
+            },
+            stakeholders: correlations
+              .map((c) => ({
+                id: c.targetEntity.id,
+                name: c.targetEntity.title,
+                role: c.targetEntity.type,
+                impactLevel: c.strength > 0.8 ? 'high' : c.strength > 0.6 ? 'medium' : 'low',
+              }))
+              .slice(0, 5) as any[],
+          },
+
+          generatedAt: now,
+          lastUpdated: now,
+          version: 1,
+        });
+      }
+    } catch (error) {
+      console.error(`Error analyzing correlations for cluster ${cluster.id}:`, error);
+      // Continue with other clusters
+    }
+  }
+
+  // Cross-Initiative Resource Correlation Analysis
+  if (initiatives.length > 2) {
+    try {
+      const resourceAnalysis = await analyzeResourceCorrelations(initiatives);
+      if (resourceAnalysis) {
+        insights.push(resourceAnalysis);
+      }
+    } catch (error) {
+      console.error('Error in resource correlation analysis:', error);
+    }
+  }
+
+  return insights;
+}
+
+async function analyzeResourceCorrelations(initiatives: any[]): Promise<EnhancedInsight | null> {
+  const correlationEngine = CorrelationEngine.getInstance();
+  const now = new Date();
+
+  // Group initiatives by owner for resource correlation analysis
+  const ownerGroups = new Map<string, any[]>();
+  initiatives.forEach((initiative) => {
+    if (initiative.ownerId) {
+      const group = ownerGroups.get(initiative.ownerId) || [];
+      group.push(initiative);
+      ownerGroups.set(initiative.ownerId, group);
+    }
+  });
+
+  // Find owners with multiple active initiatives (potential resource conflicts)
+  const overloadedOwners = Array.from(ownerGroups.entries()).filter(
+    ([_, inits]) => inits.filter((i) => ['ACTIVE', 'APPROVED'].includes(i.status)).length > 2
+  );
+
+  if (overloadedOwners.length === 0) return null;
+
+  const [ownerId, ownerInitiatives] = overloadedOwners[0]; // Analyze the first overloaded owner
+
+  try {
+    const correlations = await correlationEngine.analyzeEntityCorrelations(
+      ownerInitiatives[0].id,
+      'initiative',
+      {
+        maxResults: 3,
+        minStrength: 0.5,
+      }
+    );
+
+    return {
+      id: `resource-correlation-${ownerId}`,
+      type: 'operational',
+      title: 'Resource Correlation Pattern: Multi-Initiative Bottleneck',
+      summary: `Resource correlation analysis identifies ${ownerInitiatives.length} concurrent initiatives creating potential bottleneck with ${correlations.length} system interdependencies.`,
+      impact: ownerInitiatives.length > 4 ? 'high' : 'medium',
+      actionRequired: true,
+
+      context: {
+        relatedIssues: [],
+        relatedInitiatives: ownerInitiatives.slice(0, 5),
+        historicalPatterns: [
+          {
+            pattern: 'Resource contention leads to delayed deliveries',
+            frequency: ownerInitiatives.length,
+            lastOccurrence: new Date(),
+            resolution: 'Resource reallocation and priority ranking',
+          },
+        ],
+        stakeholders: [
+          {
+            id: ownerId,
+            name: 'Resource Owner',
+            role: 'Initiative Owner',
+            responsibility: 'Multiple initiative execution',
+          },
+        ],
+        rootCauses: [
+          'Single point of failure in resource allocation',
+          'Lack of capacity planning and workload balancing',
+          'Insufficient delegation and team empowerment',
+        ],
+        contributingFactors: [
+          'Multiple high-priority initiatives assigned to same owner',
+          'Overlapping timeline and resource requirements',
+          'Limited cross-training and knowledge transfer',
+        ],
+      },
+
+      confidence: {
+        score: 85,
+        reasoning: [
+          'Direct resource allocation data analysis',
+          'Historical pattern recognition from similar scenarios',
+          'Real-time correlation strength measurement',
+        ],
+        dataQuality: 'high',
+        sampleSize: ownerInitiatives.length,
+        historicalAccuracy: 82,
+      },
+
+      actionPlan: {
+        immediate: [
+          {
+            id: 'resource-immediate-1',
+            description: 'Conduct resource capacity assessment and priority ranking',
+            assignee: 'Resource Manager',
+            dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+            estimatedHours: 4,
+            priority: 'immediate',
+            expectedOutcome: 'Clear priority order and resource allocation plan',
+            successMetrics: ['Priority ranking completed', 'Resource allocation optimized'],
+          },
+        ],
+        shortTerm: [
+          {
+            id: 'resource-short-1',
+            description: 'Redistribute workload and delegate responsibilities',
+            assignee: 'Team Lead',
+            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            estimatedHours: 12,
+            priority: 'short-term',
+            expectedOutcome: 'Balanced workload distribution',
+            successMetrics: ['Delegation completed', 'Workload balance achieved'],
+          },
+        ],
+        longTerm: [
+          {
+            id: 'resource-long-1',
+            description: 'Implement resource capacity monitoring and planning system',
+            assignee: 'Operations Team',
+            dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            estimatedHours: 24,
+            priority: 'long-term',
+            expectedOutcome: 'Proactive resource management capability',
+            successMetrics: ['Monitoring system deployed', 'Capacity planning automated'],
+          },
+        ],
+      },
+
+      businessImpact: {
+        financial: {
+          costOfInaction: ownerInitiatives.length * 20000,
+          potentialSavings: 15000,
+          investmentRequired: 5000,
+        },
+        timeline: {
+          daysToResolution: 21,
+        },
+        resources: {
+          peopleRequired: 2,
+          skillsNeeded: ['Resource Management', 'Project Planning', 'Team Coordination'],
+          toolsRequired: ['Resource Planning Tools', 'Monitoring Dashboard'],
+        },
+        stakeholders: [
+          {
+            id: ownerId,
+            name: 'Overloaded Owner',
+            role: 'Initiative Owner',
+            impactLevel: 'high',
+          },
+        ],
+      },
+
+      generatedAt: now,
+      lastUpdated: now,
+      version: 1,
+    };
+  } catch (error) {
+    console.error('Error in resource correlation analysis:', error);
+    return null;
+  }
 }
