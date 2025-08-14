@@ -80,8 +80,54 @@ interface ExecutiveInsight {
   summary: string;
   impact: 'high' | 'medium' | 'low';
   actionRequired: boolean;
-  recommendation: string;
-  confidence: number;
+  recommendation?: string; // Legacy support
+  confidence?: number; // Legacy support
+
+  // Enhanced Context (optional for backward compatibility)
+  context?: {
+    relatedIssues: any[];
+    relatedInitiatives: any[];
+    historicalPatterns: any[];
+    stakeholders: any[];
+    rootCauses: string[];
+    contributingFactors: string[];
+  };
+
+  // Enhanced Confidence (optional for backward compatibility)
+  confidenceReasoning?: {
+    score: number;
+    reasoning: string[];
+    dataQuality: 'high' | 'medium' | 'low';
+    sampleSize: number;
+    historicalAccuracy?: number;
+    uncertaintyFactors?: string[];
+  };
+
+  // Enhanced Action Plan (optional for backward compatibility)
+  actionPlan?: {
+    immediate: any[];
+    shortTerm: any[];
+    longTerm: any[];
+  };
+
+  // Business Impact (optional for backward compatibility)
+  businessImpact?: {
+    financial: {
+      costOfInaction: number;
+      potentialSavings: number;
+      investmentRequired: number;
+    };
+    timeline: {
+      daysToResolution: number;
+      criticalDeadline?: Date;
+    };
+    resources: {
+      peopleRequired: number;
+      skillsNeeded: string[];
+      toolsRequired: string[];
+    };
+    stakeholders: any[];
+  };
 }
 
 export default function InsightsDashboard() {
@@ -778,7 +824,10 @@ export default function InsightsDashboard() {
             <h2 className="text-2xl font-bold text-gray-900">AI-Powered Strategic Insights</h2>
             <div className="grid grid-cols-1 gap-6">
               {insights.map((insight) => (
-                <div key={insight.id} className="bg-white rounded-lg shadow p-6">
+                <div
+                  key={insight.id}
+                  className="bg-white rounded-lg shadow-card-elevated hover:shadow-card-elevated-hover transition-shadow p-6"
+                >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
@@ -793,19 +842,235 @@ export default function InsightsDashboard() {
                         </span>
                       </div>
                       <p className="text-gray-600 mb-3">{insight.summary}</p>
-                      <div className="bg-blue-50 p-3 rounded-lg">
-                        <p className="text-sm text-blue-800">
-                          <strong>Recommendation:</strong> {insight.recommendation}
-                        </p>
-                      </div>
+
+                      {/* Enhanced Context Section */}
+                      {insight.context && (
+                        <div className="space-y-3 mb-4">
+                          {/* Root Causes */}
+                          {insight.context.rootCauses && insight.context.rootCauses.length > 0 && (
+                            <div className="bg-red-50 p-3 rounded-lg">
+                              <h4 className="text-sm font-semibold text-red-800 mb-1">
+                                Root Causes
+                              </h4>
+                              <ul className="text-sm text-red-700 list-disc list-inside">
+                                {insight.context.rootCauses.map((cause, idx) => (
+                                  <li key={idx}>{cause}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Related Entities */}
+                          {(insight.context.relatedIssues?.length > 0 ||
+                            insight.context.relatedInitiatives?.length > 0) && (
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <h4 className="text-sm font-semibold text-blue-800 mb-2">
+                                Related Context
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                {insight.context.relatedIssues?.length > 0 && (
+                                  <div>
+                                    <span className="font-medium text-blue-700">
+                                      Related Issues:
+                                    </span>
+                                    <ul className="text-blue-600 ml-2">
+                                      {insight.context.relatedIssues
+                                        .slice(0, 3)
+                                        .map((issue: any) => (
+                                          <li key={issue.id} className="truncate">
+                                            • {issue.description}
+                                          </li>
+                                        ))}
+                                      {insight.context.relatedIssues.length > 3 && (
+                                        <li className="text-blue-500">
+                                          +{insight.context.relatedIssues.length - 3} more
+                                        </li>
+                                      )}
+                                    </ul>
+                                  </div>
+                                )}
+                                {insight.context.relatedInitiatives?.length > 0 && (
+                                  <div>
+                                    <span className="font-medium text-blue-700">
+                                      Related Initiatives:
+                                    </span>
+                                    <ul className="text-blue-600 ml-2">
+                                      {insight.context.relatedInitiatives
+                                        .slice(0, 3)
+                                        .map((initiative: any) => (
+                                          <li key={initiative.id} className="truncate">
+                                            • {initiative.title}
+                                          </li>
+                                        ))}
+                                      {insight.context.relatedInitiatives.length > 3 && (
+                                        <li className="text-blue-500">
+                                          +{insight.context.relatedInitiatives.length - 3} more
+                                        </li>
+                                      )}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Enhanced Action Plan */}
+                      {insight.actionPlan ? (
+                        <div className="space-y-3">
+                          {insight.actionPlan.immediate?.length > 0 && (
+                            <div className="bg-red-50 p-3 rounded-lg">
+                              <h4 className="text-sm font-semibold text-red-800 mb-2">
+                                🚨 Immediate Actions
+                              </h4>
+                              {insight.actionPlan.immediate.map((action: any, idx: number) => (
+                                <div
+                                  key={idx}
+                                  className="text-sm text-red-700 border-l-2 border-red-300 pl-3 mb-2"
+                                >
+                                  <div className="font-medium">{action.description}</div>
+                                  <div className="text-red-600 text-xs">
+                                    {action.assignee} • {action.estimatedHours}h • Due:{' '}
+                                    {action.dueDate
+                                      ? new Date(action.dueDate).toLocaleDateString()
+                                      : 'ASAP'}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {insight.actionPlan.shortTerm?.length > 0 && (
+                            <div className="bg-yellow-50 p-3 rounded-lg">
+                              <h4 className="text-sm font-semibold text-yellow-800 mb-2">
+                                ⏰ Short-term Actions
+                              </h4>
+                              {insight.actionPlan.shortTerm
+                                .slice(0, 2)
+                                .map((action: any, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    className="text-sm text-yellow-700 border-l-2 border-yellow-300 pl-3 mb-2"
+                                  >
+                                    <div className="font-medium">{action.description}</div>
+                                    <div className="text-yellow-600 text-xs">
+                                      {action.assignee} • {action.estimatedHours}h
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <p className="text-sm text-blue-800">
+                            <strong>Recommendation:</strong>{' '}
+                            {insight.recommendation || 'Further analysis needed'}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Business Impact */}
+                      {insight.businessImpact && (
+                        <div className="mt-4 bg-green-50 p-3 rounded-lg">
+                          <h4 className="text-sm font-semibold text-green-800 mb-2">
+                            💰 Business Impact
+                          </h4>
+                          <div className="grid grid-cols-3 gap-3 text-xs text-green-700">
+                            <div>
+                              <span className="font-medium">Cost of Inaction:</span>
+                              <div className="text-green-800">
+                                ${insight.businessImpact.financial.costOfInaction.toLocaleString()}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="font-medium">Potential Savings:</span>
+                              <div className="text-green-800">
+                                $
+                                {insight.businessImpact.financial.potentialSavings.toLocaleString()}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="font-medium">Timeline:</span>
+                              <div className="text-green-800">
+                                {insight.businessImpact.timeline.daysToResolution} days
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="ml-4 text-right">
-                      <div className="text-sm text-gray-500">Confidence</div>
-                      <div className="text-2xl font-bold text-gray-900">{insight.confidence}%</div>
+
+                    {/* Enhanced Confidence Display */}
+                    <div className="ml-4 text-right min-w-[120px]">
+                      <div className="text-sm text-gray-500">AI Confidence</div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        {insight.confidenceReasoning?.score || insight.confidence || 0}%
+                      </div>
+
+                      {/* Confidence Reasoning */}
+                      {insight.confidenceReasoning && (
+                        <div className="mt-2 text-xs text-gray-600">
+                          <div className="mb-1">
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-white text-xs ${
+                                insight.confidenceReasoning.dataQuality === 'high'
+                                  ? 'bg-green-500'
+                                  : insight.confidenceReasoning.dataQuality === 'medium'
+                                    ? 'bg-yellow-500'
+                                    : 'bg-red-500'
+                              }`}
+                            >
+                              {insight.confidenceReasoning.dataQuality} quality
+                            </span>
+                          </div>
+                          <div className="text-gray-500">
+                            Sample: {insight.confidenceReasoning.sampleSize} items
+                          </div>
+                          {insight.confidenceReasoning.historicalAccuracy && (
+                            <div className="text-gray-500">
+                              Accuracy: {insight.confidenceReasoning.historicalAccuracy}%
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {insight.actionRequired && (
                         <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
                           Action Required
                         </span>
+                      )}
+
+                      {/* Expandable Confidence Details */}
+                      {insight.confidenceReasoning?.reasoning && (
+                        <details className="mt-2 text-xs">
+                          <summary className="cursor-pointer text-blue-600 hover:text-blue-800">
+                            Why this confidence?
+                          </summary>
+                          <div className="mt-1 text-left bg-gray-50 p-2 rounded text-gray-700">
+                            <ul className="list-disc list-inside space-y-1">
+                              {insight.confidenceReasoning.reasoning.map((reason, idx) => (
+                                <li key={idx}>{reason}</li>
+                              ))}
+                            </ul>
+                            {insight.confidenceReasoning.uncertaintyFactors &&
+                              insight.confidenceReasoning.uncertaintyFactors.length > 0 && (
+                                <div className="mt-2 pt-2 border-t border-gray-200">
+                                  <div className="font-medium text-red-600">
+                                    Uncertainty Factors:
+                                  </div>
+                                  <ul className="list-disc list-inside text-red-600">
+                                    {insight.confidenceReasoning.uncertaintyFactors.map(
+                                      (factor, idx) => (
+                                        <li key={idx}>{factor}</li>
+                                      )
+                                    )}
+                                  </ul>
+                                </div>
+                              )}
+                          </div>
+                        </details>
                       )}
                     </div>
                   </div>
