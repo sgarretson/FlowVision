@@ -503,9 +503,9 @@ function CategoryCard({
                           >
                             <div
                               className={`w-5 h-5 bg-opacity-20 rounded-full flex items-center justify-center text-xs font-medium mt-0.5 flex-shrink-0 ${
-                                type === 'people'
+                                config.type === 'people'
                                   ? 'bg-emerald-100 text-emerald-600'
-                                  : type === 'process'
+                                  : config.type === 'process'
                                     ? 'bg-amber-100 text-amber-600'
                                     : 'bg-gray-100 text-gray-600'
                               }`}
