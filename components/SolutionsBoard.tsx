@@ -42,6 +42,7 @@ interface SolutionsBoardProps {
 }
 
 const STATUS_CONFIG = {
+  DRAFT: { label: 'Draft', color: 'bg-slate-100 text-slate-800', icon: '📝' },
   PLANNED: { label: 'Planned', color: 'bg-gray-100 text-gray-800', icon: '📋' },
   IN_PROGRESS: { label: 'In Progress', color: 'bg-blue-100 text-blue-800', icon: '🔄' },
   COMPLETED: { label: 'Completed', color: 'bg-green-100 text-green-800', icon: '✅' },
@@ -330,14 +331,16 @@ export default function SolutionsBoard({
                     <div className="flex items-center gap-2 mb-2">
                       <h4 className="font-medium text-gray-900">{solution.title}</h4>
                       <span
-                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${TYPE_CONFIG[solution.type].color}`}
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${TYPE_CONFIG[solution.type]?.color || 'bg-gray-100 text-gray-800'}`}
                       >
-                        {TYPE_CONFIG[solution.type].icon} {TYPE_CONFIG[solution.type].label}
+                        {TYPE_CONFIG[solution.type]?.icon || '⚙️'}{' '}
+                        {TYPE_CONFIG[solution.type]?.label || solution.type}
                       </span>
                       <span
-                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${STATUS_CONFIG[solution.status].color}`}
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${STATUS_CONFIG[solution.status]?.color || 'bg-gray-100 text-gray-800'}`}
                       >
-                        {STATUS_CONFIG[solution.status].icon} {STATUS_CONFIG[solution.status].label}
+                        {STATUS_CONFIG[solution.status]?.icon || '❓'}{' '}
+                        {STATUS_CONFIG[solution.status]?.label || solution.status}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">{solution.description}</p>
