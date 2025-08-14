@@ -84,6 +84,11 @@ model Initiative {
   addressedIssues Issue[]      @relation("IssueInitiatives") // Many-to-many with issues
   crossImpact    Json?         // Multi-departmental impact analysis
   clusterMetrics Json?         // Cluster-specific success metrics
+  // AI Analysis Context Preservation
+  sourceCategory String?       // Category that generated this initiative (e.g., "Work Environment")
+  aiAnalysisContext Json?      // Complete AI analysis that informed this initiative
+  aiConfidence   Int?          // AI confidence score that supported this initiative
+  aiGeneratedAt  DateTime?     // When the source AI analysis was generated
   dependencies   Initiative[]  @relation("InitiativeDependencies")
   dependents     Initiative[]  @relation("InitiativeDependencies")
   milestones     Milestone[]
@@ -174,6 +179,7 @@ model Issue {
   heatmapScore  Int           @default(0)
   department    String?       // Added for clustering analysis
   category      String?       // Added for clustering analysis
+  status        String        @default("OPEN") // OPEN, BEING_ADDRESSED, RESOLVED, CLOSED
   cluster       IssueCluster? @relation(fields: [clusterId], references: [id])
   clusterId     String?
   similarity    Json?         // Semantic similarity scores to other issues

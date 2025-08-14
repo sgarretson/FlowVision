@@ -36,6 +36,9 @@ export async function POST(request: NextRequest, { params }: { params: CategoryA
   try {
     const { category } = params;
 
+    // Ensure AI configuration is loaded
+    await aiConfigLoader.loadConfig();
+
     // Validate AI service availability
     if (!aiConfigLoader.isConfigured()) {
       return NextResponse.json(

@@ -3,50 +3,75 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // Parse include parameter from query string
+  const { searchParams } = new URL(req.url);
+  const includeParam = searchParams.get('include');
+  const includes = includeParam ? includeParam.split(',') : [];
+
   // Admin users can access all initiatives, others only their own
   const whereClause =
     user.role === 'ADMIN' ? { id: params.id } : { id: params.id, ownerId: user.id };
 
-  const initiative = await prisma.initiative.findFirst({
-    where: whereClause,
-    include: {
-      owner: {
-        select: {
-          name: true,
-          email: true,
-          role: true,
-        },
-      },
-      cluster: {
-        select: {
-          id: true,
-          name: true,
-          category: true,
-          severity: true,
-        },
-      },
-      milestones: {
-        orderBy: { dueDate: 'asc' },
-      },
-      comments: {
-        include: {
-          author: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-        },
-        orderBy: { createdAt: 'desc' },
+  // Build include object based on requested includes
+  const includeClause: any = {
+    owner: {
+      select: {
+        name: true,
+        email: true,
+        role: true,
       },
     },
+    cluster: {
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        severity: true,
+      },
+    },
+    milestones: {
+      orderBy: { dueDate: 'asc' },
+    },
+    comments: {
+      include: {
+        author: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    },
+  };
+
+  // Add optional includes
+  if (includes.includes('addressedIssues')) {
+    includeClause.addressedIssues = {
+      select: {
+        id: true,
+        description: true,
+        category: true,
+        status: true,
+        votes: true,
+        heatmapScore: true,
+        createdAt: true,
+      },
+      orderBy: { heatmapScore: 'desc' },
+    };
+  }
+
+  const initiative = await prisma.initiative.findFirst({
+    where: whereClause,
+    include: includeClause,
   });
+
   if (!initiative)
     return NextResponse.json({ error: 'Initiative not found or access denied' }, { status: 404 });
   return NextResponse.json(initiative);

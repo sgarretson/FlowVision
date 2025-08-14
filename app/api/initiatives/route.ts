@@ -94,7 +94,23 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await req.json();
-  const { title, problem, goal, kpis = [], cost = 0, gain = 0 } = body ?? {};
+  const {
+    title,
+    problem,
+    goal,
+    kpis = [],
+    cost = 0,
+    gain = 0,
+    // AI Context Fields
+    sourceCategory,
+    aiAnalysisContext,
+    aiConfidence,
+    aiGeneratedAt,
+    // Issue Linking
+    addressedIssueIds = [],
+    updateIssueStatus = false,
+  } = body ?? {};
+
   const profile = await prisma.businessProfile.findUnique({ where: { userId: user.id } });
   const difficulty = scoreDifficulty(`${title} ${problem}`, {
     industry: profile?.industry || 'Unknown',
@@ -104,30 +120,79 @@ export async function POST(req: NextRequest) {
   const roi = scoreROI(cost, gain);
   const priorityScore = scorePriority(difficulty, roi);
 
-  const count = await prisma.initiative.count({ where: { ownerId: user.id } });
-  const created = await prisma.initiative.create({
-    data: {
-      title,
-      problem,
-      goal,
-      kpis,
-      ownerId: user.id,
-      status: 'Define',
-      progress: 0,
-      difficulty,
-      roi,
-      priorityScore,
-      orderIndex: count,
-    },
-  });
+  try {
+    const count = await prisma.initiative.count({ where: { ownerId: user.id } });
 
-  await prisma.auditLog.create({
-    data: {
-      userId: user.id,
-      action: 'INITIATIVE_CREATE',
-      details: { id: created.id, title },
-    },
-  });
+    // Create initiative with AI context and issue relationships
+    const created = await prisma.initiative.create({
+      data: {
+        title,
+        problem,
+        goal,
+        kpis,
+        ownerId: user.id,
+        status: 'Define',
+        progress: 0,
+        difficulty,
+        roi,
+        priorityScore,
+        orderIndex: count,
+        // AI Context Preservation
+        sourceCategory,
+        aiAnalysisContext,
+        aiConfidence,
+        aiGeneratedAt: aiGeneratedAt ? new Date(aiGeneratedAt) : null,
+        // Link addressed issues
+        addressedIssues:
+          addressedIssueIds.length > 0
+            ? {
+                connect: addressedIssueIds.map((id: string) => ({ id })),
+              }
+            : undefined,
+      },
+      include: {
+        addressedIssues: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
 
-  return NextResponse.json(created, { status: 201 });
+    // Update issue statuses if requested
+    if (updateIssueStatus && addressedIssueIds.length > 0) {
+      await prisma.issue.updateMany({
+        where: {
+          id: {
+            in: addressedIssueIds,
+          },
+        },
+        data: {
+          status: 'BEING_ADDRESSED',
+        },
+      });
+    }
+
+    await prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: 'INITIATIVE_CREATE',
+        details: {
+          id: created.id,
+          title,
+          sourceCategory,
+          addressedIssueCount: addressedIssueIds.length,
+          aiGenerated: !!aiAnalysisContext,
+        },
+      },
+    });
+
+    return NextResponse.json(created, { status: 201 });
+  } catch (error) {
+    console.error('Initiative creation error:', error);
+    return NextResponse.json({ error: 'Failed to create initiative' }, { status: 500 });
+  }
 }

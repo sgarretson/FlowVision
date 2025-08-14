@@ -101,7 +101,13 @@ export default function CategoryAISummary({
     try {
       setLoading(true);
 
-      // Create initiative from AI analysis
+      // First, get all issues in this category to link to the initiative
+      const issuesResponse = await fetch(
+        `/api/issues?category=${encodeURIComponent(categoryName)}`
+      );
+      const categoryIssues = issuesResponse.ok ? await issuesResponse.json() : [];
+
+      // Create initiative from AI analysis with complete context
       const initiativeData = {
         title: `${categoryName} Strategic Initiative`,
         problem: analysis.categorySummary,
@@ -111,6 +117,25 @@ export default function CategoryAISummary({
           `Reduce related issues by 50%`,
           `Achieve sustained improvement metrics`,
         ],
+        // AI Context Preservation
+        sourceCategory: categoryName,
+        aiAnalysisContext: {
+          categorySummary: analysis.categorySummary,
+          strategicRecommendations: analysis.strategicRecommendations,
+          impactAnalysis: analysis.impactAnalysis,
+          patterns: analysis.patterns || [],
+          rootCauses: analysis.rootCauses || [],
+          businessImpact: analysis.businessImpact || {},
+          confidence: analysis.confidence,
+          generatedAt: new Date().toISOString(),
+          issueCount: categoryIssues.length,
+        },
+        aiConfidence: analysis.confidence,
+        aiGeneratedAt: new Date().toISOString(),
+        // Link all issues in this category
+        addressedIssueIds: categoryIssues.map((issue: any) => issue.id),
+        // Update linked issues to "BEING_ADDRESSED" status
+        updateIssueStatus: true,
       };
 
       const response = await fetch('/api/initiatives', {
@@ -123,10 +148,14 @@ export default function CategoryAISummary({
 
       if (response.ok) {
         const initiative = await response.json();
-        // Redirect to the new initiative
+        // Show success message and redirect
+        alert(
+          `Initiative created successfully! ${categoryIssues.length} issues have been linked and marked as "Being Addressed".`
+        );
         window.location.href = `/initiatives/${initiative.id}`;
       } else {
-        throw new Error('Failed to create initiative');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create initiative');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create initiative');

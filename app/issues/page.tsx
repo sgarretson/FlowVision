@@ -15,11 +15,18 @@ type Issue = {
   description: string;
   votes: number;
   heatmapScore: number;
+  status?: string;
+  category?: string;
   createdAt: string;
   aiSummary?: string | null;
   aiConfidence?: number | null;
   aiGeneratedAt?: string | null;
   aiVersion?: string | null;
+  initiatives?: Array<{
+    id: string;
+    title: string;
+    status: string;
+  }>;
 };
 
 export default function IssuesPage() {

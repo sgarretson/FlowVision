@@ -3,10 +3,35 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const status = searchParams.get('status');
+
+    // Build where clause based on query parameters
+    const whereClause: any = {};
+
+    if (category) {
+      whereClause.category = category;
+    }
+
+    if (status) {
+      whereClause.status = status;
+    }
+
     const issues = await prisma.issue.findMany({
+      where: whereClause,
       orderBy: [{ votes: 'desc' }, { heatmapScore: 'desc' }, { createdAt: 'desc' }],
+      include: {
+        initiatives: {
+          select: {
+            id: true,
+            title: true,
+            status: true,
+          },
+        },
+      },
     });
     return NextResponse.json(issues);
   } catch (error) {

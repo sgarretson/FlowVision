@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import RequirementCardsBoard from '@/components/RequirementCardsBoard';
 import SolutionsBoard from '@/components/SolutionsBoard';
+import InitiativeAIContext from '@/components/InitiativeAIContext';
 
 type Initiative = {
   id: string;
@@ -21,6 +22,13 @@ type Initiative = {
   difficulty: number;
   roi: number;
   priorityScore: number;
+  // AI Context Fields
+  sourceCategory?: string;
+  aiAnalysisContext?: any;
+  aiConfidence?: number;
+  aiGeneratedAt?: string;
+  // Relationships
+  addressedIssues?: any[];
   createdAt: string;
   updatedAt: string;
 };
@@ -38,7 +46,7 @@ export default function InitiativeDetailPage() {
   useEffect(() => {
     async function loadInitiative() {
       try {
-        const res = await fetch(`/api/initiatives/${id}`);
+        const res = await fetch(`/api/initiatives/${id}?include=addressedIssues`);
         if (res.ok) {
           const data = await res.json();
           setForm(data);
@@ -430,6 +438,17 @@ export default function InitiativeDetailPage() {
             </div>
           </div>
         </form>
+      </div>
+
+      {/* AI Context and Addressed Issues */}
+      <div className="max-w-4xl mx-auto">
+        <InitiativeAIContext
+          sourceCategory={form.sourceCategory}
+          aiAnalysisContext={form.aiAnalysisContext}
+          aiConfidence={form.aiConfidence}
+          aiGeneratedAt={form.aiGeneratedAt}
+          addressedIssues={form.addressedIssues}
+        />
       </div>
 
       {/* Metadata */}
