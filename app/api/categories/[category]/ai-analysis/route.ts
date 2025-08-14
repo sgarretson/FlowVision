@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { OpenAIService } from '@/lib/openai';
+import { openAIService } from '@/lib/openai';
 import { aiServiceMonitor } from '@/lib/ai-service-monitor';
-import { AIMigration } from '@/lib/ai-config-loader';
+import { aiConfigLoader } from '@/lib/ai-config-loader';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest, { params }: { params: CategoryA
     const { category } = params;
 
     // Validate AI service availability
-    if (!AIMigration.isConfigured()) {
+    if (!aiConfigLoader.isConfigured()) {
       return NextResponse.json(
         { error: 'AI analysis not available - OpenAI not configured' },
         { status: 503 }
@@ -66,8 +66,8 @@ export async function POST(request: NextRequest, { params }: { params: CategoryA
       return NextResponse.json({ error: 'No issues found for this category' }, { status: 404 });
     }
 
-    // Initialize OpenAI service
-    const openaiService = new OpenAIService();
+    // Use OpenAI service singleton
+    // openAIService is already configured via ai-config-loader
 
     // Prepare context data for AI analysis
     const issueDescriptions = issues.map((issue) => issue.description).join('\n- ');
@@ -128,7 +128,7 @@ Focus on strategic business value, executive decision-making, and actionable ins
 
     try {
       // Generate AI analysis
-      const response = await openaiService.client!.chat.completions.create({
+      const response = await openAIService.client!.chat.completions.create({
         model: 'gpt-4',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 1500,
