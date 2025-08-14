@@ -269,6 +269,7 @@ async function createComprehensiveFlowVisionSeed() {
   console.log('🗑️ Clearing existing data...');
   await prisma.solutionTask.deleteMany();
   await prisma.initiativeSolution.deleteMany();
+  await prisma.requirementCard.deleteMany();
   await prisma.initiative.deleteMany();
   await prisma.issueCluster.deleteMany();
   await prisma.issue.deleteMany();
@@ -278,14 +279,24 @@ async function createComprehensiveFlowVisionSeed() {
   await prisma.businessProfile.deleteMany();
   await prisma.user.deleteMany();
 
-  // Create admin user
-  console.log('👤 Creating admin user...');
+  // Create admin users
+  console.log('👤 Creating admin users...');
   const adminUser = await prisma.user.create({
     data: {
       email: 'admin@flowvision.dev',
       passwordHash: await bcrypt.hash('Admin123!', 10),
       role: 'ADMIN',
       name: 'FlowVision Admin'
+    }
+  });
+
+  // Create David Morrison as admin user
+  await prisma.user.create({
+    data: {
+      email: 'david.morrison@morrisonae.com',
+      passwordHash: await bcrypt.hash('Admin123!', 10),
+      role: 'ADMIN',
+      name: 'David Morrison'
     }
   });
 
@@ -311,6 +322,7 @@ async function createComprehensiveFlowVisionSeed() {
 
   console.log(`✅ Comprehensive FlowVision seed completed successfully!`);
   console.log(`📊 Created: ${issues.length} issues, ${clusters.length} clusters, ${initiatives.length} initiatives`);
+  console.log(`👥 Admin users: admin@flowvision.dev & david.morrison@morrisonae.com (password: Admin123!)`);
   
   return { issues, clusters, initiatives };
 }
@@ -557,6 +569,31 @@ async function createStrategicInitiatives(clusters, userId) {
         }
       });
 
+      // Create requirement cards for each solution
+      const requirementTemplates = generateRequirementCards(solutionTemplate);
+      for (let k = 0; k < requirementTemplates.length; k++) {
+        const reqTemplate = requirementTemplates[k];
+        
+        await prisma.requirementCard.create({
+          data: {
+            initiativeId: initiative.id,
+            type: reqTemplate.type,
+            title: reqTemplate.title,
+            description: reqTemplate.description,
+            priority: reqTemplate.priority,
+            status: reqTemplate.status,
+            category: reqTemplate.category,
+            assignedToId: reqTemplate.status !== 'DRAFT' ? userId : null,
+            createdById: userId,
+            approvedById: reqTemplate.status === 'APPROVED' ? userId : null,
+            approvedAt: reqTemplate.status === 'APPROVED' ? new Date() : null,
+            orderIndex: k,
+            aiGenerated: false,
+            sourceType: 'manual'
+          }
+        });
+      }
+
       // Create tasks for each solution
       for (let j = 0; j < solutionTemplate.tasks.length; j++) {
         const taskTemplate = solutionTemplate.tasks[j];
@@ -599,6 +636,95 @@ async function createImprovementIdeas(userId) {
 }
 
 // Helper functions
+function generateRequirementCards(solutionTemplate) {
+  const baseRequirements = {
+    'Workload Analytics & Capacity Planning System': [
+      {
+        type: 'BUSINESS',
+        title: 'Real-time Workload Visibility',
+        description: 'System must provide real-time visibility into individual and team workload distribution across all projects and tasks.',
+        priority: 'HIGH',
+        status: 'APPROVED',
+        category: 'Analytics'
+      },
+      {
+        type: 'FUNCTIONAL',
+        title: 'Automated Capacity Alerts',
+        description: 'Automatically alert managers when team members exceed 85% capacity or approach burnout risk thresholds.',
+        priority: 'HIGH', 
+        status: 'DRAFT',
+        category: 'Automation'
+      },
+      {
+        type: 'ACCEPTANCE',
+        title: 'Performance Baseline Integration',
+        description: 'System must integrate with existing performance management tools and maintain historical baseline data for trend analysis.',
+        priority: 'MEDIUM',
+        status: 'REVIEW',
+        category: 'Integration'
+      }
+    ],
+    'Unified Communication Platform': [
+      {
+        type: 'BUSINESS',
+        title: 'Enterprise-wide Communication Hub',
+        description: 'Centralized platform that consolidates chat, video, file sharing, and project communication across all departments.',
+        priority: 'CRITICAL',
+        status: 'APPROVED',
+        category: 'Infrastructure'
+      },
+      {
+        type: 'FUNCTIONAL',
+        title: 'Smart Notification Management',
+        description: 'Intelligent notification filtering that reduces noise while ensuring critical communications reach appropriate stakeholders.',
+        priority: 'HIGH',
+        status: 'APPROVED', 
+        category: 'User Experience'
+      }
+    ],
+    'Leadership Development Program': [
+      {
+        type: 'BUSINESS',
+        title: 'Manager Competency Framework',
+        description: 'Define core leadership competencies and assessment criteria for all management levels within the organization.',
+        priority: 'HIGH',
+        status: 'APPROVED',
+        category: 'Training'
+      },
+      {
+        type: 'FUNCTIONAL',
+        title: 'Mentorship Matching System',
+        description: 'Automated system to match emerging leaders with senior mentors based on skills, goals, and availability.',
+        priority: 'MEDIUM',
+        status: 'DRAFT',
+        category: 'Development'
+      }
+    ]
+  };
+
+  // Default requirements for solutions not specifically mapped
+  const defaultRequirements = [
+    {
+      type: 'BUSINESS',
+      title: `${solutionTemplate.title} Business Requirements`,
+      description: `Core business requirements and success criteria for implementing ${solutionTemplate.title}.`,
+      priority: 'HIGH',
+      status: 'DRAFT',
+      category: 'Business'
+    },
+    {
+      type: 'FUNCTIONAL', 
+      title: `${solutionTemplate.title} Technical Specifications`,
+      description: `Detailed technical specifications and functional requirements for ${solutionTemplate.title} implementation.`,
+      priority: 'MEDIUM',
+      status: 'REVIEW',
+      category: 'Technical'
+    }
+  ];
+
+  return baseRequirements[solutionTemplate.title] || defaultRequirements;
+}
+
 function generateKeywords(category, description) {
   const keywordMap = {
     'Workload Management': ['burnout', 'workload', 'stress', 'deadlines', 'capacity', 'overtime'],

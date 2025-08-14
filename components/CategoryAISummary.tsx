@@ -74,6 +74,18 @@ export default function CategoryAISummary({
 
       const analysisData = await response.json();
       setAnalysis(analysisData);
+
+      // Persist analysis to localStorage for future visits
+      const storageKey = `ai-analysis-${categoryName}`;
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          data: analysisData,
+          timestamp: Date.now(),
+          categoryName,
+        })
+      );
+
       onAnalysisGenerated?.(analysisData);
     } catch (err) {
       console.error('Analysis generation error:', err);
@@ -82,6 +94,69 @@ export default function CategoryAISummary({
       setLoading(false);
     }
   }
+
+  async function createInitiativeFromAnalysis() {
+    if (!analysis) return;
+
+    try {
+      setLoading(true);
+
+      // Create initiative from AI analysis
+      const initiativeData = {
+        title: `${categoryName} Strategic Initiative`,
+        problem: analysis.categorySummary,
+        goal: analysis.strategicRecommendations[0] || `Resolve ${categoryName} challenges`,
+        kpis: [
+          `Improve ${categoryName} satisfaction by 25%`,
+          `Reduce related issues by 50%`,
+          `Achieve sustained improvement metrics`,
+        ],
+      };
+
+      const response = await fetch('/api/initiatives', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(initiativeData),
+      });
+
+      if (response.ok) {
+        const initiative = await response.json();
+        // Redirect to the new initiative
+        window.location.href = `/initiatives/${initiative.id}`;
+      } else {
+        throw new Error('Failed to create initiative');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create initiative');
+      console.error('Initiative creation error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Load cached analysis on component mount
+  React.useEffect(() => {
+    if (!categoryName) return;
+
+    const storageKey = `ai-analysis-${categoryName}`;
+    const cached = localStorage.getItem(storageKey);
+
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        // Use cached analysis if less than 7 days old
+        const daysSinceGenerated = (Date.now() - timestamp) / (1000 * 60 * 60 * 24);
+
+        if (daysSinceGenerated < 7) {
+          setAnalysis(data);
+        }
+      } catch (err) {
+        console.warn('Failed to load cached analysis:', err);
+      }
+    }
+  }, [categoryName]);
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
@@ -119,13 +194,15 @@ export default function CategoryAISummary({
               </p>
             </div>
           </div>
-          <button
-            onClick={generateAnalysis}
-            className="btn-primary flex items-center gap-2 hover:scale-105 transition-transform duration-200"
-          >
-            <CpuChipIcon className="w-4 h-4" />
-            Generate Analysis
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={generateAnalysis}
+              className="btn-primary flex items-center gap-2 hover:scale-105 transition-transform duration-200"
+            >
+              <CpuChipIcon className="w-4 h-4" />
+              Generate Analysis
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -197,13 +274,23 @@ export default function CategoryAISummary({
             </div>
           </div>
         </div>
-        <button
-          onClick={generateAnalysis}
-          disabled={loading}
-          className="btn-secondary text-sm hover:scale-105 transition-transform duration-200"
-        >
-          Refresh Analysis
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={generateAnalysis}
+            disabled={loading}
+            className="btn-secondary text-sm hover:scale-105 transition-transform duration-200"
+          >
+            {loading ? 'Refreshing...' : 'Refresh Analysis'}
+          </button>
+          <button
+            onClick={createInitiativeFromAnalysis}
+            disabled={loading}
+            className="btn-primary flex items-center gap-2 text-sm hover:scale-105 transition-transform duration-200"
+          >
+            <LightBulbIcon className="w-4 h-4" />
+            Create Initiative
+          </button>
+        </div>
       </div>
 
       {/* Navigation Tabs */}
