@@ -324,8 +324,10 @@ function CategoryCard({
 
   return (
     <div
-      className={`card-interactive hover:shadow-card-standard-hover transition-all duration-300 ${
-        isExpanded ? 'shadow-card-elevated ring-2 ring-opacity-50' : ''
+      className={`card-interactive transition-all duration-300 ${
+        isExpanded
+          ? 'shadow-card-elevated ring-2 ring-blue-200 ring-opacity-60'
+          : 'hover:shadow-card-standard-hover hover:ring-1 hover:ring-gray-200 hover:ring-opacity-40'
       }`}
       style={{
         backdropFilter: 'blur(10px)',
@@ -400,130 +402,154 @@ function CategoryCard({
             {(cluster.analysis || cluster.rationale) && (
               <button
                 onClick={() => setExpandedCluster(isExpanded ? null : cluster.label)}
-                className={`${config.textColor} hover:opacity-75 transition-colors duration-200 text-xs`}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  isExpanded
+                    ? 'bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300'
+                    : 'bg-white/60 hover:bg-white/80 text-gray-700 border border-white/60 hover:border-gray-300'
+                }`}
               >
-                {isExpanded ? '👁️ Hide Details' : '👁️ Show Details'}
+                <span className="text-sm">{isExpanded ? '📋' : '🔍'}</span>
+                {isExpanded ? 'Hide Analysis' : 'View Analysis'}
               </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Expanded Details */}
-      {isExpanded && (
-        <div className="border-t border-opacity-30 px-4 py-3 bg-gradient-to-r from-white/30 to-white/10 animate-fade-in">
-          <div className="space-y-6">
-            {/* AI Strategic Analysis */}
-            <CategoryAISummary
-              categoryName={cluster.label}
-              onAnalysisGenerated={(analysis) => {
-                console.log('Category analysis generated:', analysis);
-                track('category_ai_analysis_generated', {
-                  category: cluster.label,
-                  confidence: analysis.confidence,
-                  businessImpact: analysis.impactAnalysis.businessImpact,
-                });
-              }}
-            />
+      {/* Analysis Section - Always present for consistent spacing */}
+      <div
+        className={`border-t border-opacity-30 transition-all duration-300 overflow-hidden ${
+          isExpanded ? 'max-h-screen opacity-100' : 'max-h-16 opacity-60'
+        }`}
+      >
+        {isExpanded ? (
+          /* Expanded Details */
+          <div className="px-4 py-3 bg-gradient-to-r from-white/30 to-white/10 animate-fade-in transform transition-all duration-300 ease-in-out">
+            <div className="space-y-6">
+              {/* AI Strategic Analysis */}
+              <CategoryAISummary
+                categoryName={cluster.label}
+                onAnalysisGenerated={(analysis) => {
+                  console.log('Category analysis generated:', analysis);
+                  track('category_ai_analysis_generated', {
+                    category: cluster.label,
+                    confidence: analysis.confidence,
+                    businessImpact: analysis.impactAnalysis.businessImpact,
+                  });
+                }}
+              />
 
-            {/* Basic Rationale */}
-            {cluster.rationale && (
-              <div>
-                <h5 className={`text-body-sm font-semibold ${config.textColor} mb-2`}>
-                  Clustering Rationale
-                </h5>
-                <p className="text-body-sm text-gray-800 leading-relaxed bg-white/50 p-3 rounded-lg">
-                  {cluster.rationale}
-                </p>
-              </div>
-            )}
-
-            {/* AI Analysis Details */}
-            {cluster.analysis && (
-              <>
-                {/* Summary */}
+              {/* Basic Rationale */}
+              {cluster.rationale && (
                 <div>
                   <h5 className={`text-body-sm font-semibold ${config.textColor} mb-2`}>
-                    AI Analysis Summary
+                    Clustering Rationale
                   </h5>
                   <p className="text-body-sm text-gray-800 leading-relaxed bg-white/50 p-3 rounded-lg">
-                    {cluster.analysis.summary}
+                    {cluster.rationale}
                   </p>
                 </div>
+              )}
 
-                {/* Strategic Priority */}
-                <div>
-                  <h5 className={`text-body-sm font-semibold ${config.textColor} mb-2`}>
-                    Strategic Priority
-                  </h5>
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                      cluster.analysis.strategicPriority === 'HIGH'
-                        ? 'bg-red-100 text-red-800 border border-red-200'
-                        : cluster.analysis.strategicPriority === 'MEDIUM'
-                          ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                          : 'bg-green-100 text-green-800 border border-green-200'
-                    }`}
-                  >
-                    {cluster.analysis.strategicPriority} Priority
-                  </span>
-                </div>
-
-                {/* Cross-Issue Patterns */}
-                {cluster.analysis.crossIssuePatterns.length > 0 && (
+              {/* AI Analysis Details */}
+              {cluster.analysis && (
+                <>
+                  {/* Summary */}
                   <div>
                     <h5 className={`text-body-sm font-semibold ${config.textColor} mb-2`}>
-                      Cross-Issue Patterns
+                      AI Analysis Summary
                     </h5>
-                    <div className="space-y-2">
-                      {cluster.analysis.crossIssuePatterns.map((pattern: string, index: number) => (
-                        <div
-                          key={index}
-                          className="bg-white/50 p-2 rounded text-body-xs text-gray-700"
-                        >
-                          • {pattern}
-                        </div>
-                      ))}
-                    </div>
+                    <p className="text-body-sm text-gray-800 leading-relaxed bg-white/50 p-3 rounded-lg">
+                      {cluster.analysis.summary}
+                    </p>
                   </div>
-                )}
 
-                {/* Initiative Recommendations */}
-                {cluster.analysis.initiativeRecommendations.length > 0 && (
+                  {/* Strategic Priority */}
                   <div>
                     <h5 className={`text-body-sm font-semibold ${config.textColor} mb-2`}>
-                      Strategic Recommendations
+                      Strategic Priority
                     </h5>
-                    <div className="space-y-2">
-                      {cluster.analysis.initiativeRecommendations.map(
-                        (rec: string, index: number) => (
-                          <div
-                            key={index}
-                            className="flex items-start gap-2 bg-white/50 p-2 rounded"
-                          >
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                        cluster.analysis.strategicPriority === 'HIGH'
+                          ? 'bg-red-100 text-red-800 border border-red-200'
+                          : cluster.analysis.strategicPriority === 'MEDIUM'
+                            ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                            : 'bg-green-100 text-green-800 border border-green-200'
+                      }`}
+                    >
+                      {cluster.analysis.strategicPriority} Priority
+                    </span>
+                  </div>
+
+                  {/* Cross-Issue Patterns */}
+                  {cluster.analysis.crossIssuePatterns.length > 0 && (
+                    <div>
+                      <h5 className={`text-body-sm font-semibold ${config.textColor} mb-2`}>
+                        Cross-Issue Patterns
+                      </h5>
+                      <div className="space-y-2">
+                        {cluster.analysis.crossIssuePatterns.map(
+                          (pattern: string, index: number) => (
                             <div
-                              className={`w-5 h-5 bg-opacity-20 rounded-full flex items-center justify-center text-xs font-medium mt-0.5 flex-shrink-0 ${
-                                config.type === 'people'
-                                  ? 'bg-emerald-100 text-emerald-600'
-                                  : config.type === 'process'
-                                    ? 'bg-amber-100 text-amber-600'
-                                    : 'bg-gray-100 text-gray-600'
-                              }`}
+                              key={index}
+                              className="bg-white/50 p-2 rounded text-body-xs text-gray-700"
                             >
-                              {index + 1}
+                              • {pattern}
                             </div>
-                            <p className="text-body-xs text-gray-700">{rec}</p>
-                          </div>
-                        )
-                      )}
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </>
-            )}
+                  )}
+
+                  {/* Initiative Recommendations */}
+                  {cluster.analysis.initiativeRecommendations.length > 0 && (
+                    <div>
+                      <h5 className={`text-body-sm font-semibold ${config.textColor} mb-2`}>
+                        Strategic Recommendations
+                      </h5>
+                      <div className="space-y-2">
+                        {cluster.analysis.initiativeRecommendations.map(
+                          (rec: string, index: number) => (
+                            <div
+                              key={index}
+                              className="flex items-start gap-2 bg-white/50 p-2 rounded"
+                            >
+                              <div
+                                className={`w-5 h-5 bg-opacity-20 rounded-full flex items-center justify-center text-xs font-medium mt-0.5 flex-shrink-0 ${
+                                  config.type === 'people'
+                                    ? 'bg-emerald-100 text-emerald-600'
+                                    : config.type === 'process'
+                                      ? 'bg-amber-100 text-amber-600'
+                                      : 'bg-gray-100 text-gray-600'
+                                }`}
+                              >
+                                {index + 1}
+                              </div>
+                              <p className="text-body-xs text-gray-700">{rec}</p>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          /* Collapsed State Placeholder */
+          <div className="px-4 py-3 bg-gradient-to-r from-white/20 to-white/5">
+            <div className="flex items-center justify-center py-2">
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span className="text-blue-400">🔍</span>
+                <span>Click "View Analysis" to see AI insights for this category</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
