@@ -36,13 +36,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if AI is available (handled internally by AIMigration)
-    try {
-      // AIMigration will handle configuration checks and fallbacks
-    } catch (configError) {
+    // Check if AI service is configured
+    if (!(await AIMigration.isConfigured())) {
       return NextResponse.json(
         {
-          error: 'AI generation not available - service unavailable',
+          error: 'AI generation not available - OpenAI not configured',
           fallback: 'Use the admin panel to configure OpenAI integration for AI-powered features.',
         },
         { status: 503 }

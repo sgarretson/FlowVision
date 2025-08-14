@@ -3,30 +3,51 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { scoreDifficulty, scoreROI, scorePriority } from '@/utils/ai';
+import { secureApiRoute, logSecurityEvent } from '@/lib/rbac-middleware';
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) return NextResponse.json([], { status: 200 });
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-  if (!user) return NextResponse.json([], { status: 200 });
+export const GET = secureApiRoute(
+  async (req: NextRequest, { user }) => {
+    try {
+      // Log access for audit trail
+      await logSecurityEvent('INITIATIVES_ACCESS', user.id, {
+        userAgent: req.headers.get('user-agent'),
+        ip: req.headers.get('x-forwarded-for') || 'unknown',
+      });
 
-  // Admin users can see all initiatives, others see only their own
-  const whereClause = user.role === 'ADMIN' ? {} : { ownerId: user.id };
+      // Admin users can see all initiatives, others see only their own
+      const whereClause = user.role === 'ADMIN' ? {} : { ownerId: user.id };
 
-  const initiatives = await prisma.initiative.findMany({
-    where: whereClause,
-    orderBy: { orderIndex: 'asc' },
-    include: {
-      owner: {
-        select: {
-          name: true,
-          email: true,
+      const initiatives = await prisma.initiative.findMany({
+        where: whereClause,
+        orderBy: { orderIndex: 'asc' },
+        include: {
+          owner: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
         },
-      },
-    },
-  });
-  return NextResponse.json(initiatives);
-}
+      });
+
+      return NextResponse.json(initiatives);
+    } catch (error) {
+      console.error('Initiatives fetch error:', error);
+      await logSecurityEvent(
+        'INITIATIVES_ERROR',
+        user.id,
+        {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
+        'error'
+      );
+      return NextResponse.json({ error: 'Failed to fetch initiatives' }, { status: 500 });
+    }
+  },
+  {
+    allowedRoles: ['ADMIN', 'LEADER'],
+  }
+);
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);

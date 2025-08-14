@@ -1,6 +1,7 @@
 // AI Migration utility for gradual rollout of optimized service
 import { openAIService } from '@/lib/openai';
 import { optimizedOpenAIService } from '@/lib/optimized-openai-service';
+import { AIConfigLoader } from '@/lib/ai-config-loader';
 
 export class AIMigration {
   // Feature flag for gradual rollout
@@ -181,8 +182,14 @@ export class AIMigration {
   }
 
   // Service management methods
-  static isConfigured(): boolean {
-    return openAIService.isConfigured() || optimizedOpenAIService.isConfigured();
+  static async isConfigured(): Promise<boolean> {
+    // First check if already configured in memory
+    if (openAIService.isConfigured() || optimizedOpenAIService.isConfigured()) {
+      return true;
+    }
+
+    // If not configured, try loading from database
+    return await AIConfigLoader.isConfigured();
   }
 
   static async testConnection(): Promise<{ success: boolean; error?: string; model?: string }> {

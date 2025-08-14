@@ -29,7 +29,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     // Check if AI service is configured
-    if (!AIMigration.isConfigured()) {
+    if (!(await AIMigration.isConfigured())) {
       return NextResponse.json(
         {
           error: 'AI analysis not available - OpenAI not configured',

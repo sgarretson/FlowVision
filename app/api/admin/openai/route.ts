@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import AIMigration from '@/lib/ai-migration';
 import { prisma } from '@/lib/prisma';
+import { AIConfigLoader } from '@/lib/ai-config-loader';
 
 // GET /api/admin/openai - Get current OpenAI configuration and status
 export async function GET() {
@@ -21,7 +22,7 @@ export async function GET() {
     }
 
     const config = AIMigration.getConfig();
-    const isConfigured = AIMigration.isConfigured();
+    const isConfigured = await AIMigration.isConfigured();
     const rawUsageStats = await AIMigration.getPerformanceMetrics();
 
     // Transform usage stats to match frontend expectations
@@ -100,7 +101,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Temperature must be between 0 and 2' }, { status: 400 });
     }
 
-    // Configure OpenAI service
+    // Save configuration to database
+    const configData = {
+      key: 'default', // Primary configuration key
+      apiKey: effectiveApiKey,
+      model: model || 'gpt-3.5-turbo',
+      maxTokens: maxTokens || 500,
+      temperature: temperature || 0.7,
+      enabled: enabled !== false,
+      userId: user.id,
+    };
+
+    // Upsert configuration in database
+    await prisma.aIConfiguration.upsert({
+      where: { key: 'default' },
+      update: configData,
+      create: configData,
+    });
+
+    // Configure OpenAI service in memory
     AIMigration.configure({
       apiKey: effectiveApiKey,
       model: model || 'gpt-3.5-turbo',
@@ -108,6 +127,9 @@ export async function POST(req: NextRequest) {
       temperature: temperature || 0.7,
       enabled: enabled !== false,
     });
+
+    // Force reload from database to ensure consistency
+    await AIConfigLoader.forceReload();
 
     // Log the configuration change
     await prisma.auditLog.create({
