@@ -184,6 +184,8 @@ model Issue {
   aiConfidence  Int?          // AI confidence score (0-100)
   aiGeneratedAt DateTime?     // When AI summary was created
   aiVersion     String?       // AI model version used
+  // Enhanced AI Analysis Fields
+  aiAnalysisDetails Json?     // Full detailed analysis (rootCauses, recommendations, impact, etc.)
   // System Impact Relationships
   systemImpacts IssueSystemImpact[] // System categories affected by this issue
   comments      Comment[]
@@ -212,6 +214,8 @@ model IssueCluster {
   aiConfidence   Int?        // AI confidence score (0-100)
   aiGeneratedAt  DateTime?   // When AI summary was created
   aiVersion      String?     // AI model version used
+  // Enhanced AI Analysis Fields
+  aiAnalysisDetails Json?    // Full detailed analysis (consolidatedSummary, crossIssuePatterns, strategicPriority, initiativeRecommendations, etc.)
   color          String      @default("#3B82F6") // UI color for visualization
   isActive       Boolean     @default(true) // Whether cluster is actively used
   createdAt      DateTime    @default(now())

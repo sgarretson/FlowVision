@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { executeAIOperation, getUserFriendlyAIError, AIServiceError } from './ai-error-handler';
+import { AIJSONParser } from './ai-json-parser';
 
 export interface OpenAIConfig {
   apiKey: string;
@@ -148,9 +149,21 @@ Format as JSON with keys: recommendations, estimatedDifficulty, estimatedROI, su
 
       const content = response.choices[0]?.message?.content;
       if (content) {
-        try {
-          return JSON.parse(content);
-        } catch {
+        const expectedFields = [
+          'recommendations',
+          'estimatedDifficulty',
+          'estimatedROI',
+          'suggestedKPIs',
+        ];
+        const parseResult = AIJSONParser.parseByModel(
+          content,
+          this.config?.model || 'gpt-3.5-turbo',
+          expectedFields
+        );
+
+        if (parseResult.success) {
+          return parseResult.data;
+        } else {
           // If JSON parsing fails, return as text recommendations
           return { recommendations: content };
         }
@@ -196,9 +209,16 @@ Extract and format as JSON:
 
       const content = response.choices[0]?.message?.content;
       if (content) {
-        try {
-          return JSON.parse(content);
-        } catch {
+        const expectedFields = ['title', 'problem', 'goal', 'acceptanceCriteria'];
+        const parseResult = AIJSONParser.parseByModel(
+          content,
+          this.config?.model || 'gpt-3.5-turbo',
+          expectedFields
+        );
+
+        if (parseResult.success) {
+          return parseResult.data;
+        } else {
           return null;
         }
       }
@@ -261,23 +281,36 @@ Focus on practical A&E operational challenges like coordination, technical compl
 
       const content = response.choices[0]?.message?.content;
       if (content) {
-        try {
-          const parsed = JSON.parse(content);
+        const expectedFields = ['summary', 'rootCauses', 'impact', 'recommendations', 'confidence'];
+        const parseResult = AIJSONParser.parseByModel(
+          content,
+          this.config?.model || 'gpt-3.5-turbo',
+          expectedFields
+        );
+
+        if (parseResult.success) {
+          const validatedResult = AIJSONParser.validateIssueAnalysis(parseResult);
           return {
-            summary: parsed.summary || 'AI analysis generated',
-            rootCauses: Array.isArray(parsed.rootCauses) ? parsed.rootCauses : [],
-            impact: parsed.impact || 'Impact analysis pending',
-            recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations : [],
-            confidence: Math.min(Math.max(parsed.confidence || 75, 0), 100),
+            summary: validatedResult.data.summary || 'AI analysis generated',
+            rootCauses: Array.isArray(validatedResult.data.rootCauses)
+              ? validatedResult.data.rootCauses
+              : [],
+            impact: validatedResult.data.impact || 'Impact analysis pending',
+            recommendations: Array.isArray(validatedResult.data.recommendations)
+              ? validatedResult.data.recommendations
+              : [],
+            confidence: validatedResult.data.confidence || validatedResult.confidence,
           };
-        } catch {
-          // Fallback if JSON parsing fails
+        } else {
+          // Use fallback data from parser
           return {
-            summary: content.substring(0, 200) + '...',
-            rootCauses: ['Analysis available in summary'],
-            impact: 'Detailed analysis in summary section',
-            recommendations: ['Review full analysis for recommendations'],
-            confidence: 60,
+            summary: parseResult.data.summary || content.substring(0, 200) + '...',
+            rootCauses: parseResult.data.rootCauses || ['Analysis available in summary'],
+            impact: parseResult.data.impact || 'Detailed analysis in summary section',
+            recommendations: parseResult.data.recommendations || [
+              'Review full analysis for recommendations',
+            ],
+            confidence: parseResult.confidence,
           };
         }
       }
@@ -353,26 +386,45 @@ Focus on systemic problems, cross-departmental impacts, client effects, and stra
 
       const content = response.choices[0]?.message?.content;
       if (content) {
-        try {
-          const parsed = JSON.parse(content);
+        const expectedFields = [
+          'consolidatedSummary',
+          'crossIssuePatterns',
+          'strategicPriority',
+          'initiativeRecommendations',
+          'confidence',
+        ];
+        const parseResult = AIJSONParser.parseByModel(
+          content,
+          this.config?.model || 'gpt-3.5-turbo',
+          expectedFields
+        );
+
+        if (parseResult.success) {
+          const validatedResult = AIJSONParser.validateClusterAnalysis(parseResult);
           return {
-            consolidatedSummary: parsed.consolidatedSummary || 'Cluster analysis generated',
-            crossIssuePatterns: Array.isArray(parsed.crossIssuePatterns)
-              ? parsed.crossIssuePatterns
+            consolidatedSummary:
+              validatedResult.data.consolidatedSummary || 'Cluster analysis generated',
+            crossIssuePatterns: Array.isArray(validatedResult.data.crossIssuePatterns)
+              ? validatedResult.data.crossIssuePatterns
               : [],
-            strategicPriority: parsed.strategicPriority || 'MEDIUM',
-            initiativeRecommendations: Array.isArray(parsed.initiativeRecommendations)
-              ? parsed.initiativeRecommendations
+            strategicPriority: validatedResult.data.strategicPriority || 'MEDIUM',
+            initiativeRecommendations: Array.isArray(validatedResult.data.initiativeRecommendations)
+              ? validatedResult.data.initiativeRecommendations
               : [],
-            confidence: Math.min(Math.max(parsed.confidence || 80, 0), 100),
+            confidence: validatedResult.data.confidence || validatedResult.confidence,
           };
-        } catch {
+        } else {
+          // Use fallback data from parser
           return {
-            consolidatedSummary: content.substring(0, 250) + '...',
-            crossIssuePatterns: ['Analysis available in summary'],
+            consolidatedSummary: parseResult.data.summary || content.substring(0, 250) + '...',
+            crossIssuePatterns: parseResult.data.crossIssuePatterns || [
+              'Analysis available in summary',
+            ],
             strategicPriority: 'MEDIUM - Requires review',
-            initiativeRecommendations: ['Review cluster summary for recommendations'],
-            confidence: 65,
+            initiativeRecommendations: parseResult.data.recommendations || [
+              'Review cluster summary for recommendations',
+            ],
+            confidence: parseResult.confidence,
           };
         }
       }

@@ -101,7 +101,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       );
     }
 
-    // Store AI summary in database
+    // Store AI summary and detailed analysis in database
     const updatedCluster = await prisma.issueCluster.update({
       where: { id: params.id },
       data: {
@@ -116,6 +116,16 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         aiConfidence: aiAnalysis.confidence,
         aiGeneratedAt: new Date(),
         aiVersion: 'gpt-3.5-turbo',
+        aiAnalysisDetails: {
+          consolidatedSummary: aiAnalysis.consolidatedSummary,
+          crossIssuePatterns: aiAnalysis.crossIssuePatterns,
+          strategicPriority: aiAnalysis.strategicPriority,
+          initiativeRecommendations: aiAnalysis.initiativeRecommendations,
+          confidence: aiAnalysis.confidence,
+          generatedAt: new Date().toISOString(),
+          model: 'gpt-3.5-turbo',
+          issueCount: cluster.issues.length,
+        },
       },
     });
 

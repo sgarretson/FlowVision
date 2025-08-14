@@ -52,10 +52,48 @@ export default function AISummary({
   const [fullAnalysis, setFullAnalysis] = useState<AIAnalysis | null>(null);
   const [showFullAnalysis, setShowFullAnalysis] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingPersistentAnalysis, setLoadingPersistentAnalysis] = useState(false);
 
   useEffect(() => {
     setEditedSummary(summary || '');
-  }, [summary]);
+
+    // Load persistent detailed analysis if summary exists but fullAnalysis doesn't
+    if (summary && !fullAnalysis && !loadingPersistentAnalysis) {
+      loadPersistentAnalysis();
+    }
+  }, [summary, fullAnalysis, loadingPersistentAnalysis]);
+
+  const loadPersistentAnalysis = async () => {
+    setLoadingPersistentAnalysis(true);
+    try {
+      const endpoint = itemType === 'issue' ? `/api/issues/${itemId}` : `/api/clusters/${itemId}`;
+
+      const response = await fetch(endpoint);
+      if (response.ok) {
+        const data = await response.json();
+        const analysisDetails =
+          itemType === 'issue' ? data.issue?.aiAnalysisDetails : data.cluster?.aiAnalysisDetails;
+
+        if (analysisDetails) {
+          setFullAnalysis({
+            summary: analysisDetails.summary || summary || '',
+            rootCauses: analysisDetails.rootCauses || [],
+            impact: analysisDetails.impact || '',
+            recommendations: analysisDetails.recommendations || [],
+            crossIssuePatterns: analysisDetails.crossIssuePatterns || [],
+            strategicPriority: analysisDetails.strategicPriority || '',
+            initiativeRecommendations: analysisDetails.initiativeRecommendations || [],
+            confidence: analysisDetails.confidence || 75,
+            generatedAt: analysisDetails.generatedAt || new Date().toISOString(),
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load persistent analysis:', err);
+    } finally {
+      setLoadingPersistentAnalysis(false);
+    }
+  };
 
   const generateSummary = async () => {
     setIsGenerating(true);
