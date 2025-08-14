@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import CategoryAISummary from '@/components/CategoryAISummary';
 
 type Cluster = {
   label: string;
@@ -411,7 +412,20 @@ function CategoryCard({
       {/* Expanded Details */}
       {isExpanded && (
         <div className="border-t border-opacity-30 px-4 py-3 bg-gradient-to-r from-white/30 to-white/10 animate-fade-in">
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* AI Strategic Analysis */}
+            <CategoryAISummary
+              categoryName={cluster.label}
+              onAnalysisGenerated={(analysis) => {
+                console.log('Category analysis generated:', analysis);
+                track('category_ai_analysis_generated', {
+                  category: cluster.label,
+                  confidence: analysis.confidence,
+                  businessImpact: analysis.impactAnalysis.businessImpact,
+                });
+              }}
+            />
+
             {/* Basic Rationale */}
             {cluster.rationale && (
               <div>
