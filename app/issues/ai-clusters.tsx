@@ -33,8 +33,22 @@ export default function AIClusters({ onSelectAll }: Props) {
     };
   }, []);
 
-  if (loading) return <div className="text-caption">Analyzing issues…</div>;
-  if (error) return <div className="text-caption text-red-600">{error}</div>;
+  if (loading)
+    return (
+      <div className="flex items-center gap-2 animate-pulse">
+        <div className="skeleton-modern h-4 w-4 rounded-full"></div>
+        <div className="text-body-sm text-gray-600">Analyzing issues with AI...</div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+        <div className="text-body-sm text-red-700">{error}</div>
+      </div>
+    );
+
   if (!clusters.length) return null;
 
   async function track(event: string, metadata?: any) {
@@ -48,23 +62,33 @@ export default function AIClusters({ onSelectAll }: Props) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-3 animate-fade-in">
       {clusters.map((c) => (
         <div
           key={c.label}
-          className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm flex items-center gap-2"
+          className="card-interactive hover:shadow-card-standard-hover transition-all duration-300 transform hover:-translate-y-0.5"
+          style={{
+            backdropFilter: 'blur(10px)',
+            background: 'rgba(99, 102, 241, 0.1)',
+            border: '1px solid rgba(99, 102, 241, 0.2)',
+          }}
         >
-          <span className="font-medium">{c.label}</span>
-          <button
-            onClick={() => {
-              onSelectAll(c.issueIds);
-              track('issues_select_all_related', { label: c.label, count: c.issueIds.length });
-            }}
-            className="underline text-indigo-700 hover:text-indigo-900"
-            title={c.rationale}
-          >
-            Select all related ({c.issueIds.length})
-          </button>
+          <div className="px-4 py-3 rounded-lg flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+              <span className="text-body-sm font-semibold text-indigo-700">{c.label}</span>
+            </div>
+            <button
+              onClick={() => {
+                onSelectAll(c.issueIds);
+                track('issues_select_all_related', { label: c.label, count: c.issueIds.length });
+              }}
+              className="btn-primary text-xs hover:scale-105 transition-transform duration-200"
+              title={c.rationale}
+            >
+              Select all ({c.issueIds.length})
+            </button>
+          </div>
         </div>
       ))}
     </div>
