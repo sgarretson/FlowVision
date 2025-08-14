@@ -15,7 +15,8 @@
     "cypress:open": "cypress open",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "node prisma/seed-comprehensive-showcase.cjs",
+    "prisma:seed": "node prisma/seed-employee-feedback.cjs",
+    "prisma:seed:feedback": "node prisma/seed-employee-feedback.cjs",
     "prepare": "husky"
   },
   "keywords": [],
