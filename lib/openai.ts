@@ -252,10 +252,10 @@ Focus on practical A&E operational challenges like coordination, technical compl
 
       const response = await executeAIOperation(async () => {
         return await this.client!.chat.completions.create({
-          model: this.config.model || 'gpt-3.5-turbo',
+          model: this.config?.model || 'gpt-3.5-turbo',
           messages: [{ role: 'user', content: prompt }],
-          max_tokens: this.config.maxTokens || 600,
-          temperature: this.config.temperature || 0.7,
+          max_tokens: this.config?.maxTokens || 600,
+          temperature: this.config?.temperature || 0.7,
         });
       }, 'Generate Issue Summary');
 
