@@ -4,23 +4,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  console.log('GET /api/initiatives/[id] called with ID:', params.id);
-
   const session = await getServerSession(authOptions);
-  console.log('Session:', session ? 'exists' : 'null');
-
-  if (!session?.user?.email) {
-    console.log('No session or email, returning 401');
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+  if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-  console.log('User found:', user ? `${user.email} (${user.role})` : 'null');
-
-  if (!user) {
-    console.log('User not found, returning 401');
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   // Parse include parameter from query string
   const { searchParams } = new URL(req.url);
@@ -80,21 +67,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     };
   }
 
-  console.log('Looking for initiative with where clause:', whereClause);
-
   const initiative = await prisma.initiative.findFirst({
     where: whereClause,
     include: includeClause,
   });
 
-  console.log('Initiative found:', initiative ? `${initiative.title}` : 'null');
-
-  if (!initiative) {
-    console.log('Initiative not found, returning 404');
+  if (!initiative)
     return NextResponse.json({ error: 'Initiative not found or access denied' }, { status: 404 });
-  }
-
-  console.log('Returning initiative data');
   return NextResponse.json(initiative);
 }
 

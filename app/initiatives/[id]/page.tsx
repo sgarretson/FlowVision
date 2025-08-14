@@ -46,21 +46,16 @@ export default function InitiativeDetailPage() {
   useEffect(() => {
     async function loadInitiative() {
       try {
-        console.log('Loading initiative with ID:', id);
         const res = await fetch(`/api/initiatives/${id}?include=addressedIssues`);
-        console.log('Response status:', res.status);
 
         if (res.ok) {
           const data = await res.json();
-          console.log('Initiative data:', data);
           setForm(data);
         } else {
           const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
-          console.error('Failed to load initiative:', res.status, errorData);
           setMessage(`Failed to load initiative: ${errorData.error || 'Unknown error'}`);
         }
       } catch (error) {
-        console.error('Error loading initiative:', error);
         setMessage('Error loading initiative.');
       } finally {
         setLoading(false);
