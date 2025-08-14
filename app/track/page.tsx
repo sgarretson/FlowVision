@@ -884,15 +884,327 @@ export default function TrackPage() {
         </div>
       )}
 
-      {/* Resource View Placeholder */}
+      {/* Resource Allocation View */}
       {viewMode === 'resource' && (
-        <div className="card-elevated p-8 text-center">
-          <UsersIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-h3 text-gray-600 mb-2">Resource Allocation</h3>
-          <p className="text-gray-500">
-            Coming soon: Team workload analysis, capacity planning, and resource optimization
-            insights.
-          </p>
+        <div className="space-y-6">
+          {/* Resource Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {(() => {
+              const teamMap = new Map();
+              let totalAllocatedHours = 0;
+              let activeTeams = 0;
+
+              initiatives.forEach((initiative) => {
+                initiative.assignments?.forEach((assignment) => {
+                  const teamId = assignment.team.id;
+                  totalAllocatedHours += assignment.hoursAllocated;
+
+                  if (!teamMap.has(teamId)) {
+                    teamMap.set(teamId, {
+                      name: assignment.team.name,
+                      department: assignment.team.department,
+                      totalHours: 0,
+                      initiatives: new Set(),
+                      assignments: [],
+                    });
+                    activeTeams++;
+                  }
+                  const team = teamMap.get(teamId);
+                  team.totalHours += assignment.hoursAllocated;
+                  team.initiatives.add(initiative.id);
+                  team.assignments.push({ ...assignment, initiative });
+                });
+              });
+
+              const averageHoursPerTeam =
+                activeTeams > 0 ? Math.round(totalAllocatedHours / activeTeams) : 0;
+              const teamsOverCapacity = Array.from(teamMap.values()).filter(
+                (team) => team.totalHours > 160
+              ).length;
+
+              return (
+                <>
+                  <div className="card-elevated p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-h4 text-gray-800">Active Teams</h3>
+                      <div className="icon-container">
+                        <UsersIcon className="h-5 w-5 text-blue-600" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-blue-600 mb-2">{activeTeams}</div>
+                    <div className="text-body-sm text-gray-600">teams allocated</div>
+                  </div>
+
+                  <div className="card-elevated p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-h4 text-gray-800">Total Hours</h3>
+                      <div className="icon-container">
+                        <ClockIcon className="h-5 w-5 text-green-600" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-green-600 mb-2">
+                      {totalAllocatedHours}h
+                    </div>
+                    <div className="text-body-sm text-gray-600">allocated across initiatives</div>
+                  </div>
+
+                  <div className="card-elevated p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-h4 text-gray-800">Avg Load</h3>
+                      <div className="icon-container">
+                        <ArrowTrendingUpIcon className="h-5 w-5 text-purple-600" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-purple-600 mb-2">
+                      {averageHoursPerTeam}h
+                    </div>
+                    <div className="text-body-sm text-gray-600">average per team</div>
+                  </div>
+
+                  <div className="card-elevated p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-h4 text-gray-800">Capacity Risk</h3>
+                      <div className="icon-container">
+                        <ExclamationTriangleIcon className="h-5 w-5 text-orange-600" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-orange-600 mb-2">
+                      {teamsOverCapacity}
+                    </div>
+                    <div className="text-body-sm text-gray-600">teams over capacity</div>
+                    <div className="mt-3">
+                      <div
+                        className={`text-xs px-2 py-1 rounded-full inline-block ${
+                          teamsOverCapacity === 0
+                            ? 'bg-green-100 text-green-700'
+                            : teamsOverCapacity <= 1
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                        }`}
+                      >
+                        {teamsOverCapacity === 0
+                          ? 'Balanced'
+                          : teamsOverCapacity <= 1
+                            ? 'Minor Risk'
+                            : 'Overloaded'}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+
+          {/* Team Workload Analysis */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Team Capacity Overview */}
+            <div className="card-elevated p-6">
+              <h3 className="text-h3 mb-4 flex items-center">
+                <UsersIcon className="h-5 w-5 mr-2 text-blue-600" />
+                Team Capacity Analysis
+              </h3>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {(() => {
+                  const teamMap = new Map();
+
+                  initiatives.forEach((initiative) => {
+                    initiative.assignments?.forEach((assignment) => {
+                      const teamId = assignment.team.id;
+                      if (!teamMap.has(teamId)) {
+                        teamMap.set(teamId, {
+                          name: assignment.team.name,
+                          department: assignment.team.department,
+                          totalHours: 0,
+                          initiatives: [],
+                          assignments: [],
+                        });
+                      }
+                      const team = teamMap.get(teamId);
+                      team.totalHours += assignment.hoursAllocated;
+                      team.initiatives.push(initiative);
+                      team.assignments.push({ ...assignment, initiative });
+                    });
+                  });
+
+                  return Array.from(teamMap.values())
+                    .sort((a, b) => b.totalHours - a.totalHours)
+                    .map((team) => {
+                      const capacityPercentage = Math.min((team.totalHours / 160) * 100, 100); // Assuming 160h monthly capacity
+                      const utilizationLevel =
+                        capacityPercentage >= 100
+                          ? 'overloaded'
+                          : capacityPercentage >= 80
+                            ? 'high'
+                            : capacityPercentage >= 60
+                              ? 'optimal'
+                              : capacityPercentage >= 40
+                                ? 'moderate'
+                                : 'low';
+
+                      const utilizationColor = {
+                        overloaded: {
+                          bg: 'bg-red-500',
+                          text: 'text-red-700',
+                          bgLight: 'bg-red-50',
+                        },
+                        high: {
+                          bg: 'bg-orange-500',
+                          text: 'text-orange-700',
+                          bgLight: 'bg-orange-50',
+                        },
+                        optimal: {
+                          bg: 'bg-green-500',
+                          text: 'text-green-700',
+                          bgLight: 'bg-green-50',
+                        },
+                        moderate: {
+                          bg: 'bg-blue-500',
+                          text: 'text-blue-700',
+                          bgLight: 'bg-blue-50',
+                        },
+                        low: { bg: 'bg-gray-500', text: 'text-gray-700', bgLight: 'bg-gray-50' },
+                      }[utilizationLevel];
+
+                      return (
+                        <div
+                          key={team.name}
+                          className={`p-4 rounded-lg border ${utilizationColor.bgLight}`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <div className="font-medium text-gray-800">{team.name}</div>
+                              <div className="text-xs text-gray-500">{team.department}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-bold">{team.totalHours}h</div>
+                              <div
+                                className={`text-xs px-2 py-0.5 rounded-full bg-white ${utilizationColor.text}`}
+                              >
+                                {Math.round(capacityPercentage)}% utilized
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mb-3">
+                            <div className="bg-gray-200 rounded-full h-2">
+                              <div
+                                className={`h-2 rounded-full transition-all duration-500 ${utilizationColor.bg}`}
+                                style={{ width: `${Math.min(capacityPercentage, 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between text-xs text-gray-600">
+                            <span>{team.initiatives.length} initiatives</span>
+                            <span>{team.assignments.length} assignments</span>
+                          </div>
+
+                          {/* Show overload warning */}
+                          {utilizationLevel === 'overloaded' && (
+                            <div className="mt-2 text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
+                              ⚠️ Over capacity - consider rebalancing workload
+                            </div>
+                          )}
+                        </div>
+                      );
+                    });
+                })()}
+
+                {initiatives.every((i) => !i.assignments?.length) && (
+                  <div className="text-center py-8 text-gray-500">
+                    <UsersIcon className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <div className="text-sm">No resource assignments found</div>
+                    <div className="text-xs">
+                      Assign teams to initiatives to see capacity analysis
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Initiative Resource Requirements */}
+            <div className="card-elevated p-6">
+              <h3 className="text-h3 mb-4 flex items-center">
+                <ChartBarIcon className="h-5 w-5 mr-2 text-purple-600" />
+                Initiative Resource Requirements
+              </h3>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {initiatives
+                  .filter((initiative) => initiative.assignments?.length)
+                  .sort((a, b) => {
+                    const totalA =
+                      a.assignments?.reduce((sum, assign) => sum + assign.hoursAllocated, 0) || 0;
+                    const totalB =
+                      b.assignments?.reduce((sum, assign) => sum + assign.hoursAllocated, 0) || 0;
+                    return totalB - totalA;
+                  })
+                  .map((initiative) => {
+                    const totalHours =
+                      initiative.assignments?.reduce(
+                        (sum, assign) => sum + assign.hoursAllocated,
+                        0
+                      ) || 0;
+                    const teamCount = initiative.assignments?.length || 0;
+
+                    return (
+                      <div key={initiative.id} className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-800 text-sm truncate max-w-[200px]">
+                              {initiative.title}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span
+                                className={`text-xs px-2 py-0.5 rounded-full ${
+                                  initiative.status === 'COMPLETED'
+                                    ? 'bg-green-100 text-green-700'
+                                    : initiative.status === 'ACTIVE'
+                                      ? 'bg-blue-100 text-blue-700'
+                                      : 'bg-gray-100 text-gray-700'
+                                }`}
+                              >
+                                {initiative.status}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {initiative.progress}% complete
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-bold text-gray-800">{totalHours}h</div>
+                            <div className="text-xs text-gray-500">{teamCount} teams</div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          {initiative.assignments?.map((assignment) => (
+                            <div
+                              key={assignment.team.id}
+                              className="flex items-center justify-between text-xs"
+                            >
+                              <span className="text-gray-600">{assignment.team.name}</span>
+                              <span className="font-medium">
+                                {assignment.hoursAllocated}h ({assignment.role})
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                {!initiatives.some((i) => i.assignments?.length) && (
+                  <div className="text-center py-8 text-gray-500">
+                    <ChartBarIcon className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <div className="text-sm">No resource requirements found</div>
+                    <div className="text-xs">
+                      Configure team assignments to see resource planning
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
