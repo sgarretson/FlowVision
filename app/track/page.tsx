@@ -637,15 +637,238 @@ export default function TrackPage() {
         </div>
       )}
 
-      {/* Progress Dashboard Placeholder */}
+      {/* Progress Dashboard */}
       {viewMode === 'progress' && (
-        <div className="card-elevated p-8 text-center">
-          <ArrowTrendingUpIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-h3 text-gray-600 mb-2">Progress Dashboard</h3>
-          <p className="text-gray-500">
-            Coming soon: Comprehensive progress analytics, completion rates, and performance
-            metrics.
-          </p>
+        <div className="space-y-6">
+          {/* Progress Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="card-elevated p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-h4 text-gray-800">Completion Rate</h3>
+                <div className="icon-container">
+                  <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-green-600 mb-2">
+                {metrics.completionRate}%
+              </div>
+              <div className="text-body-sm text-gray-600">
+                {metrics.completedInitiatives} of {metrics.totalInitiatives} initiatives
+              </div>
+              <div className="mt-3 bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-green-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${metrics.completionRate}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="card-elevated p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-h4 text-gray-800">Solutions Progress</h3>
+                <div className="icon-container">
+                  <BoltIcon className="h-5 w-5 text-blue-600" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">
+                {metrics.solutionCompletionRate}%
+              </div>
+              <div className="text-body-sm text-gray-600">
+                {metrics.completedSolutions} of {metrics.totalSolutions} solutions
+              </div>
+              <div className="mt-3 bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${metrics.solutionCompletionRate}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="card-elevated p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-h4 text-gray-800">Task Completion</h3>
+                <div className="icon-container">
+                  <ArrowTrendingUpIcon className="h-5 w-5 text-purple-600" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">
+                {metrics.taskCompletionRate}%
+              </div>
+              <div className="text-body-sm text-gray-600">
+                {metrics.completedTasks} of {metrics.totalTasks} tasks
+              </div>
+              <div className="mt-3 bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-purple-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${metrics.taskCompletionRate}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="card-elevated p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-h4 text-gray-800">Risk Assessment</h3>
+                <div className="icon-container">
+                  <ExclamationTriangleIcon className="h-5 w-5 text-orange-600" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-orange-600 mb-2">
+                {metrics.atRiskInitiatives}
+              </div>
+              <div className="text-body-sm text-gray-600">initiatives at risk</div>
+              <div className="mt-3">
+                <div
+                  className={`text-xs px-2 py-1 rounded-full inline-block ${
+                    metrics.atRiskInitiatives === 0
+                      ? 'bg-green-100 text-green-700'
+                      : metrics.atRiskInitiatives <= 2
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-red-100 text-red-700'
+                  }`}
+                >
+                  {metrics.atRiskInitiatives === 0
+                    ? 'All On Track'
+                    : metrics.atRiskInitiatives <= 2
+                      ? 'Minor Risk'
+                      : 'High Risk'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed Analytics Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Initiative Progress Breakdown */}
+            <div className="card-elevated p-6">
+              <h3 className="text-h3 mb-4 flex items-center">
+                <ChartBarIcon className="h-5 w-5 mr-2 text-blue-600" />
+                Initiative Progress Breakdown
+              </h3>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {initiatives.map((initiative) => {
+                  const progressColor =
+                    initiative.progress >= 90
+                      ? 'bg-green-500'
+                      : initiative.progress >= 70
+                        ? 'bg-blue-500'
+                        : initiative.progress >= 50
+                          ? 'bg-yellow-500'
+                          : initiative.progress >= 30
+                            ? 'bg-orange-500'
+                            : 'bg-red-500';
+
+                  return (
+                    <div key={initiative.id} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-800 truncate max-w-[200px]">
+                          {initiative.title}
+                        </span>
+                        <span className="text-sm text-gray-600">{initiative.progress}%</span>
+                      </div>
+                      <div className="bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-500 ${progressColor}`}
+                          style={{ width: `${initiative.progress}%` }}
+                        ></div>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{initiative.solutions?.length || 0} solutions</span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full ${
+                            initiative.status === 'COMPLETED'
+                              ? 'bg-green-100 text-green-700'
+                              : initiative.status === 'ACTIVE'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {initiative.status}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Team Performance Scorecard */}
+            <div className="card-elevated p-6">
+              <h3 className="text-h3 mb-4 flex items-center">
+                <UsersIcon className="h-5 w-5 mr-2 text-green-600" />
+                Team Performance Scorecard
+              </h3>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {(() => {
+                  const teamMap = new Map();
+                  initiatives.forEach((initiative) => {
+                    initiative.assignments?.forEach((assignment) => {
+                      const teamId = assignment.team.id;
+                      if (!teamMap.has(teamId)) {
+                        teamMap.set(teamId, {
+                          name: assignment.team.name,
+                          department: assignment.team.department,
+                          initiatives: [],
+                          totalHours: 0,
+                          completedInitiatives: 0,
+                        });
+                      }
+                      const team = teamMap.get(teamId);
+                      team.initiatives.push(initiative);
+                      team.totalHours += assignment.hoursAllocated;
+                      if (initiative.status === 'COMPLETED') {
+                        team.completedInitiatives++;
+                      }
+                    });
+                  });
+
+                  return Array.from(teamMap.values()).map((team) => {
+                    const completionRate =
+                      team.initiatives.length > 0
+                        ? Math.round((team.completedInitiatives / team.initiatives.length) * 100)
+                        : 0;
+
+                    return (
+                      <div key={team.name} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-sm font-medium text-gray-800">{team.name}</span>
+                            <div className="text-xs text-gray-500">{team.department}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-gray-800">
+                              {completionRate}%
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {team.initiatives.length} projects
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-green-500 h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${completionRate}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>{team.totalHours}h allocated</span>
+                          <span>{team.completedInitiatives} completed</span>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+                {initiatives.every((i) => !i.assignments?.length) && (
+                  <div className="text-center py-8 text-gray-500">
+                    <UsersIcon className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <div className="text-sm">No team assignments found</div>
+                    <div className="text-xs">
+                      Assign teams to initiatives to see performance data
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
