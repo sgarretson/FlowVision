@@ -233,6 +233,22 @@ Focus on strategic business value, executive decision-making, and actionable ins
         };
       }
 
+      // Include associated issues data in response
+      const issuesForResponse = issues.map((issue) => ({
+        id: issue.id,
+        description: issue.description,
+        heatmapScore: issue.heatmapScore,
+        votes: issue.votes,
+        department: issue.department,
+        category: issue.category,
+        status: issue.status,
+      }));
+
+      const responseData = {
+        ...analysisData,
+        associatedIssues: issuesForResponse,
+      };
+
       // Record successful operation
       await aiServiceMonitor.recordOperation(
         'category_analysis',
@@ -240,7 +256,7 @@ Focus on strategic business value, executive decision-making, and actionable ins
         Date.now() - startTime
       );
 
-      return NextResponse.json(analysisData);
+      return NextResponse.json(responseData);
     } catch (aiError) {
       console.error('AI service error:', aiError);
       await aiServiceMonitor.recordOperation('category_analysis', 'error', Date.now() - startTime);
