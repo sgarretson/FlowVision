@@ -40,6 +40,19 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  /* Enhanced card text overflow handling */
+  .text-truncate-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Consistent card heights for requirement boards */
+  .requirement-card-container {
+    min-height: 280px;
+    max-height: 400px;
+  }
 }
 
 /* Component Styles */

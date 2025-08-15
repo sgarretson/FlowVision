@@ -100,14 +100,14 @@ export default function RequirementCard({
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => onView(card)}
-          className={`group card-interactive ${
+          className={`group card-interactive min-h-[280px] flex flex-col ${
             snapshot.isDragging
               ? 'rotate-1 shadow-card-elevated-hover ring-2 ring-primary scale-105'
               : ''
           }`}
         >
           {/* Card Header with Modern Type Indicator */}
-          <div className="p-6">
+          <div className="p-6 flex-1 flex flex-col">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start space-x-4 flex-1">
                 <div
@@ -124,11 +124,11 @@ export default function RequirementCard({
                       {card.priority}
                     </span>
                   </div>
-                  <h3 className="font-semibold text-gray-900 text-base leading-snug line-clamp-2 mb-3">
+                  <h3 className="font-semibold text-gray-900 text-base leading-snug line-clamp-2 mb-3 break-words overflow-hidden">
                     {card.title}
                   </h3>
                   {card.category && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700">
+                    <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 max-w-full truncate">
                       {card.category}
                     </span>
                   )}
@@ -175,19 +175,19 @@ export default function RequirementCard({
             </div>
 
             {/* Description */}
-            <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-4">
+            <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-4 break-words overflow-hidden">
               {card.description}
             </p>
 
             {/* Modern Card Footer */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
               <div className="flex items-center space-x-3">
                 {card.assignedTo ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
                       <UserIcon className="w-3.5 h-3.5 text-blue-600" />
                     </div>
-                    <span className="text-sm text-gray-700 font-medium">
+                    <span className="text-sm text-gray-700 font-medium truncate max-w-24">
                       {card.assignedTo.name}
                     </span>
                   </div>
@@ -212,7 +212,9 @@ export default function RequirementCard({
                 {card.status === 'APPROVED' && card.approvedBy && (
                   <div className="flex items-center space-x-1.5 text-green-600 bg-green-50 px-2 py-1 rounded-md">
                     <CheckIcon className="w-4 h-4" />
-                    <span className="text-sm font-medium">{card.approvedBy.name}</span>
+                    <span className="text-sm font-medium truncate max-w-20">
+                      {card.approvedBy.name}
+                    </span>
                   </div>
                 )}
               </div>
