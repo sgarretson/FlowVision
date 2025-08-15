@@ -311,10 +311,24 @@ export default function IssuesPage() {
           });
         }
       } else {
-        console.error('Failed to get AI suggestions');
+        console.error('Failed to get AI suggestions:', response.status, response.statusText);
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Error details:', errorData);
+        // Set a fallback to show the user something is wrong
+        setAiSuggestions({
+          suggestions: null,
+          aiConfidence: 0,
+          error: errorData.error || `API error: ${response.status}`,
+        });
       }
     } catch (error) {
       console.error('AI suggestions error:', error);
+      // Set a fallback to show the user there was an error
+      setAiSuggestions({
+        suggestions: null,
+        aiConfidence: 0,
+        error: 'Network error or AI service unavailable',
+      });
     } finally {
       setSuggestionsLoading(false);
     }
@@ -765,6 +779,21 @@ Example: 'Our project approval process takes 3-4 weeks due to unclear requiremen
                             Regenerate
                           </button>
                         </div>
+                      </div>
+                    ) : aiSuggestions?.error ? (
+                      <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                        <div className="flex items-center gap-2 text-red-800 text-sm font-medium mb-2">
+                          <span>❌</span>
+                          AI Categorization Failed
+                        </div>
+                        <div className="text-red-700 text-xs mb-2">{aiSuggestions.error}</div>
+                        <button
+                          type="button"
+                          onClick={() => generateAISuggestions(newIssue)}
+                          className="text-xs text-red-600 hover:text-red-800 underline"
+                        >
+                          Try Again
+                        </button>
                       </div>
                     ) : (
                       <div className="text-purple-700 text-sm">

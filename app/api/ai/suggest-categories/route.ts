@@ -152,9 +152,19 @@ export async function POST(req: NextRequest) {
 
     // Load taxonomy from database
     const taxonomy = await loadTaxonomyFromDatabase();
+    console.log('🔍 Taxonomy loaded:', {
+      businessAreas: taxonomy.businessAreas.length,
+      departments: taxonomy.departments.length,
+      impactTypes: taxonomy.impactTypes.length,
+    });
 
     // Generate AI category suggestions
+    console.log(
+      '🤖 Generating AI suggestions for description:',
+      description.substring(0, 100) + '...'
+    );
     const suggestions = await generateCategorySuggestions(description, businessContext, taxonomy);
+    console.log('✅ AI suggestions result:', suggestions ? 'Generated' : 'Failed');
 
     // Check for duplicate issues
     const duplicateCheck = await checkForDuplicates(description);
@@ -200,6 +210,12 @@ async function generateCategorySuggestions(
   }
 
   try {
+    console.log('📝 Creating AI prompt with taxonomy:', {
+      businessAreas: taxonomy.businessAreas.slice(0, 3),
+      departments: taxonomy.departments.slice(0, 3),
+      impactTypes: taxonomy.impactTypes.slice(0, 3),
+    });
+
     const prompt = `
 Analyze this business issue and suggest appropriate categorization for a ${businessContext?.industry || 'business'} company:
 
@@ -232,9 +248,12 @@ Respond in this exact JSON format:
 Use confidence scores 0-100 based on how clearly the issue fits each category.
 `;
 
+    console.log('🚀 Calling AI service...');
     const response = await AIMigration.generateStructuredResponse(prompt);
+    console.log('📡 AI response received:', response ? 'Success' : 'Failed');
 
     if (!response) {
+      console.error('❌ AI service returned null response');
       return null;
     }
 

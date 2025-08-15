@@ -827,20 +827,30 @@ RESPONSE FORMAT (JSON):
     // Ensure configuration is loaded from database
     const initialized = await this.ensureInitialized();
     if (!initialized || !this.config?.enabled) {
+      console.log('⚠️ OpenAI service not initialized or disabled');
       return null;
     }
 
+    console.log('🤖 Making OpenAI API call with model:', this.config.model);
+
     try {
+      // Use higher token limit for categorization (needs space for multiple categories + reasoning)
+      const maxTokens = Math.max(this.config.maxTokens || 500, 800);
+
       const response = await this.client!.chat.completions.create({
         model: this.config.model || 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: this.config.maxTokens || 600,
+        max_tokens: maxTokens,
         temperature: 0.3, // Lower temperature for more consistent JSON output
       });
 
-      return response.choices[0]?.message?.content || null;
+      const content = response.choices[0]?.message?.content;
+      console.log('✅ OpenAI response received:', content ? 'Success' : 'Empty');
+      console.log('📊 Token usage:', response.usage);
+
+      return content || null;
     } catch (error) {
-      console.error('OpenAI structured response error:', error);
+      console.error('❌ OpenAI structured response error:', error);
       return null;
     }
   }
