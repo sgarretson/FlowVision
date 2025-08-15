@@ -158,6 +158,122 @@ const DEFAULT_SYSTEM_CONFIGURATIONS = [
     scope: 'global',
     tags: ['ux', 'validation', 'forms'],
   },
+
+  // AI ADVANCED CONFIGURATION
+  {
+    category: 'ai',
+    key: 'model_specific_configs',
+    value: {
+      'gpt-3.5-turbo': {
+        maxTokens: 4096,
+        costPer1kInput: 0.0015,
+        costPer1kOutput: 0.002,
+        contextWindow: 4096,
+        preferredFor: ['summaries', 'categorization', 'quick_analysis'],
+      },
+      'gpt-4': {
+        maxTokens: 8192,
+        costPer1kInput: 0.03,
+        costPer1kOutput: 0.06,
+        contextWindow: 8192,
+        preferredFor: ['complex_analysis', 'strategic_insights', 'requirements'],
+      },
+      'gpt-4-turbo': {
+        maxTokens: 4096,
+        costPer1kInput: 0.01,
+        costPer1kOutput: 0.03,
+        contextWindow: 128000,
+        preferredFor: ['detailed_analysis', 'clustering', 'comprehensive_summaries'],
+      },
+    },
+    dataType: 'json',
+    description: 'Model-specific configuration including costs, limits, and use cases',
+    environment: 'all',
+    scope: 'global',
+    tags: ['ai', 'models', 'costs', 'optimization'],
+  },
+  {
+    category: 'ai',
+    key: 'operation_defaults',
+    value: {
+      issue_analysis: {
+        model: 'gpt-3.5-turbo',
+        maxTokens: 500,
+        temperature: 0.7,
+      },
+      cluster_analysis: {
+        model: 'gpt-4-turbo',
+        maxTokens: 700,
+        temperature: 0.7,
+      },
+      categorization: {
+        model: 'gpt-3.5-turbo',
+        maxTokens: 800,
+        temperature: 0.3,
+      },
+      initiative_generation: {
+        model: 'gpt-4',
+        maxTokens: 1500,
+        temperature: 0.3,
+      },
+      requirement_cards: {
+        model: 'gpt-4',
+        maxTokens: 500,
+        temperature: 0.3,
+      },
+    },
+    dataType: 'json',
+    description: 'Default AI configuration for different operation types',
+    environment: 'all',
+    scope: 'global',
+    tags: ['ai', 'operations', 'defaults'],
+  },
+  {
+    category: 'ai',
+    key: 'service_health_monitoring',
+    value: {
+      healthCheckInterval: 300000, // 5 minutes
+      maxRetries: 3,
+      retryBackoffMultiplier: 2,
+      connectionTimeoutMs: 30000,
+      circuitBreakerThreshold: 5,
+      circuitBreakerResetTimeout: 60000,
+      enableMetricsCollection: true,
+      enableCostTracking: true,
+    },
+    dataType: 'json',
+    description: 'AI service health monitoring and reliability configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['ai', 'monitoring', 'reliability', 'health'],
+  },
+  {
+    category: 'ai',
+    key: 'ab_testing_configs',
+    value: {
+      enableABTesting: false,
+      testGroups: {
+        control: {
+          percentage: 50,
+          model: 'gpt-3.5-turbo',
+          temperature: 0.7,
+        },
+        experimental: {
+          percentage: 50,
+          model: 'gpt-4-turbo',
+          temperature: 0.5,
+        },
+      },
+      testDurationDays: 7,
+      minimumSampleSize: 100,
+      statisticalSignificanceThreshold: 0.95,
+    },
+    dataType: 'json',
+    description: 'A/B testing configuration for AI parameter optimization',
+    environment: 'all',
+    scope: 'global',
+    tags: ['ai', 'ab-testing', 'optimization', 'experimentation'],
+  },
 ];
 
 async function seedSystemConfiguration(adminUserId) {

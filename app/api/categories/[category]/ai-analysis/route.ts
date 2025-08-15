@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { openAIService } from '@/lib/openai';
 import { aiServiceMonitor } from '@/lib/ai-service-monitor';
 import { aiConfigLoader } from '@/lib/ai-config-loader';
+import { systemConfig } from '@/lib/system-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -130,12 +131,15 @@ Focus on strategic business value, executive decision-making, and actionable ins
     const startTime = Date.now();
 
     try {
-      // Generate AI analysis
+      // Get AI configuration for categorization operation
+      const aiConfig = await systemConfig.getAIOperationConfig('categorization');
+
+      // Generate AI analysis using configurable parameters
       const response = await openAIService.client!.chat.completions.create({
-        model: 'gpt-4',
+        model: aiConfig.model,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 1500,
-        temperature: 0.3, // Lower temperature for more consistent analytical output
+        max_tokens: aiConfig.maxTokens,
+        temperature: aiConfig.temperature,
       });
 
       const content = response.choices[0]?.message?.content;

@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import { executeAIOperation, getUserFriendlyAIError, AIServiceError } from './ai-error-handler';
 import { AIJSONParser } from './ai-json-parser';
 import { aiConfigLoader } from './ai-config-loader';
+import { systemConfig, type OperationConfig } from './system-config';
 
 export interface OpenAIConfig {
   apiKey: string;
@@ -54,6 +55,25 @@ class OpenAIService {
       // Fall back to environment variables
       this.initializeFromEnv();
       return this.config !== null;
+    }
+  }
+
+  /**
+   * Get operation-specific AI configuration with fallbacks
+   */
+  private async getOperationConfig(
+    operationType: keyof import('./system-config').OperationDefaults
+  ): Promise<OperationConfig> {
+    try {
+      return await systemConfig.getAIOperationConfig(operationType);
+    } catch (error) {
+      console.warn(`⚠️ Failed to load ${operationType} config, using fallbacks:`, error);
+      // Fallback to basic configuration
+      return {
+        model: this.config?.model || 'gpt-3.5-turbo',
+        maxTokens: this.config?.maxTokens || 500,
+        temperature: this.config?.temperature || 0.7,
+      };
     }
   }
 
@@ -116,6 +136,9 @@ class OpenAIService {
     }
 
     try {
+      // Get operation-specific configuration
+      const operationConfig = await this.getOperationConfig('issue_analysis');
+
       const prompt = `
 Analyze this operational issue for a ${businessContext?.industry || 'business'} company with ${businessContext?.size || 'unknown'} employees:
 
@@ -132,17 +155,17 @@ Keep response concise and actionable.
 `;
 
       const response = await this.client!.chat.completions.create({
-        model: this.config.model || 'gpt-3.5-turbo',
+        model: operationConfig.model,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: this.config.maxTokens || 500,
-        temperature: this.config.temperature || 0.7,
+        max_tokens: operationConfig.maxTokens,
+        temperature: operationConfig.temperature,
       });
 
       const insights = response.choices[0]?.message?.content;
       if (insights) {
         return {
           insights,
-          model: response.model || this.config.model || 'gpt-3.5-turbo',
+          model: response.model || operationConfig.model,
         };
       }
       return null;
@@ -167,6 +190,9 @@ Keep response concise and actionable.
     }
 
     try {
+      // Get operation-specific configuration for initiative generation
+      const operationConfig = await this.getOperationConfig('initiative_generation');
+
       const prompt = `
 For a ${businessContext?.industry || 'business'} company with ${businessContext?.size || 'unknown'} employees:
 
@@ -183,10 +209,10 @@ Format as JSON with keys: recommendations, estimatedDifficulty, estimatedROI, su
 `;
 
       const response = await this.client!.chat.completions.create({
-        model: this.config.model || 'gpt-3.5-turbo',
+        model: operationConfig.model,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: this.config.maxTokens || 500,
-        temperature: this.config.temperature || 0.7,
+        max_tokens: operationConfig.maxTokens,
+        temperature: operationConfig.temperature,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -199,7 +225,7 @@ Format as JSON with keys: recommendations, estimatedDifficulty, estimatedROI, su
         ];
         const parseResult = AIJSONParser.parseByModel(
           content,
-          this.config?.model || 'gpt-3.5-turbo',
+          operationConfig.model,
           expectedFields
         );
 
@@ -228,6 +254,9 @@ Format as JSON with keys: recommendations, estimatedDifficulty, estimatedROI, su
     }
 
     try {
+      // Get operation-specific configuration for requirement cards
+      const operationConfig = await this.getOperationConfig('requirement_cards');
+
       const prompt = `
 Convert this business description into a structured requirement:
 
@@ -243,10 +272,10 @@ Extract and format as JSON:
 `;
 
       const response = await this.client!.chat.completions.create({
-        model: this.config.model || 'gpt-3.5-turbo',
+        model: operationConfig.model,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: this.config.maxTokens || 400,
-        temperature: 0.3, // Lower temperature for more structured output
+        max_tokens: operationConfig.maxTokens,
+        temperature: operationConfig.temperature,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -254,7 +283,7 @@ Extract and format as JSON:
         const expectedFields = ['title', 'problem', 'goal', 'acceptanceCriteria'];
         const parseResult = AIJSONParser.parseByModel(
           content,
-          this.config?.model || 'gpt-3.5-turbo',
+          operationConfig.model,
           expectedFields
         );
 
@@ -288,6 +317,9 @@ Extract and format as JSON:
     }
 
     try {
+      // Get operation-specific configuration for issue analysis
+      const operationConfig = await this.getOperationConfig('issue_analysis');
+
       const contextInfo = businessContext
         ? `\nBusiness Context: ${businessContext.industry || 'Architecture & Engineering'} firm with ${businessContext.size || 'unknown'} employees.`
         : '\nBusiness Context: Architecture & Engineering firm.';
@@ -314,10 +346,10 @@ Focus on practical A&E operational challenges like coordination, technical compl
 
       const response = await executeAIOperation(async () => {
         return await this.client!.chat.completions.create({
-          model: this.config?.model || 'gpt-3.5-turbo',
+          model: operationConfig.model,
           messages: [{ role: 'user', content: prompt }],
-          max_tokens: this.config?.maxTokens || 600,
-          temperature: this.config?.temperature || 0.7,
+          max_tokens: operationConfig.maxTokens,
+          temperature: operationConfig.temperature,
         });
       }, 'Generate Issue Summary');
 
@@ -326,7 +358,7 @@ Focus on practical A&E operational challenges like coordination, technical compl
         const expectedFields = ['summary', 'rootCauses', 'impact', 'recommendations', 'confidence'];
         const parseResult = AIJSONParser.parseByModel(
           content,
-          this.config?.model || 'gpt-3.5-turbo',
+          operationConfig.model,
           expectedFields
         );
 
@@ -419,11 +451,14 @@ Provide a strategic cluster analysis in JSON format:
 Focus on systemic problems, cross-departmental impacts, client effects, and strategic solutions for A&E operations.
 `;
 
+      // Get operation-specific configuration for cluster analysis
+      const operationConfig = await this.getOperationConfig('cluster_analysis');
+
       const response = await this.client!.chat.completions.create({
-        model: this.config.model || 'gpt-3.5-turbo',
+        model: operationConfig.model,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: this.config.maxTokens || 700,
-        temperature: this.config.temperature || 0.7,
+        max_tokens: operationConfig.maxTokens,
+        temperature: operationConfig.temperature,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -437,7 +472,7 @@ Focus on systemic problems, cross-departmental impacts, client effects, and stra
         ];
         const parseResult = AIJSONParser.parseByModel(
           content,
-          this.config?.model || 'gpt-3.5-turbo',
+          operationConfig.model,
           expectedFields
         );
 
@@ -831,17 +866,17 @@ RESPONSE FORMAT (JSON):
       return null;
     }
 
-    console.log('🤖 Making OpenAI API call with model:', this.config.model);
-
     try {
-      // Use higher token limit for categorization (needs space for multiple categories + reasoning)
-      const maxTokens = Math.max(this.config.maxTokens || 500, 800);
+      // Get operation-specific configuration for categorization
+      const operationConfig = await this.getOperationConfig('categorization');
+
+      console.log('🤖 Making OpenAI API call with model:', operationConfig.model);
 
       const response = await this.client!.chat.completions.create({
-        model: this.config.model || 'gpt-3.5-turbo',
+        model: operationConfig.model,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: maxTokens,
-        temperature: 0.3, // Lower temperature for more consistent JSON output
+        max_tokens: operationConfig.maxTokens,
+        temperature: operationConfig.temperature,
       });
 
       const content = response.choices[0]?.message?.content;
