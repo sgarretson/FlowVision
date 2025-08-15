@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import SmartFormValidation from '@/components/SmartFormValidation';
+import { ValidationResult } from '@/lib/smart-form-validation';
 import AIAnalysis from './ai-analysis';
 import ClusteringView from './clustering-view';
 import AIClusters from './ai-clusters';
@@ -52,6 +54,10 @@ export default function IssuesPage() {
     department: '',
     impactType: '',
   });
+
+  // Smart Form Validation State
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [showValidation, setShowValidation] = useState(false);
 
   useEffect(() => {
     if (!session) {
@@ -298,6 +304,16 @@ export default function IssuesPage() {
       setSuggestionsLoading(false);
     }
   }
+
+  // Handle validation result updates
+  const handleValidationChange = (result: ValidationResult) => {
+    setValidationResult(result);
+  };
+
+  // Show validation when user starts typing meaningful content
+  useEffect(() => {
+    setShowValidation(newIssue.trim().length >= 10);
+  }, [newIssue]);
 
   // Debounced AI suggestions
   useEffect(() => {
@@ -573,6 +589,17 @@ Example: 'Our project approval process takes 3-4 weeks due to unclear requiremen
                   </div>
                 </div>
 
+                {/* Smart Form Validation */}
+                {showValidation && (
+                  <SmartFormValidation
+                    description={newIssue}
+                    selectedCategories={selectedCategories}
+                    onValidationChange={handleValidationChange}
+                    showSuggestions={true}
+                    className="mb-4"
+                  />
+                )}
+
                 {/* AI Category Suggestions */}
                 {newIssue.trim().length >= 20 && (
                   <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6">
@@ -733,27 +760,63 @@ Example: 'Our project approval process takes 3-4 weeks due to unclear requiremen
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <button
-                    type="submit"
-                    className={`btn-primary px-8 py-3 text-base font-semibold transition-all duration-200 ${
-                      submitting || !newIssue.trim() || newIssue.length > 500
-                        ? 'opacity-50 cursor-not-allowed'
-                        : 'hover:scale-105 shadow-lg hover:shadow-xl'
-                    }`}
-                    disabled={submitting || !newIssue.trim() || newIssue.length > 500}
-                  >
-                    {submitting ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 loading-spinner"></div>
-                        Submitting Issue...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <span>📝</span>
-                        Submit Issue
+                  <div className="flex flex-col items-center gap-2">
+                    <button
+                      type="submit"
+                      className={`btn-primary px-8 py-3 text-base font-semibold transition-all duration-200 ${
+                        submitting || !newIssue.trim() || newIssue.length > 500
+                          ? 'opacity-50 cursor-not-allowed'
+                          : validationResult?.score && validationResult.score >= 80
+                            ? 'bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl hover:scale-105'
+                            : validationResult?.score && validationResult.score >= 60
+                              ? 'bg-yellow-600 hover:bg-yellow-700 shadow-lg hover:shadow-xl hover:scale-105'
+                              : 'hover:scale-105 shadow-lg hover:shadow-xl'
+                      }`}
+                      disabled={submitting || !newIssue.trim() || newIssue.length > 500}
+                    >
+                      {submitting ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 loading-spinner"></div>
+                          Submitting Issue...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          {validationResult?.score && validationResult.score >= 80 ? (
+                            <span>✅</span>
+                          ) : validationResult?.score && validationResult.score >= 60 ? (
+                            <span>⚠️</span>
+                          ) : (
+                            <span>📝</span>
+                          )}
+                          Submit Issue
+                          {validationResult?.score && (
+                            <span className="text-xs opacity-75">
+                              ({validationResult.score}/100)
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Validation Status Indicator */}
+                    {validationResult && !submitting && (
+                      <div className="text-xs text-center">
+                        {validationResult.score >= 80 ? (
+                          <span className="text-green-600 font-medium">
+                            🎉 Excellent quality - ready to submit!
+                          </span>
+                        ) : validationResult.score >= 60 ? (
+                          <span className="text-yellow-600 font-medium">
+                            👍 Good quality - consider improvements above
+                          </span>
+                        ) : (
+                          <span className="text-red-600 font-medium">
+                            🔧 Needs improvement - check suggestions above
+                          </span>
+                        )}
                       </div>
                     )}
-                  </button>
+                  </div>
 
                   {newIssue.trim().length > 0 && !submitting && (
                     <button
