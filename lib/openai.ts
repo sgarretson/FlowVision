@@ -190,6 +190,9 @@ Keep response concise and actionable.
     }
 
     try {
+      // Get operation-specific configuration for initiative generation
+      const operationConfig = await this.getOperationConfig('initiative_generation');
+
       const prompt = `
 For a ${businessContext?.industry || 'business'} company with ${businessContext?.size || 'unknown'} employees:
 
@@ -206,10 +209,10 @@ Format as JSON with keys: recommendations, estimatedDifficulty, estimatedROI, su
 `;
 
       const response = await this.client!.chat.completions.create({
-        model: this.config.model || 'gpt-3.5-turbo',
+        model: operationConfig.model,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: this.config.maxTokens || 500,
-        temperature: this.config.temperature || 0.7,
+        max_tokens: operationConfig.maxTokens,
+        temperature: operationConfig.temperature,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -222,7 +225,7 @@ Format as JSON with keys: recommendations, estimatedDifficulty, estimatedROI, su
         ];
         const parseResult = AIJSONParser.parseByModel(
           content,
-          this.config?.model || 'gpt-3.5-turbo',
+          operationConfig.model,
           expectedFields
         );
 
@@ -251,6 +254,9 @@ Format as JSON with keys: recommendations, estimatedDifficulty, estimatedROI, su
     }
 
     try {
+      // Get operation-specific configuration for requirement cards
+      const operationConfig = await this.getOperationConfig('requirement_cards');
+
       const prompt = `
 Convert this business description into a structured requirement:
 
@@ -266,10 +272,10 @@ Extract and format as JSON:
 `;
 
       const response = await this.client!.chat.completions.create({
-        model: this.config.model || 'gpt-3.5-turbo',
+        model: operationConfig.model,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: this.config.maxTokens || 400,
-        temperature: 0.3, // Lower temperature for more structured output
+        max_tokens: operationConfig.maxTokens,
+        temperature: operationConfig.temperature,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -277,7 +283,7 @@ Extract and format as JSON:
         const expectedFields = ['title', 'problem', 'goal', 'acceptanceCriteria'];
         const parseResult = AIJSONParser.parseByModel(
           content,
-          this.config?.model || 'gpt-3.5-turbo',
+          operationConfig.model,
           expectedFields
         );
 
@@ -311,6 +317,9 @@ Extract and format as JSON:
     }
 
     try {
+      // Get operation-specific configuration for issue analysis
+      const operationConfig = await this.getOperationConfig('issue_analysis');
+
       const contextInfo = businessContext
         ? `\nBusiness Context: ${businessContext.industry || 'Architecture & Engineering'} firm with ${businessContext.size || 'unknown'} employees.`
         : '\nBusiness Context: Architecture & Engineering firm.';
@@ -337,10 +346,10 @@ Focus on practical A&E operational challenges like coordination, technical compl
 
       const response = await executeAIOperation(async () => {
         return await this.client!.chat.completions.create({
-          model: this.config?.model || 'gpt-3.5-turbo',
+          model: operationConfig.model,
           messages: [{ role: 'user', content: prompt }],
-          max_tokens: this.config?.maxTokens || 600,
-          temperature: this.config?.temperature || 0.7,
+          max_tokens: operationConfig.maxTokens,
+          temperature: operationConfig.temperature,
         });
       }, 'Generate Issue Summary');
 
@@ -349,7 +358,7 @@ Focus on practical A&E operational challenges like coordination, technical compl
         const expectedFields = ['summary', 'rootCauses', 'impact', 'recommendations', 'confidence'];
         const parseResult = AIJSONParser.parseByModel(
           content,
-          this.config?.model || 'gpt-3.5-turbo',
+          operationConfig.model,
           expectedFields
         );
 
@@ -442,11 +451,14 @@ Provide a strategic cluster analysis in JSON format:
 Focus on systemic problems, cross-departmental impacts, client effects, and strategic solutions for A&E operations.
 `;
 
+      // Get operation-specific configuration for cluster analysis
+      const operationConfig = await this.getOperationConfig('cluster_analysis');
+
       const response = await this.client!.chat.completions.create({
-        model: this.config.model || 'gpt-3.5-turbo',
+        model: operationConfig.model,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: this.config.maxTokens || 700,
-        temperature: this.config.temperature || 0.7,
+        max_tokens: operationConfig.maxTokens,
+        temperature: operationConfig.temperature,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -460,7 +472,7 @@ Focus on systemic problems, cross-departmental impacts, client effects, and stra
         ];
         const parseResult = AIJSONParser.parseByModel(
           content,
-          this.config?.model || 'gpt-3.5-turbo',
+          operationConfig.model,
           expectedFields
         );
 
