@@ -12,8 +12,10 @@ import {
   EyeIcon,
   PencilIcon,
   ArrowPathIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { systemConfig } from '@/lib/system-config';
+import PerformanceConfigPanel from '@/components/admin/PerformanceConfigPanel';
 
 interface ConfigurationItem {
   id: string;
@@ -41,6 +43,7 @@ const CATEGORIES = [
     id: 'performance',
     name: 'Performance Settings',
     description: 'Timeout values and performance tuning',
+    enhanced: true, // Flag for enhanced UI
   },
   { id: 'ux', name: 'User Experience', description: 'UI timing and interaction settings' },
 ];
@@ -199,25 +202,23 @@ export default function SystemConfigPage() {
           ))}
         </div>
 
-        {/* Configuration List */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {CATEGORIES.find((c) => c.id === selectedCategory)?.name} Configuration
-              </h2>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setPreviewMode(!previewMode)}
-                  className={`px-3 py-1 rounded-md text-sm ${
-                    previewMode
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <EyeIcon className="w-4 h-4 inline mr-1" />
-                  Preview Mode
-                </button>
+        {/* Configuration Content */}
+        {selectedCategory === 'performance' ? (
+          /* Enhanced Performance Configuration Panel */
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <ChartBarIcon className="w-8 h-8 text-blue-600 mr-3" />
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      Performance Configuration
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      Enhanced visual interface for performance settings
+                    </p>
+                  </div>
+                </div>
                 <button
                   onClick={loadConfigurations}
                   className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200"
@@ -227,33 +228,68 @@ export default function SystemConfigPage() {
                 </button>
               </div>
             </div>
-          </div>
 
-          <div className="p-6">
-            {filteredConfigurations.length === 0 ? (
-              <div className="text-center py-12">
-                <AdjustmentsHorizontalIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No configurations found</h3>
-                <p className="text-gray-500">No configurations available for this category.</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {filteredConfigurations.map((config) => (
-                  <ConfigurationCard
-                    key={config.id}
-                    config={config}
-                    isEditing={editingConfig?.id === config.id}
-                    isPreview={previewMode}
-                    onEdit={setEditingConfig}
-                    onSave={handleSaveConfiguration}
-                    onCancel={() => setEditingConfig(null)}
-                    saveLoading={saveLoading}
-                  />
-                ))}
-              </div>
-            )}
+            <PerformanceConfigPanel onConfigUpdate={loadConfigurations} />
           </div>
-        </div>
+        ) : (
+          /* Standard Configuration List */
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {CATEGORIES.find((c) => c.id === selectedCategory)?.name} Configuration
+                </h2>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setPreviewMode(!previewMode)}
+                    className={`px-3 py-1 rounded-md text-sm ${
+                      previewMode
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <EyeIcon className="w-4 h-4 inline mr-1" />
+                    Preview Mode
+                  </button>
+                  <button
+                    onClick={loadConfigurations}
+                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200"
+                  >
+                    <ArrowPathIcon className="w-4 h-4 inline mr-1" />
+                    Refresh
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {filteredConfigurations.length === 0 ? (
+                <div className="text-center py-12">
+                  <AdjustmentsHorizontalIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No configurations found
+                  </h3>
+                  <p className="text-gray-500">No configurations available for this category.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {filteredConfigurations.map((config) => (
+                    <ConfigurationCard
+                      key={config.id}
+                      config={config}
+                      isEditing={editingConfig?.id === config.id}
+                      isPreview={previewMode}
+                      onEdit={setEditingConfig}
+                      onSave={handleSaveConfiguration}
+                      onCancel={() => setEditingConfig(null)}
+                      saveLoading={saveLoading}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
