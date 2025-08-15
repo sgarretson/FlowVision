@@ -53,6 +53,50 @@
     min-height: 280px;
     max-height: 400px;
   }
+
+  /* Card layout improvements */
+  .card-responsive-header {
+    @apply flex flex-col sm:flex-row sm:items-start justify-between gap-4;
+  }
+
+  .card-responsive-content {
+    @apply flex-1 min-w-0;
+  }
+
+  .card-responsive-actions {
+    @apply flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0;
+  }
+
+  .card-text-safe {
+    @apply break-words overflow-hidden;
+  }
+
+  .card-button-safe {
+    @apply whitespace-nowrap flex-shrink-0;
+  }
+
+  /* Text wrapping and overflow safety */
+  .text-safe {
+    @apply break-words overflow-wrap-anywhere;
+  }
+
+  /* Flex button groups that don't overflow */
+  .button-group-responsive {
+    @apply flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0 items-stretch sm:items-center;
+  }
+
+  /* Card header responsive pattern */
+  .card-header-responsive {
+    @apply flex flex-col sm:flex-row sm:items-start gap-4;
+  }
+
+  .card-header-content {
+    @apply flex-1 min-w-0;
+  }
+
+  .card-header-actions {
+    @apply flex-shrink-0;
+  }
 }
 
 /* Component Styles */

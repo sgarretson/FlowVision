@@ -280,64 +280,69 @@ export default function CategoryAISummary({
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-            <CpuChipIcon className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-blue-900">AI Strategic Analysis</h3>
-            <div className="flex items-center gap-4 text-sm text-blue-700">
-              <span>
-                Category: <span className="font-medium">{categoryName}</span>
-              </span>
-              <span
-                className={`px-2 py-1 rounded-full text-xs font-medium border ${getImpactColor(analysis.impactAnalysis.businessImpact)}`}
-              >
-                {analysis.impactAnalysis.businessImpact} Impact
-              </span>
-              <span className="flex items-center gap-1">
-                <InformationCircleIcon className="w-4 h-4" />
-                {analysis.confidence}% Confidence
-              </span>
+      <div className="space-y-4 mb-6">
+        {/* Title Row */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <CpuChipIcon className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xl font-bold text-blue-900 break-words">AI Strategic Analysis</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-blue-700 mt-1">
+                <span className="break-words">
+                  Category: <span className="font-medium">{categoryName}</span>
+                </span>
+                <span
+                  className={`inline-flex px-2 py-1 rounded-full text-xs font-medium border self-start ${getImpactColor(analysis.impactAnalysis.businessImpact)}`}
+                >
+                  {analysis.impactAnalysis.businessImpact} Impact
+                </span>
+                <span className="flex items-center gap-1 self-start">
+                  <InformationCircleIcon className="w-4 h-4 flex-shrink-0" />
+                  {analysis.confidence}% Confidence
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={generateAnalysis}
-            disabled={loading}
-            className="btn-secondary text-sm hover:scale-105 transition-transform duration-200"
-          >
-            {loading ? 'Refreshing...' : 'Refresh Analysis'}
-          </button>
-          <button
-            onClick={createInitiativeFromAnalysis}
-            disabled={loading}
-            className="btn-primary flex items-center gap-2 text-sm hover:scale-105 transition-transform duration-200"
-          >
-            <LightBulbIcon className="w-4 h-4" />
-            Create Initiative
-          </button>
+
+          {/* Action Buttons - Responsive */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0">
+            <button
+              onClick={generateAnalysis}
+              disabled={loading}
+              className="btn-secondary text-sm hover:scale-105 transition-transform duration-200 whitespace-nowrap"
+            >
+              {loading ? 'Refreshing...' : 'Refresh Analysis'}
+            </button>
+            <button
+              onClick={createInitiativeFromAnalysis}
+              disabled={loading}
+              className="btn-primary flex items-center justify-center gap-2 text-sm hover:scale-105 transition-transform duration-200 whitespace-nowrap"
+            >
+              <LightBulbIcon className="w-4 h-4 flex-shrink-0" />
+              Create Initiative
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex gap-1 mb-6 bg-white/50 p-1 rounded-lg">
+      <div className="flex flex-wrap gap-1 mb-6 bg-white/50 p-1 rounded-lg">
         {sections.map((section) => {
           const Icon = section.icon;
           return (
             <button
               key={section.id}
               onClick={() => setActiveSection(section.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex-shrink-0 ${
                 activeSection === section.id
                   ? 'bg-white text-blue-700 shadow-sm'
                   : 'text-blue-600 hover:bg-white/30'
               }`}
             >
-              <Icon className="w-4 h-4" />
-              {section.label}
+              <Icon className="w-4 h-4 flex-shrink-0" />
+              <span className="whitespace-nowrap">{section.label}</span>
             </button>
           );
         })}
