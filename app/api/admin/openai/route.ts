@@ -106,8 +106,8 @@ export async function POST(req: NextRequest) {
     const fallbackModel = await systemConfig.getAIFallbackModel();
     const operationDefaults = await systemConfig.getOperationDefaults();
 
-    // Configure and save OpenAI service to database
-    const configSuccess = await AIMigration.configure(
+    // Save API key to legacy table for backward compatibility
+    const legacyConfigSuccess = await AIMigration.configure(
       {
         apiKey: effectiveApiKey,
         model: model || fallbackModel,
@@ -118,7 +118,30 @@ export async function POST(req: NextRequest) {
       user.id
     );
 
-    if (!configSuccess) {
+    // Also update the SystemConfiguration for issue_analysis operation defaults
+    // This ensures the new system uses the admin-configured model
+    if (model && model !== operationDefaults.issue_analysis.model) {
+      const updatedOperationDefaults = {
+        ...operationDefaults,
+        issue_analysis: {
+          ...operationDefaults.issue_analysis,
+          model: model,
+          maxTokens: maxTokens || operationDefaults.issue_analysis.maxTokens,
+          temperature: temperature || operationDefaults.issue_analysis.temperature,
+        },
+      };
+
+      // Update SystemConfiguration
+      await systemConfig.setConfig(
+        'ai',
+        'operation_defaults',
+        updatedOperationDefaults,
+        'Admin panel model configuration update',
+        user.id
+      );
+    }
+
+    if (!legacyConfigSuccess) {
       return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 });
     }
 
