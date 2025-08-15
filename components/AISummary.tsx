@@ -152,9 +152,9 @@ export default function AISummary({
   };
 
   const getConfidenceColor = (conf: number) => {
-    if (conf >= 80) return 'text-green-600 bg-green-50';
-    if (conf >= 60) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
+    if (conf >= 80) return 'status-high text-green-700 bg-green-100';
+    if (conf >= 60) return 'status-medium text-yellow-700 bg-yellow-100';
+    return 'status-low text-red-700 bg-red-100';
   };
 
   const getConfidenceText = (conf: number) => {
@@ -166,25 +166,22 @@ export default function AISummary({
   // If no summary exists, show generate button
   if (!summary && !isGenerating) {
     return (
-      <div className={`bg-blue-50 border border-blue-200 rounded-lg p-4 ${className}`}>
-        <div className="flex items-center justify-between">
+      <div className={`card-tertiary p-6 border-2 border-dashed border-gray-300 ${className}`}>
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
-            <SparklesIcon className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-900 font-medium">AI Analysis Available</span>
+            <SparklesIcon className="w-5 h-5 text-primary" />
+            <span className="text-h3 text-gray-900">AI Analysis Available</span>
           </div>
-          <button
-            onClick={generateSummary}
-            className="flex items-center space-x-2 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
+          <button onClick={generateSummary} className="btn-primary flex items-center space-x-2">
             <SparklesIcon className="w-4 h-4" />
             <span>Generate Summary</span>
           </button>
         </div>
-        <p className="text-blue-700 text-sm mt-2">
+        <p className="text-caption mb-3">
           Get AI-powered insights, root cause analysis, and recommendations for this {itemType}.
         </p>
         {error && (
-          <div className="mt-2 flex items-center space-x-2 text-red-600">
+          <div className="mt-3 flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
             <ExclamationTriangleIcon className="w-4 h-4" />
             <span className="text-sm">{error}</span>
           </div>
@@ -196,49 +193,58 @@ export default function AISummary({
   // Show loading state
   if (isGenerating) {
     return (
-      <div className={`bg-blue-50 border border-blue-200 rounded-lg p-4 ${className}`}>
-        <div className="flex items-center space-x-2">
+      <div className={`card-secondary p-6 ${className}`}>
+        <div className="flex items-center space-x-3 mb-3">
           <div className="animate-spin">
-            <SparklesIcon className="w-5 h-5 text-blue-600" />
+            <SparklesIcon className="w-5 h-5 text-primary" />
           </div>
-          <span className="text-blue-900 font-medium">Generating AI Analysis...</span>
+          <span className="text-h3">Generating AI Analysis...</span>
         </div>
-        <p className="text-blue-700 text-sm mt-2">
+        <p className="text-caption">
           Analyzing {itemType} with AI to provide insights and recommendations.
         </p>
+        <div className="mt-4 bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div className="bg-primary h-full rounded-full animate-pulse w-3/4"></div>
+        </div>
       </div>
     );
   }
 
   // Show summary with edit capability
   return (
-    <div
-      className={`bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4 ${className}`}
-    >
+    <div className={`card-secondary p-6 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <SparklesIcon className="w-5 h-5 text-purple-600" />
-          <span className="text-purple-900 font-medium">AI Analysis</span>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            <SparklesIcon className="w-5 h-5 text-primary" />
+            <span className="text-h3">AI Analysis</span>
+          </div>
           {confidence && (
             <span
-              className={`px-2 py-1 rounded-full text-xs font-medium ${getConfidenceColor(confidence)}`}
+              className={`status-badge px-3 py-1 text-xs font-medium ${getConfidenceColor(confidence)}`}
             >
               {getConfidenceText(confidence)} ({confidence}%)
             </span>
           )}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
+          {version && (
+            <div className="flex items-center space-x-1 text-caption">
+              <span className="font-medium">Model:</span>
+              <span className="text-primary font-mono text-sm">{version}</span>
+            </div>
+          )}
           {generatedAt && (
-            <div className="flex items-center space-x-1 text-xs text-gray-500">
-              <ClockIcon className="w-3 h-3" />
+            <div className="flex items-center space-x-1 text-caption">
+              <ClockIcon className="w-4 h-4" />
               <span>{new Date(generatedAt).toLocaleDateString()}</span>
             </div>
           )}
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="p-1 text-gray-400 hover:text-gray-600"
+              className="p-2 text-gray-400 hover:text-primary transition-colors rounded-lg hover:bg-gray-50"
               title="Edit summary"
             >
               <PencilIcon className="w-4 h-4" />
@@ -249,53 +255,49 @@ export default function AISummary({
 
       {/* Summary Content */}
       {isEditing ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <textarea
             value={editedSummary}
             onChange={(e) => setEditedSummary(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            rows={3}
+            className="textarea-field w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            rows={4}
             placeholder="Edit the AI summary..."
           />
-          <div className="flex justify-end space-x-2">
-            <button
-              onClick={cancelEdit}
-              className="flex items-center space-x-1 px-3 py-1 text-gray-600 hover:text-gray-800"
-            >
+          <div className="flex justify-end space-x-3">
+            <button onClick={cancelEdit} className="btn-secondary flex items-center space-x-2">
               <XMarkIcon className="w-4 h-4" />
               <span>Cancel</span>
             </button>
-            <button
-              onClick={saveSummary}
-              className="flex items-center space-x-1 px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-            >
+            <button onClick={saveSummary} className="btn-primary flex items-center space-x-2">
               <CheckIcon className="w-4 h-4" />
-              <span>Save</span>
+              <span>Save Changes</span>
             </button>
           </div>
         </div>
       ) : (
-        <div>
-          <p className="text-gray-800 leading-relaxed">{summary}</p>
+        <div className="space-y-4">
+          <p className="text-body leading-relaxed">{summary}</p>
 
           {fullAnalysis && (
-            <div className="mt-3">
+            <div className="border-t pt-4">
               <button
                 onClick={() => setShowFullAnalysis(!showFullAnalysis)}
-                className="flex items-center space-x-1 text-purple-600 hover:text-purple-800 text-sm"
+                className="flex items-center space-x-2 text-primary hover:text-blue-700 text-sm font-medium transition-colors"
               >
                 <InformationCircleIcon className="w-4 h-4" />
                 <span>{showFullAnalysis ? 'Hide' : 'Show'} Detailed Analysis</span>
               </button>
 
               {showFullAnalysis && (
-                <div className="mt-3 space-y-3 bg-white bg-opacity-50 rounded-lg p-3">
+                <div className="mt-4 space-y-4 card-tertiary p-4">
                   {fullAnalysis.rootCauses && fullAnalysis.rootCauses.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-1">Root Causes:</h4>
-                      <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                      <h4 className="text-h3 mb-2 text-gray-900">Root Causes:</h4>
+                      <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 ml-2">
                         {fullAnalysis.rootCauses.map((cause, index) => (
-                          <li key={index}>{cause}</li>
+                          <li key={index} className="leading-relaxed">
+                            {cause}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -303,10 +305,12 @@ export default function AISummary({
 
                   {fullAnalysis.recommendations && fullAnalysis.recommendations.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-1">Recommendations:</h4>
-                      <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                      <h4 className="text-h3 mb-2 text-gray-900">Recommendations:</h4>
+                      <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 ml-2">
                         {fullAnalysis.recommendations.map((rec, index) => (
-                          <li key={index}>{rec}</li>
+                          <li key={index} className="leading-relaxed">
+                            {rec}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -315,10 +319,12 @@ export default function AISummary({
                   {fullAnalysis.crossIssuePatterns &&
                     fullAnalysis.crossIssuePatterns.length > 0 && (
                       <div>
-                        <h4 className="font-semibold text-gray-800 mb-1">Cross-Issue Patterns:</h4>
-                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                        <h4 className="text-h3 mb-2 text-gray-900">Cross-Issue Patterns:</h4>
+                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 ml-2">
                           {fullAnalysis.crossIssuePatterns.map((pattern, index) => (
-                            <li key={index}>{pattern}</li>
+                            <li key={index} className="leading-relaxed">
+                              {pattern}
+                            </li>
                           ))}
                         </ul>
                       </div>
@@ -328,17 +334,15 @@ export default function AISummary({
             </div>
           )}
 
-          <div className="mt-3 flex justify-between items-center">
+          <div className="border-t pt-4 flex justify-between items-center">
             <button
               onClick={generateSummary}
-              className="text-purple-600 hover:text-purple-800 text-sm flex items-center space-x-1"
+              className="btn-secondary text-sm flex items-center space-x-2"
               disabled={isGenerating}
             >
               <SparklesIcon className="w-4 h-4" />
               <span>Regenerate</span>
             </button>
-
-            {version && <span className="text-xs text-gray-500">Model: {version}</span>}
           </div>
         </div>
       )}
