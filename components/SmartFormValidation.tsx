@@ -13,6 +13,7 @@ import {
   ValidationFeedback,
   SmartSuggestion,
 } from '@/lib/smart-form-validation';
+import { systemConfig } from '@/lib/system-config';
 
 interface SmartFormValidationProps {
   description: string;
@@ -35,7 +36,31 @@ export default function SmartFormValidation({
 }: SmartFormValidationProps) {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [validationThresholds, setValidationThresholds] = useState({
+    excellent: 80,
+    good: 60,
+    poor: 40,
+  });
   const [improvementSuggestions, setImprovementSuggestions] = useState<SmartSuggestion[]>([]);
+
+  // Load validation thresholds from configuration
+  useEffect(() => {
+    const loadValidationThresholds = async () => {
+      try {
+        const thresholds = await systemConfig.getValidationThresholds();
+        setValidationThresholds({
+          excellent: thresholds.excellent,
+          good: thresholds.good,
+          poor: thresholds.needsImprovement,
+        });
+      } catch (error) {
+        console.error('Failed to load validation thresholds:', error);
+        // Keep default values if loading fails
+      }
+    };
+
+    loadValidationThresholds();
+  }, []);
 
   // Debounced validation effect
   useEffect(() => {
@@ -80,14 +105,17 @@ export default function SmartFormValidation({
   }
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 bg-green-50 border-green-200';
-    if (score >= 60) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    if (score >= validationThresholds.excellent)
+      return 'text-green-600 bg-green-50 border-green-200';
+    if (score >= validationThresholds.good) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
     return 'text-red-600 bg-red-50 border-red-200';
   };
 
   const getScoreIcon = (score: number) => {
-    if (score >= 80) return <CheckCircleIcon className="w-5 h-5 text-green-600" />;
-    if (score >= 60) return <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600" />;
+    if (score >= validationThresholds.excellent)
+      return <CheckCircleIcon className="w-5 h-5 text-green-600" />;
+    if (score >= validationThresholds.good)
+      return <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600" />;
     return <XCircleIcon className="w-5 h-5 text-red-600" />;
   };
 
@@ -145,9 +173,9 @@ export default function SmartFormValidation({
             <div className="w-full bg-white rounded-full h-2 mb-2">
               <div
                 className={`h-2 rounded-full transition-all duration-500 ${
-                  validationResult.score >= 80
+                  validationResult.score >= validationThresholds.excellent
                     ? 'bg-green-500'
-                    : validationResult.score >= 60
+                    : validationResult.score >= validationThresholds.good
                       ? 'bg-yellow-500'
                       : 'bg-red-500'
                 }`}

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import SmartFormValidation from '@/components/SmartFormValidation';
 import { ValidationResult } from '@/lib/smart-form-validation';
+import { systemConfig } from '@/lib/system-config';
 import AIAnalysis from './ai-analysis';
 import ClusteringView from './clustering-view';
 import AIClusters from './ai-clusters';
@@ -55,6 +56,12 @@ export default function IssuesPage() {
     impactType: '',
   });
 
+  // Configuration-driven scoring
+  const [scoringConfig, setScoringConfig] = useState<{
+    thresholds: { critical: number; high: number; medium: number; low: number };
+    colorMapping: { [key: string]: { color: string; textColor: string } };
+  } | null>(null);
+
   // Smart Form Validation State
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [showValidation, setShowValidation] = useState(false);
@@ -66,6 +73,33 @@ export default function IssuesPage() {
     }
     fetchIssues();
   }, [session, router]);
+
+  // Load scoring configuration on component mount
+  useEffect(() => {
+    const loadScoringConfig = async () => {
+      try {
+        const [thresholds, colorMapping] = await Promise.all([
+          systemConfig.getScoringThresholds(),
+          systemConfig.getColorMapping(),
+        ]);
+        setScoringConfig({ thresholds, colorMapping });
+      } catch (error) {
+        console.error('Failed to load scoring configuration:', error);
+        // Set fallback configuration
+        setScoringConfig({
+          thresholds: { critical: 80, high: 60, medium: 40, low: 0 },
+          colorMapping: {
+            critical: { color: 'bg-red-500', textColor: 'text-white' },
+            high: { color: 'bg-orange-500', textColor: 'text-white' },
+            medium: { color: 'bg-yellow-500', textColor: 'text-black' },
+            low: { color: 'bg-green-500', textColor: 'text-white' },
+          },
+        });
+      }
+    };
+
+    loadScoringConfig();
+  }, []);
 
   // Restore persisted selection
   useEffect(() => {
@@ -271,10 +305,19 @@ export default function IssuesPage() {
   }
 
   function getHeatmapColor(score: number): string {
-    if (score >= 80) return 'bg-red-500';
-    if (score >= 60) return 'bg-orange-500';
-    if (score >= 40) return 'bg-yellow-500';
-    return 'bg-green-500';
+    if (!scoringConfig) {
+      // Fallback to hardcoded colors if configuration not loaded
+      if (score >= 80) return 'bg-red-500';
+      if (score >= 60) return 'bg-orange-500';
+      if (score >= 40) return 'bg-yellow-500';
+      return 'bg-green-500';
+    }
+
+    const { thresholds, colorMapping } = scoringConfig;
+    if (score >= thresholds.critical) return colorMapping.critical.color;
+    if (score >= thresholds.high) return colorMapping.high.color;
+    if (score >= thresholds.medium) return colorMapping.medium.color;
+    return colorMapping.low.color;
   }
 
   // Generate AI category suggestions
@@ -356,9 +399,18 @@ export default function IssuesPage() {
   }, [newIssue]);
 
   function getHeatmapLabel(score: number): string {
-    if (score >= 80) return 'Critical';
-    if (score >= 60) return 'High';
-    if (score >= 40) return 'Medium';
+    if (!scoringConfig) {
+      // Fallback to hardcoded labels if configuration not loaded
+      if (score >= 80) return 'Critical';
+      if (score >= 60) return 'High';
+      if (score >= 40) return 'Medium';
+      return 'Low';
+    }
+
+    const { thresholds } = scoringConfig;
+    if (score >= thresholds.critical) return 'Critical';
+    if (score >= thresholds.high) return 'High';
+    if (score >= thresholds.medium) return 'Medium';
     return 'Low';
   }
 
@@ -507,7 +559,11 @@ export default function IssuesPage() {
               </div>
               <div className="card-primary p-6 text-center">
                 <div className="text-3xl font-bold text-red-600 mb-2">
-                  {issues.filter((i) => i.heatmapScore >= 80).length}
+                  {
+                    issues.filter(
+                      (i) => i.heatmapScore >= (scoringConfig?.thresholds.critical || 80)
+                    ).length
+                  }
                 </div>
                 <div className="text-sm text-gray-600">Critical</div>
               </div>
@@ -810,9 +866,11 @@ Example: 'Our project approval process takes 3-4 weeks due to unclear requiremen
                       className={`btn-primary px-8 py-3 text-base font-semibold transition-all duration-200 ${
                         submitting || !newIssue.trim() || newIssue.length > 500
                           ? 'opacity-50 cursor-not-allowed'
-                          : validationResult?.score && validationResult.score >= 80
+                          : validationResult?.score &&
+                              validationResult.score >= (scoringConfig?.thresholds.critical || 80)
                             ? 'bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl hover:scale-105'
-                            : validationResult?.score && validationResult.score >= 60
+                            : validationResult?.score &&
+                                validationResult.score >= (scoringConfig?.thresholds.high || 60)
                               ? 'bg-yellow-600 hover:bg-yellow-700 shadow-lg hover:shadow-xl hover:scale-105'
                               : 'hover:scale-105 shadow-lg hover:shadow-xl'
                       }`}
@@ -825,9 +883,11 @@ Example: 'Our project approval process takes 3-4 weeks due to unclear requiremen
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          {validationResult?.score && validationResult.score >= 80 ? (
+                          {validationResult?.score &&
+                          validationResult.score >= (scoringConfig?.thresholds.critical || 80) ? (
                             <span>✅</span>
-                          ) : validationResult?.score && validationResult.score >= 60 ? (
+                          ) : validationResult?.score &&
+                            validationResult.score >= (scoringConfig?.thresholds.high || 60) ? (
                             <span>⚠️</span>
                           ) : (
                             <span>📝</span>
@@ -845,11 +905,11 @@ Example: 'Our project approval process takes 3-4 weeks due to unclear requiremen
                     {/* Validation Status Indicator */}
                     {validationResult && !submitting && (
                       <div className="text-xs text-center">
-                        {validationResult.score >= 80 ? (
+                        {validationResult.score >= (scoringConfig?.thresholds.critical || 80) ? (
                           <span className="text-green-600 font-medium">
                             🎉 Excellent quality - ready to submit!
                           </span>
-                        ) : validationResult.score >= 60 ? (
+                        ) : validationResult.score >= (scoringConfig?.thresholds.high || 60) ? (
                           <span className="text-yellow-600 font-medium">
                             👍 Good quality - consider improvements above
                           </span>
@@ -1119,11 +1179,11 @@ Example: 'Our project approval process takes 3-4 weeks due to unclear requiremen
                             {/* Heatmap Score Badge */}
                             <div
                               className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                                issue.heatmapScore >= 80
+                                issue.heatmapScore >= (scoringConfig?.thresholds.critical || 80)
                                   ? 'status-critical'
-                                  : issue.heatmapScore >= 60
+                                  : issue.heatmapScore >= (scoringConfig?.thresholds.high || 60)
                                     ? 'status-high'
-                                    : issue.heatmapScore >= 40
+                                    : issue.heatmapScore >= (scoringConfig?.thresholds.medium || 40)
                                       ? 'status-medium'
                                       : 'status-low'
                               }`}
