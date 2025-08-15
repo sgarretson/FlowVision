@@ -53,9 +53,9 @@ export async function POST(req: NextRequest) {
       : undefined;
 
     // Generate AI insights using optimized migration service
-    const insights = await AIMigration.generateIssueInsights(description, businessContext, user.id);
+    const result = await AIMigration.generateIssueInsights(description, businessContext, user.id);
 
-    if (!insights) {
+    if (!result) {
       return NextResponse.json(
         {
           error: 'Failed to generate AI insights',
@@ -72,13 +72,15 @@ export async function POST(req: NextRequest) {
         action: 'AI_ISSUE_ANALYSIS',
         details: {
           description: description.substring(0, 100) + '...',
-          hasInsights: !!insights,
+          hasInsights: !!result.insights,
+          model: result.model,
         },
       },
     });
 
     return NextResponse.json({
-      insights,
+      insights: result.insights,
+      model: result.model,
       source: 'openai',
     });
   } catch (error) {

@@ -23,10 +23,14 @@ class OpenAIService {
   private config: OpenAIConfig | null = null;
 
   constructor() {
-    this.initializeFromDatabase();
+    // Don't initialize in constructor - do it lazily when needed
   }
 
-  private async initializeFromDatabase() {
+  private async ensureInitialized(): Promise<boolean> {
+    if (this.config && this.client) {
+      return true; // Already initialized
+    }
+
     try {
       // Load configuration from database via aiConfigLoader
       const dbConfig = await aiConfigLoader.loadConfig();
@@ -39,12 +43,17 @@ class OpenAIService {
           enabled: dbConfig.enabled,
         };
         this.client = new OpenAI({ apiKey: dbConfig.apiKey });
-        console.log('✅ OpenAI service initialized with database configuration');
+        console.log(`✅ OpenAI service initialized with model: ${dbConfig.model}`);
+        return true;
       } else {
         console.warn('⚠️ No AI configuration found in database, service will be disabled');
+        return false;
       }
     } catch (error) {
       console.error('❌ Failed to initialize OpenAI service from database:', error);
+      // Fall back to environment variables
+      this.initializeFromEnv();
+      return this.config !== null;
     }
   }
 
@@ -99,8 +108,10 @@ class OpenAIService {
   public async generateIssueInsights(
     description: string,
     businessContext?: any
-  ): Promise<string | null> {
-    if (!this.isConfigured() || !this.config?.enabled) {
+  ): Promise<{ insights: string; model: string } | null> {
+    // Ensure configuration is loaded from database
+    const initialized = await this.ensureInitialized();
+    if (!initialized || !this.config?.enabled) {
       return null;
     }
 
@@ -127,7 +138,14 @@ Keep response concise and actionable.
         temperature: this.config.temperature || 0.7,
       });
 
-      return response.choices[0]?.message?.content || null;
+      const insights = response.choices[0]?.message?.content;
+      if (insights) {
+        return {
+          insights,
+          model: response.model || this.config.model || 'gpt-3.5-turbo',
+        };
+      }
+      return null;
     } catch (error) {
       console.error('OpenAI API error:', error);
       return null;
@@ -806,7 +824,9 @@ RESPONSE FORMAT (JSON):
 
   // Generate structured JSON responses for categorization
   public async generateStructuredResponse(prompt: string): Promise<string | null> {
-    if (!this.isConfigured() || !this.config?.enabled) {
+    // Ensure configuration is loaded from database
+    const initialized = await this.ensureInitialized();
+    if (!initialized || !this.config?.enabled) {
       return null;
     }
 

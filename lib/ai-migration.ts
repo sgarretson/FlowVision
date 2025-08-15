@@ -150,9 +150,13 @@ export class AIMigration {
     description: string,
     businessContext?: any,
     userId?: string
-  ): Promise<string | null> {
+  ): Promise<{ insights: string; model: string } | null> {
     if (this.isOptimizedEnabled(userId)) {
-      return optimizedOpenAIService.generateIssueInsights(description, businessContext);
+      const result = await optimizedOpenAIService.generateIssueInsights(
+        description,
+        businessContext
+      );
+      return result ? { insights: result, model: 'optimized-service' } : null;
     } else {
       return openAIService.generateIssueInsights(description, businessContext);
     }
