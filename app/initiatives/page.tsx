@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
+import SmartInitiativeValidation from '@/components/SmartInitiativeValidation';
 
 export default function InitiativesPage() {
   const searchParams = useSearchParams();
@@ -15,6 +16,8 @@ export default function InitiativesPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiRecommendations, setAiRecommendations] = useState<string | null>(null);
   const [showAiPanel, setShowAiPanel] = useState(false);
+  const [validationResult, setValidationResult] = useState<any>(null);
+  const [showSmartValidation, setShowSmartValidation] = useState(true);
 
   async function load() {
     const res = await fetch('/api/initiatives');
@@ -215,12 +218,55 @@ export default function InitiativesPage() {
               required
             />
           </div>
-          <div className="flex justify-center">
-            <button className="btn-primary" type="submit">
+          <div className="flex flex-col items-center gap-2">
+            <button
+              className={`btn-primary ${
+                validationResult && validationResult.score < 50
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
+              }`}
+              type="submit"
+              disabled={validationResult && validationResult.score < 50}
+            >
               Create Initiative
             </button>
+            {validationResult && validationResult.score < 50 && (
+              <p className="text-sm text-red-600 text-center max-w-md">
+                💡 Your initiative needs improvement (score: {validationResult.score}/100). Please
+                address the feedback above before creating.
+              </p>
+            )}
+            {validationResult && validationResult.score >= 85 && (
+              <p className="text-sm text-green-600 text-center max-w-md">
+                ✅ Excellent strategic initiative! (score: {validationResult.score}/100)
+              </p>
+            )}
           </div>
         </form>
+
+        {/* Smart AI Validation Panel */}
+        {showSmartValidation && (title.trim() || problem.trim()) && (
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-h3 text-gray-800">AI-Powered Strategic Analysis</h3>
+              <button
+                onClick={() => setShowSmartValidation(!showSmartValidation)}
+                className="text-sm text-gray-600 hover:text-gray-800"
+              >
+                {showSmartValidation ? 'Hide Analysis' : 'Show Analysis'}
+              </button>
+            </div>
+            <SmartInitiativeValidation
+              title={title}
+              problem={problem}
+              goal={goal}
+              onValidationChange={setValidationResult}
+              showStrategicAnalysis={true}
+              showCrossImpactAnalysis={true}
+              className="mb-6"
+            />
+          </div>
+        )}
 
         {/* AI Recommendations Panel */}
         {showAiPanel && aiRecommendations && (
