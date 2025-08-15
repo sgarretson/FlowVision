@@ -186,7 +186,7 @@ export default function AIClusters({ onSelectAll }: Props) {
               {peopleClusters.reduce((sum, c) => sum + c.issueIds.length, 0)} issues
             </span>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start auto-rows-max">
             {peopleClusters.map((c) => (
               <CategoryCard
                 key={c.label}
@@ -213,7 +213,7 @@ export default function AIClusters({ onSelectAll }: Props) {
               {processClusters.reduce((sum, c) => sum + c.issueIds.length, 0)} issues
             </span>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start auto-rows-max">
             {processClusters.map((c) => (
               <CategoryCard
                 key={c.label}
@@ -240,7 +240,7 @@ export default function AIClusters({ onSelectAll }: Props) {
               {otherClusters.reduce((sum, c) => sum + c.issueIds.length, 0)} issues
             </span>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start auto-rows-max">
             {otherClusters.map((c) => (
               <CategoryCard
                 key={c.label}
@@ -418,9 +418,12 @@ function CategoryCard({
 
       {/* Analysis Section - Always present for consistent spacing */}
       <div
-        className={`border-t border-opacity-30 transition-all duration-300 overflow-hidden ${
-          isExpanded ? 'max-h-screen opacity-100' : 'max-h-16 opacity-60'
+        className={`border-t border-opacity-30 transition-all duration-500 ease-in-out ${
+          isExpanded ? 'max-h-none opacity-100' : 'max-h-0 opacity-0'
         }`}
+        style={{
+          overflow: isExpanded ? 'visible' : 'hidden',
+        }}
       >
         {isExpanded ? (
           /* Expanded Details */

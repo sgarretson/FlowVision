@@ -336,7 +336,7 @@ export default function CategoryAISummary({
   if (!analysis) return null;
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 animate-fade-in">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 sm:p-6 animate-fade-in h-fit">
       {/* Header */}
       <div className="space-y-4 mb-6">
         {/* Title Row */}
@@ -483,7 +483,7 @@ export default function CategoryAISummary({
               </div>
 
               {showAssociatedIssues && analysis.associatedIssues && (
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400 pr-2">
                   {analysis.associatedIssues.slice(0, 5).map((issue, index) => (
                     <div
                       key={issue.id}
