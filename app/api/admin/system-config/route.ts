@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { PrismaClient } from '@prisma/client';
 import { authOptions } from '../../auth/[...nextauth]/route';
+import { ConfigurationValidator } from '@/lib/config-validator';
 
 const prisma = new PrismaClient();
 
@@ -122,14 +123,42 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Additional validation for specific configurations
-    if (existingConfig.category === 'scoring' && existingConfig.key.includes('thresholds')) {
-      if (!validateScoringThresholds(validatedValue)) {
-        return NextResponse.json(
-          { error: 'Invalid scoring thresholds: values must be in ascending order' },
-          { status: 400 }
-        );
-      }
+    // Enhanced validation using ConfigurationValidator
+    const validationResult = await ConfigurationValidator.validateConfiguration(
+      existingConfig.category,
+      existingConfig.key,
+      validatedValue,
+      existingConfig.value
+    );
+
+    if (!validationResult.valid) {
+      return NextResponse.json(
+        {
+          error: 'Configuration validation failed',
+          details: validationResult.errors,
+          warnings: validationResult.warnings,
+          suggestions: validationResult.suggestions,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Run configuration tests if available
+    const testResult = await ConfigurationValidator.testConfiguration(
+      existingConfig.category,
+      existingConfig.key,
+      validatedValue
+    );
+
+    if (!testResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Configuration tests failed',
+          details: testResult.errors,
+          testResults: testResult.results,
+        },
+        { status: 400 }
+      );
     }
 
     // Update the configuration
@@ -153,7 +182,17 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    // Log the configuration change
+    // Enhanced audit logging with validation results
+    await ConfigurationValidator.auditConfigurationChange(
+      existingConfig.category,
+      existingConfig.key,
+      existingConfig.value,
+      validatedValue,
+      session.user.id,
+      validationResult
+    );
+
+    // Also log the configuration change with test results
     await prisma.auditLog.create({
       data: {
         userId: session.user.id,
@@ -166,6 +205,13 @@ export async function PUT(request: NextRequest) {
           newValue: validatedValue,
           oldVersion: existingConfig.version,
           newVersion: updatedConfig.version,
+          validation: {
+            valid: validationResult.valid,
+            errorsCount: validationResult.errors.length,
+            warningsCount: validationResult.warnings.length,
+            suggestionsCount: validationResult.suggestions.length,
+          },
+          testResults: testResult.results,
           timestamp: new Date().toISOString(),
         },
       },
@@ -175,6 +221,12 @@ export async function PUT(request: NextRequest) {
       success: true,
       configuration: updatedConfig,
       message: 'Configuration updated successfully',
+      validation: {
+        valid: validationResult.valid,
+        warnings: validationResult.warnings,
+        suggestions: validationResult.suggestions,
+      },
+      testResults: testResult.success ? testResult.results : null,
     });
   } catch (error) {
     console.error('Error updating system configuration:', error);
