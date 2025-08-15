@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import SmartInitiativeValidation from '@/components/SmartInitiativeValidation';
+import InitiativeSmartSuggestions from '@/components/InitiativeSmartSuggestions';
 
 export default function InitiativesPage() {
   const searchParams = useSearchParams();
@@ -18,6 +19,21 @@ export default function InitiativesPage() {
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [validationResult, setValidationResult] = useState<any>(null);
   const [showSmartValidation, setShowSmartValidation] = useState(true);
+
+  // Handler for applying smart suggestions
+  const handleApplySuggestion = (type: 'title' | 'problem' | 'goal', value: string) => {
+    switch (type) {
+      case 'title':
+        setTitle(value);
+        break;
+      case 'problem':
+        setProblem(value);
+        break;
+      case 'goal':
+        setGoal(value);
+        break;
+    }
+  };
 
   async function load() {
     const res = await fetch('/api/initiatives');
@@ -264,6 +280,16 @@ export default function InitiativesPage() {
               showStrategicAnalysis={true}
               showCrossImpactAnalysis={true}
               className="mb-6"
+            />
+
+            {/* Smart Enhancement Suggestions */}
+            <InitiativeSmartSuggestions
+              title={title}
+              problem={problem}
+              goal={goal}
+              validationResult={validationResult}
+              onApplySuggestion={handleApplySuggestion}
+              className="mt-4"
             />
           </div>
         )}
