@@ -92,10 +92,7 @@ Guidelines:
 Keep suggestions concise but impactful. Each suggestion should demonstrably improve the initiative's strategic quality and clarity.`;
 
     // Get AI analysis
-    const aiResult = await AIMigration.generateStructuredResponse(improvementPrompt, {
-      maxTokens: 1500,
-      temperature: 0.2,
-    });
+    const aiResult = await AIMigration.generateStructuredResponse(improvementPrompt);
 
     if (!aiResult) {
       return NextResponse.json(
@@ -127,11 +124,7 @@ Keep suggestions concise but impactful. Each suggestion should demonstrably impr
     }
 
     // Record successful operation
-    await aiServiceMonitor.recordOperation(
-      'improvement_suggestions',
-      'success',
-      Date.now() - startTime
-    );
+    await aiServiceMonitor.recordOperation('improvement_suggestions', true, Date.now() - startTime);
 
     return NextResponse.json(suggestionData);
   } catch (error) {
@@ -140,7 +133,7 @@ Keep suggestions concise but impactful. Each suggestion should demonstrably impr
     // Record failed operation
     await aiServiceMonitor.recordOperation(
       'improvement_suggestions',
-      'error',
+      false,
       Date.now() - (Date.now() - 1000)
     );
 

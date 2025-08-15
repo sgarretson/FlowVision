@@ -7,7 +7,7 @@ import {
   LightBulbIcon,
   ChartBarIcon,
   SparklesIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   UsersIcon,
   CurrencyDollarIcon,
   ClockIcon,
@@ -167,7 +167,7 @@ export default function SmartInitiativeValidation({
     if (score >= validationThresholds.excellent)
       return <CheckCircleIcon className="w-5 h-5 text-green-600" />;
     if (score >= validationThresholds.good)
-      return <TrendingUpIcon className="w-5 h-5 text-blue-600" />;
+      return <ArrowTrendingUpIcon className="w-5 h-5 text-blue-600" />;
     return <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />;
   };
 
@@ -380,7 +380,7 @@ export default function SmartInitiativeValidation({
                 validationResult.crossImpactAnalysis.synergisticOpportunities.length > 0) && (
                 <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-5">
                   <h4 className="text-lg font-semibold text-indigo-800 flex items-center gap-2 mb-4">
-                    <TrendingUpIcon className="w-5 h-5" />
+                    <ArrowTrendingUpIcon className="w-5 h-5" />
                     Cross-Initiative Impact Analysis
                   </h4>
 

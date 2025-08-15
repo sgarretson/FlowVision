@@ -208,10 +208,7 @@ Focus on:
 Provide specific, actionable feedback that helps improve the initiative quality.`;
 
     // Get AI analysis
-    const aiResult = await AIMigration.generateStructuredResponse(validationPrompt, {
-      maxTokens: 2000,
-      temperature: 0.3,
-    });
+    const aiResult = await AIMigration.generateStructuredResponse(validationPrompt);
 
     if (!aiResult) {
       return NextResponse.json(
@@ -263,11 +260,7 @@ Provide specific, actionable feedback that helps improve the initiative quality.
     }
 
     // Record successful operation
-    await aiServiceMonitor.recordOperation(
-      'initiative_validation',
-      'success',
-      Date.now() - startTime
-    );
+    await aiServiceMonitor.recordOperation('initiative_validation', true, Date.now() - startTime);
 
     return NextResponse.json(validationResult);
   } catch (error) {
@@ -276,7 +269,7 @@ Provide specific, actionable feedback that helps improve the initiative quality.
     // Record failed operation
     await aiServiceMonitor.recordOperation(
       'initiative_validation',
-      'error',
+      false,
       Date.now() - (Date.now() - 1000)
     );
 
