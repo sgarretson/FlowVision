@@ -112,6 +112,53 @@ export interface ABTestingConfig {
   statisticalSignificanceThreshold: number;
 }
 
+// Performance Configuration Interfaces
+export interface APIResponseThresholds {
+  warning: number; // milliseconds
+  critical: number; // milliseconds
+  timeout: number; // milliseconds
+  healthCheck: number; // milliseconds
+}
+
+export interface DatabaseConfiguration {
+  queryTimeout: number; // milliseconds
+  connectionPoolMin: number; // minimum connections
+  connectionPoolMax: number; // maximum connections
+  slowQueryThreshold: number; // milliseconds
+  retryAttempts: number; // retry attempts
+  retryDelay: number; // milliseconds
+}
+
+export interface CachingStrategy {
+  defaultTTL: number; // seconds
+  systemConfigTTL: number; // seconds
+  aiResponseTTL: number; // seconds
+  userSessionTTL: number; // seconds
+  maxCacheSize: number; // number of items
+  evictionPolicy: 'LRU' | 'LFU' | 'FIFO';
+  enableCompression: boolean;
+  cacheWarming: boolean;
+}
+
+export interface RateLimiting {
+  apiCallsPerMinute: number;
+  apiCallsPerHour: number;
+  aiBurstLimit: number;
+  aiCooldownPeriod: number; // milliseconds
+  adminRateMultiplier: number;
+  enableRateLimiting: boolean;
+  blockDuration: number; // milliseconds
+}
+
+export interface MemoryManagement {
+  heapWarningThreshold: number; // percentage
+  heapCriticalThreshold: number; // percentage
+  garbageCollectionTrigger: number; // percentage
+  maxRequestSize: number; // bytes
+  maxResponseSize: number; // bytes
+  enableMemoryProfiling: boolean;
+}
+
 /**
  * Configuration Service with Caching and Real-time Updates
  *
@@ -608,6 +655,75 @@ class SystemConfigService {
       size: this.cache.size,
       entries,
     };
+  }
+
+  // Performance Configuration Getters
+  async getAPIResponseThresholds(): Promise<APIResponseThresholds> {
+    return (await this.getConfig(
+      'performance',
+      'api_response_thresholds'
+    )) as APIResponseThresholds;
+  }
+
+  async getDatabaseConfiguration(): Promise<DatabaseConfiguration> {
+    return (await this.getConfig('performance', 'database_configuration')) as DatabaseConfiguration;
+  }
+
+  async getCachingStrategy(): Promise<CachingStrategy> {
+    return (await this.getConfig('performance', 'caching_strategy')) as CachingStrategy;
+  }
+
+  async getRateLimiting(): Promise<RateLimiting> {
+    return (await this.getConfig('performance', 'rate_limiting')) as RateLimiting;
+  }
+
+  async getMemoryManagement(): Promise<MemoryManagement> {
+    return (await this.getConfig('performance', 'memory_management')) as MemoryManagement;
+  }
+
+  // Performance Helper Methods
+  async isPerformanceMonitoringEnabled(): Promise<boolean> {
+    const thresholds = await this.getAPIResponseThresholds();
+    return thresholds.warning > 0 && thresholds.critical > 0;
+  }
+
+  async isCachingEnabled(): Promise<boolean> {
+    const caching = await this.getCachingStrategy();
+    return caching.defaultTTL > 0 && caching.maxCacheSize > 0;
+  }
+
+  async isRateLimitingEnabled(): Promise<boolean> {
+    const rateLimiting = await this.getRateLimiting();
+    return rateLimiting.enableRateLimiting;
+  }
+
+  async getEffectiveRateLimit(
+    isAdmin: boolean = false
+  ): Promise<{ perMinute: number; perHour: number }> {
+    const rateLimiting = await this.getRateLimiting();
+    const multiplier = isAdmin ? rateLimiting.adminRateMultiplier : 1;
+
+    return {
+      perMinute: rateLimiting.apiCallsPerMinute * multiplier,
+      perHour: rateLimiting.apiCallsPerHour * multiplier,
+    };
+  }
+
+  async getCacheTTL(
+    type: 'default' | 'systemConfig' | 'aiResponse' | 'userSession'
+  ): Promise<number> {
+    const caching = await this.getCachingStrategy();
+
+    switch (type) {
+      case 'systemConfig':
+        return caching.systemConfigTTL;
+      case 'aiResponse':
+        return caching.aiResponseTTL;
+      case 'userSession':
+        return caching.userSessionTTL;
+      default:
+        return caching.defaultTTL;
+    }
   }
 }
 
