@@ -4,39 +4,81 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import AIMigration from '@/lib/ai-migration';
 
-// Business area categories aligned with executive thinking
-const BUSINESS_AREAS = [
-  'Operations',
-  'People & Culture',
-  'Technology',
-  'Financial',
-  'Strategy',
-  'Compliance',
-] as const;
+// Database-driven taxonomy loading
+async function loadTaxonomyFromDatabase() {
+  try {
+    const businessAreas = await prisma.systemCategory.findMany({
+      where: {
+        type: 'PROCESS',
+        isActive: true,
+        tags: { has: 'business-area' },
+      },
+      select: { id: true, name: true, description: true },
+      orderBy: { name: 'asc' },
+    });
 
-const DEPARTMENTS = [
-  'Engineering',
-  'Sales',
-  'Marketing',
-  'HR',
-  'Finance',
-  'Operations',
-  'Leadership',
-  'Customer Service',
-  'Legal',
-  'IT',
-] as const;
+    const departments = await prisma.systemCategory.findMany({
+      where: {
+        type: 'PEOPLE',
+        isActive: true,
+        tags: { has: 'department' },
+      },
+      select: { id: true, name: true, description: true },
+      orderBy: { name: 'asc' },
+    });
 
-const IMPACT_TYPES = [
-  'Productivity Loss',
-  'Employee Satisfaction',
-  'Customer Impact',
-  'Revenue Impact',
-  'Cost Increase',
-  'Risk/Compliance',
-  'Quality Issues',
-  'Communication Problems',
-] as const;
+    const impactTypes = await prisma.systemCategory.findMany({
+      where: {
+        type: 'PROCESS',
+        isActive: true,
+        tags: { has: 'impact-type' },
+      },
+      select: { id: true, name: true, description: true },
+      orderBy: { name: 'asc' },
+    });
+
+    return {
+      businessAreas: businessAreas.map((cat) => cat.name),
+      departments: departments.map((cat) => cat.name),
+      impactTypes: impactTypes.map((cat) => cat.name),
+    };
+  } catch (error) {
+    console.error('Failed to load taxonomy from database:', error);
+    // Fallback to default categories if database fails
+    return {
+      businessAreas: [
+        'Operations',
+        'People & Culture',
+        'Technology',
+        'Financial',
+        'Strategy',
+        'Compliance',
+      ],
+      departments: [
+        'Engineering',
+        'Sales',
+        'Marketing',
+        'HR',
+        'Finance',
+        'Operations',
+        'Leadership',
+        'Customer Service',
+        'Legal',
+        'IT',
+      ],
+      impactTypes: [
+        'Productivity Loss',
+        'Employee Satisfaction',
+        'Customer Impact',
+        'Revenue Impact',
+        'Cost Increase',
+        'Risk/Compliance',
+        'Quality Issues',
+        'Communication Problems',
+      ],
+    };
+  }
+}
 
 interface CategorySuggestion {
   businessArea: string;
@@ -108,8 +150,11 @@ export async function POST(req: NextRequest) {
         }
       : undefined;
 
+    // Load taxonomy from database
+    const taxonomy = await loadTaxonomyFromDatabase();
+
     // Generate AI category suggestions
-    const suggestions = await generateCategorySuggestions(description, businessContext);
+    const suggestions = await generateCategorySuggestions(description, businessContext, taxonomy);
 
     // Check for duplicate issues
     const duplicateCheck = await checkForDuplicates(description);
@@ -146,8 +191,14 @@ export async function POST(req: NextRequest) {
 
 async function generateCategorySuggestions(
   description: string,
-  businessContext?: any
+  businessContext?: any,
+  taxonomy?: { businessAreas: string[]; departments: string[]; impactTypes: string[] }
 ): Promise<CategorySuggestionsResponse['suggestions'] | null> {
+  if (!taxonomy) {
+    console.error('No taxonomy provided for AI categorization');
+    return null;
+  }
+
   try {
     const prompt = `
 Analyze this business issue and suggest appropriate categorization for a ${businessContext?.industry || 'business'} company:
@@ -157,13 +208,13 @@ Issue: "${description}"
 Categorize this issue into:
 
 1. BUSINESS AREA (select 1-2 most relevant):
-${BUSINESS_AREAS.map((area) => `- ${area}`).join('\n')}
+${taxonomy.businessAreas.map((area) => `- ${area}`).join('\n')}
 
 2. DEPARTMENTS (select 1-3 most affected):
-${DEPARTMENTS.map((dept) => `- ${dept}`).join('\n')}
+${taxonomy.departments.map((dept) => `- ${dept}`).join('\n')}
 
 3. IMPACT TYPES (select 1-2 most relevant):
-${IMPACT_TYPES.map((impact) => `- ${impact}`).join('\n')}
+${taxonomy.impactTypes.map((impact) => `- ${impact}`).join('\n')}
 
 Respond in this exact JSON format:
 {

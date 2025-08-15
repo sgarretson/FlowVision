@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { executeAIOperation, getUserFriendlyAIError, AIServiceError } from './ai-error-handler';
 import { AIJSONParser } from './ai-json-parser';
+import { aiConfigLoader } from './ai-config-loader';
 
 export interface OpenAIConfig {
   apiKey: string;
@@ -22,9 +23,32 @@ class OpenAIService {
   private config: OpenAIConfig | null = null;
 
   constructor() {
-    this.initializeFromEnv();
+    this.initializeFromDatabase();
   }
 
+  private async initializeFromDatabase() {
+    try {
+      // Load configuration from database via aiConfigLoader
+      const dbConfig = await aiConfigLoader.loadConfig();
+      if (dbConfig) {
+        this.config = {
+          apiKey: dbConfig.apiKey,
+          model: dbConfig.model,
+          maxTokens: dbConfig.maxTokens,
+          temperature: dbConfig.temperature,
+          enabled: dbConfig.enabled,
+        };
+        this.client = new OpenAI({ apiKey: dbConfig.apiKey });
+        console.log('✅ OpenAI service initialized with database configuration');
+      } else {
+        console.warn('⚠️ No AI configuration found in database, service will be disabled');
+      }
+    } catch (error) {
+      console.error('❌ Failed to initialize OpenAI service from database:', error);
+    }
+  }
+
+  // Legacy method for backward compatibility
   private initializeFromEnv() {
     const apiKey = process.env.OPENAI_API_KEY;
     if (apiKey) {
