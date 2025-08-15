@@ -335,10 +335,10 @@ export default function IssuesPage() {
       {/* Enhanced Tab Navigation */}
       <div className="max-w-6xl mx-auto">
         <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8 justify-center">
+          <nav className="-mb-px flex flex-wrap space-x-4 sm:space-x-8 justify-center">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+              className={`py-3 px-3 sm:px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${
                 activeTab === 'overview'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -351,7 +351,7 @@ export default function IssuesPage() {
             </button>
             <button
               onClick={() => setActiveTab('report')}
-              className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+              className={`py-3 px-3 sm:px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${
                 activeTab === 'report'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -361,7 +361,7 @@ export default function IssuesPage() {
             </button>
             <button
               onClick={() => setActiveTab('browse')}
-              className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+              className={`py-3 px-3 sm:px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${
                 activeTab === 'browse'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -374,7 +374,7 @@ export default function IssuesPage() {
             </button>
             <button
               onClick={() => setActiveTab('ai-analysis')}
-              className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+              className={`py-3 px-3 sm:px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${
                 activeTab === 'ai-analysis'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -435,8 +435,8 @@ export default function IssuesPage() {
                 >
                   <span className="text-2xl">📋</span>
                   <div className="text-left">
-                    <div className="font-medium">Browse & Vote</div>
-                    <div className="text-sm text-gray-600">Review existing issues</div>
+                    <div className="font-medium">Browse Issues</div>
+                    <div className="text-sm text-gray-600">View, vote & manage existing issues</div>
                   </div>
                 </button>
                 <button
@@ -456,90 +456,135 @@ export default function IssuesPage() {
 
         {activeTab === 'report' && (
           <div className="space-y-8">
-            {/* Create New Issue Form */}
-            <div className="card-primary p-8 max-w-3xl mx-auto">
-              <h2 className="text-h2 mb-6 text-center">Report New Issue</h2>
-              <p className="text-center text-gray-600 mb-8">
-                Help us identify problems that need attention. Be specific about impact and
-                frequency.
-              </p>
+            {/* Enhanced Issue Reporting Form */}
+            <div className="card-primary p-8 max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-h2 mb-4">Report New Issue</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  Help us identify problems that need attention. Your input drives strategic
+                  improvements across the organization.
+                </p>
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-6">
-                <textarea
-                  className="textarea-field"
-                  placeholder="Describe the issue or problem you've identified. Include:
+                <div className="space-y-2">
+                  <label
+                    htmlFor="issue-description"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Issue Description
+                  </label>
+                  <textarea
+                    id="issue-description"
+                    className={`textarea-field transition-colors ${
+                      newIssue.trim().length > 0
+                        ? 'border-green-300 focus:border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                    }`}
+                    placeholder="Describe the issue or problem you've identified. Be specific and include:
+
 • What is the problem?
 • How often does it occur?
 • What is the business impact?
-• Who is affected?"
-                  value={newIssue}
-                  onChange={(e) => setNewIssue(e.target.value)}
-                  rows={6}
-                  disabled={submitting}
-                />
-                <div className="flex justify-center">
+• Who is affected?
+• When does this typically happen?
+
+Example: 'Our project approval process takes 3-4 weeks due to unclear requirements and multiple approval rounds. This affects all departments when requesting new initiatives and delays strategic implementations by 30-60 days.'"
+                    value={newIssue}
+                    onChange={(e) => setNewIssue(e.target.value)}
+                    rows={8}
+                    disabled={submitting}
+                    required
+                  />
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">
+                      {newIssue.trim().length > 20
+                        ? '✓ Good detail level'
+                        : newIssue.trim().length > 0
+                          ? 'Add more detail for better analysis'
+                          : 'Minimum 20 characters recommended'}
+                    </span>
+                    <span className={`${newIssue.length > 500 ? 'text-red-500' : 'text-gray-400'}`}>
+                      {newIssue.length}/500
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <button
                     type="submit"
-                    className={`btn-primary ${submitting || !newIssue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={submitting || !newIssue.trim()}
+                    className={`btn-primary px-8 py-3 text-base font-semibold transition-all duration-200 ${
+                      submitting || !newIssue.trim() || newIssue.length > 500
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:scale-105 shadow-lg hover:shadow-xl'
+                    }`}
+                    disabled={submitting || !newIssue.trim() || newIssue.length > 500}
                   >
                     {submitting ? (
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 loading-spinner"></div>
-                        Creating...
+                        <div className="w-5 h-5 loading-spinner"></div>
+                        Submitting Issue...
                       </div>
                     ) : (
-                      'Submit Issue'
+                      <div className="flex items-center gap-2">
+                        <span>📝</span>
+                        Submit Issue
+                      </div>
                     )}
                   </button>
+
+                  {newIssue.trim().length > 0 && !submitting && (
+                    <button
+                      type="button"
+                      onClick={() => setNewIssue('')}
+                      className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
+                    >
+                      Clear Form
+                    </button>
+                  )}
                 </div>
               </form>
+
               {message && (
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-sm text-center">
-                  {message}
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-600 text-lg">✅</span>
+                    <div className="text-green-800 font-medium">Issue Submitted Successfully!</div>
+                  </div>
+                  <p className="text-green-700 text-sm mt-1">{message}</p>
                 </div>
               )}
+
+              {/* Helper Tips */}
+              <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-3">
+                  💡 Tips for Effective Issue Reports
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-800">
+                  <div>
+                    <div className="font-medium">✅ Be Specific</div>
+                    <div>Include concrete examples and measurable impacts</div>
+                  </div>
+                  <div>
+                    <div className="font-medium">✅ Focus on Business Impact</div>
+                    <div>Explain how this affects productivity, costs, or goals</div>
+                  </div>
+                  <div>
+                    <div className="font-medium">✅ Include Frequency</div>
+                    <div>Daily, weekly, or project-specific occurrences</div>
+                  </div>
+                  <div>
+                    <div className="font-medium">✅ Identify Stakeholders</div>
+                    <div>Who is affected and in what departments</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {activeTab === 'browse' && (
           <div className="space-y-8">
-            {/* Create New Issue Form */}
-            <div className="card-primary p-6 max-w-2xl mx-auto">
-              <h2 className="text-h2 mb-6 text-center">Report New Issue</h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <textarea
-                  className="textarea-field"
-                  placeholder="Describe the issue or problem you've identified. Be specific about the impact and frequency..."
-                  value={newIssue}
-                  onChange={(e) => setNewIssue(e.target.value)}
-                  rows={4}
-                  disabled={submitting}
-                />
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    className={`btn-primary ${submitting || !newIssue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={submitting || !newIssue.trim()}
-                  >
-                    {submitting ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 loading-spinner"></div>
-                        Creating...
-                      </div>
-                    ) : (
-                      'Report Issue'
-                    )}
-                  </button>
-                </div>
-              </form>
-              {message && (
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-sm text-center">
-                  {message}
-                </div>
-              )}
-            </div>
-
             {/* Issues Heatmap Legend */}
             <div className="card-secondary p-6 max-w-4xl mx-auto">
               <h3 className="text-h3 mb-4 text-center">Priority Heatmap</h3>
