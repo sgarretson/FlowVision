@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import AIMigration from '@/lib/ai-migration';
 import { aiConfigLoader } from '@/lib/ai-config-loader';
 import { prisma } from '@/lib/prisma';
+import { systemConfig } from '@/lib/system-config';
 
 // GET /api/admin/openai - Get current OpenAI configuration and status
 export async function GET() {
@@ -101,13 +102,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Temperature must be between 0 and 2' }, { status: 400 });
     }
 
+    // Get fallback values from configuration system
+    const fallbackModel = await systemConfig.getAIFallbackModel();
+    const operationDefaults = await systemConfig.getOperationDefaults();
+
     // Configure and save OpenAI service to database
     const configSuccess = await AIMigration.configure(
       {
         apiKey: effectiveApiKey,
-        model: model || 'gpt-3.5-turbo',
-        maxTokens: maxTokens || 500,
-        temperature: temperature || 0.7,
+        model: model || fallbackModel,
+        maxTokens: maxTokens || operationDefaults.issue_analysis.maxTokens,
+        temperature: temperature || operationDefaults.issue_analysis.temperature,
         enabled: enabled !== false,
       },
       user.id
@@ -123,9 +128,9 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         action: 'OPENAI_CONFIG_UPDATE',
         details: {
-          model: model || 'gpt-3.5-turbo',
-          maxTokens: maxTokens || 500,
-          temperature: temperature || 0.7,
+          model: model || fallbackModel,
+          maxTokens: maxTokens || operationDefaults.issue_analysis.maxTokens,
+          temperature: temperature || operationDefaults.issue_analysis.temperature,
           enabled: enabled !== false,
         },
       },
@@ -164,11 +169,15 @@ export async function PUT(req: NextRequest) {
     let testResult;
     if (apiKey) {
       // Test with temporary configuration
+      // Get fallback values for test configuration
+      const fallbackModel = await systemConfig.getAIFallbackModel();
+      const operationDefaults = await systemConfig.getOperationDefaults();
+
       testResult = await aiConfigLoader.testConfiguration({
         apiKey,
-        model: model || 'gpt-3.5-turbo',
+        model: model || fallbackModel,
         maxTokens: 10,
-        temperature: 0.7,
+        temperature: operationDefaults.issue_analysis.temperature,
         enabled: true,
       });
     } else {
