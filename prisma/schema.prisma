@@ -28,6 +28,7 @@ model User {
   auditLogs     AuditLog[]
   attachments   Attachment[]
   assignedRequirementCards RequirementCard[] @relation("UserRequirementCards")
+  systemConfigUpdates      SystemConfiguration[] @relation("SystemConfigUpdatedBy")
   createdRequirementCards  RequirementCard[] @relation("CreatedRequirementCards")
   approvedRequirementCards RequirementCard[] @relation("ApprovedRequirementCards")
   accounts      Account[]
@@ -696,6 +697,49 @@ model SystemCategory {
   @@index([parentId])
   @@index([organizationId])
   @@unique([name, type, organizationId]) // Prevent duplicates within org/type
+}
+
+// System Configuration Management
+// Centralized storage for all configurable business rules and system settings
+model SystemConfiguration {
+  id          String   @id @default(cuid())
+  
+  // Configuration Identification
+  category    String   // e.g., "scoring", "ai", "performance", "ux"
+  key         String   // e.g., "issue_thresholds", "validation_scores", "ai_fallback_model"
+  
+  // Configuration Value and Metadata
+  value       Json     // The actual configuration value (supports any JSON structure)
+  dataType    String   // "string", "number", "boolean", "json", "array" for validation
+  description String?  // Human-readable description of what this config controls
+  
+  // Environment and Context
+  environment String   @default("production") // "development", "staging", "production", "all"
+  scope       String   @default("global")     // "global", "user", "organization"
+  
+  // Configuration Management
+  isActive    Boolean  @default(true)         // Enable/disable configuration
+  version     Int      @default(1)            // Configuration versioning for rollback
+  tags        String[] @default([])           // Tags for grouping and filtering
+  
+  // Validation and Constraints
+  validation  Json?    // JSON schema or validation rules for the value
+  constraints Json?    // Business constraints (e.g., min/max values, dependencies)
+  
+  // Audit and Tracking
+  updatedBy   String?  // User ID who last updated this configuration
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  
+  // Relationships
+  updatedUser User?    @relation("SystemConfigUpdatedBy", fields: [updatedBy], references: [id])
+  
+  // Ensure unique configurations per category/key/environment
+  @@unique([category, key, environment, scope])
+  @@index([category, isActive])
+  @@index([environment, scope])
+  @@index([updatedAt])
+  @@map("system_configurations")
 }
 
 enum SystemType {
