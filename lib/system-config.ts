@@ -65,6 +65,53 @@ export interface FormValidation {
   confidenceDisplayThreshold: number;
 }
 
+export interface ModelConfig {
+  maxTokens: number;
+  costPer1kInput: number;
+  costPer1kOutput: number;
+  contextWindow: number;
+  preferredFor: string[];
+}
+
+export interface OperationConfig {
+  model: string;
+  maxTokens: number;
+  temperature: number;
+}
+
+export interface OperationDefaults {
+  issue_analysis: OperationConfig;
+  cluster_analysis: OperationConfig;
+  categorization: OperationConfig;
+  initiative_generation: OperationConfig;
+  requirement_cards: OperationConfig;
+}
+
+export interface ServiceHealthMonitoring {
+  healthCheckInterval: number;
+  maxRetries: number;
+  retryBackoffMultiplier: number;
+  connectionTimeoutMs: number;
+  circuitBreakerThreshold: number;
+  circuitBreakerResetTimeout: number;
+  enableMetricsCollection: boolean;
+  enableCostTracking: boolean;
+}
+
+export interface ABTestingConfig {
+  enableABTesting: boolean;
+  testGroups: {
+    [key: string]: {
+      percentage: number;
+      model: string;
+      temperature: number;
+    };
+  };
+  testDurationDays: number;
+  minimumSampleSize: number;
+  statisticalSignificanceThreshold: number;
+}
+
 /**
  * Configuration Service with Caching and Real-time Updates
  *
@@ -225,6 +272,82 @@ class SystemConfigService {
       requiredFieldsForAI: 3,
       confidenceDisplayThreshold: 50,
     });
+  }
+
+  /**
+   * AI-specific configuration getters
+   */
+  public async getModelSpecificConfigs(): Promise<{ [model: string]: ModelConfig }> {
+    return this.getConfig<{ [model: string]: ModelConfig }>('ai', 'model_specific_configs', {
+      'gpt-3.5-turbo': {
+        maxTokens: 4096,
+        costPer1kInput: 0.0015,
+        costPer1kOutput: 0.002,
+        contextWindow: 4096,
+        preferredFor: ['summaries', 'categorization', 'quick_analysis'],
+      },
+      'gpt-4': {
+        maxTokens: 8192,
+        costPer1kInput: 0.03,
+        costPer1kOutput: 0.06,
+        contextWindow: 8192,
+        preferredFor: ['complex_analysis', 'strategic_insights', 'requirements'],
+      },
+    });
+  }
+
+  public async getOperationDefaults(): Promise<OperationDefaults> {
+    return this.getConfig<OperationDefaults>('ai', 'operation_defaults', {
+      issue_analysis: { model: 'gpt-3.5-turbo', maxTokens: 500, temperature: 0.7 },
+      cluster_analysis: { model: 'gpt-4-turbo', maxTokens: 700, temperature: 0.7 },
+      categorization: { model: 'gpt-3.5-turbo', maxTokens: 800, temperature: 0.3 },
+      initiative_generation: { model: 'gpt-4', maxTokens: 1500, temperature: 0.3 },
+      requirement_cards: { model: 'gpt-4', maxTokens: 500, temperature: 0.3 },
+    });
+  }
+
+  public async getServiceHealthMonitoring(): Promise<ServiceHealthMonitoring> {
+    return this.getConfig<ServiceHealthMonitoring>('ai', 'service_health_monitoring', {
+      healthCheckInterval: 300000,
+      maxRetries: 3,
+      retryBackoffMultiplier: 2,
+      connectionTimeoutMs: 30000,
+      circuitBreakerThreshold: 5,
+      circuitBreakerResetTimeout: 60000,
+      enableMetricsCollection: true,
+      enableCostTracking: true,
+    });
+  }
+
+  public async getABTestingConfig(): Promise<ABTestingConfig> {
+    return this.getConfig<ABTestingConfig>('ai', 'ab_testing_configs', {
+      enableABTesting: false,
+      testGroups: {
+        control: { percentage: 50, model: 'gpt-3.5-turbo', temperature: 0.7 },
+        experimental: { percentage: 50, model: 'gpt-4-turbo', temperature: 0.5 },
+      },
+      testDurationDays: 7,
+      minimumSampleSize: 100,
+      statisticalSignificanceThreshold: 0.95,
+    });
+  }
+
+  /**
+   * Get configuration for a specific AI operation type
+   */
+  public async getAIOperationConfig(
+    operationType: keyof OperationDefaults
+  ): Promise<OperationConfig> {
+    const defaults = await this.getOperationDefaults();
+    return defaults[operationType];
+  }
+
+  /**
+   * Get model configuration for cost calculation and optimization
+   */
+  public async getModelConfig(model: string): Promise<ModelConfig | null> {
+    const configs = await this.getModelSpecificConfigs();
+    return configs[model] || null;
   }
 
   /**
