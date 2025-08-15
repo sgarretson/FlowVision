@@ -467,6 +467,155 @@ export const DEFAULT_SYSTEM_CONFIGURATIONS = [
     scope: 'global',
     tags: ['development', 'debugging', 'logging'],
   },
+
+  // Performance Configuration Settings
+  {
+    category: 'performance',
+    key: 'api_response_thresholds',
+    value: {
+      warning: 500, // milliseconds - log warning if response takes longer
+      critical: 2000, // milliseconds - log error if response takes longer
+      timeout: 30000, // milliseconds - hard timeout for API requests
+      healthCheck: 100, // milliseconds - health check endpoint threshold
+    },
+    dataType: 'json',
+    description: 'API response time monitoring thresholds',
+    environment: 'all',
+    scope: 'global',
+    tags: ['performance', 'monitoring', 'api'],
+    validation: {
+      type: 'object',
+      properties: {
+        warning: { type: 'number', minimum: 100, maximum: 5000 },
+        critical: { type: 'number', minimum: 500, maximum: 10000 },
+        timeout: { type: 'number', minimum: 5000, maximum: 60000 },
+        healthCheck: { type: 'number', minimum: 50, maximum: 1000 },
+      },
+      required: ['warning', 'critical', 'timeout', 'healthCheck'],
+    },
+  },
+  {
+    category: 'performance',
+    key: 'database_configuration',
+    value: {
+      queryTimeout: 10000, // milliseconds - default query timeout
+      connectionPoolMin: 2, // minimum connections in pool
+      connectionPoolMax: 10, // maximum connections in pool
+      slowQueryThreshold: 1000, // milliseconds - log slow queries
+      retryAttempts: 3, // number of retry attempts for failed queries
+      retryDelay: 1000, // milliseconds - delay between retries
+    },
+    dataType: 'json',
+    description: 'Database performance and connection configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['performance', 'database', 'connection-pool'],
+    validation: {
+      type: 'object',
+      properties: {
+        queryTimeout: { type: 'number', minimum: 1000, maximum: 30000 },
+        connectionPoolMin: { type: 'number', minimum: 1, maximum: 10 },
+        connectionPoolMax: { type: 'number', minimum: 5, maximum: 50 },
+        slowQueryThreshold: { type: 'number', minimum: 100, maximum: 5000 },
+        retryAttempts: { type: 'number', minimum: 1, maximum: 5 },
+        retryDelay: { type: 'number', minimum: 100, maximum: 5000 },
+      },
+      required: ['queryTimeout', 'connectionPoolMin', 'connectionPoolMax', 'slowQueryThreshold'],
+    },
+  },
+  {
+    category: 'performance',
+    key: 'caching_strategy',
+    value: {
+      defaultTTL: 300, // seconds - default cache TTL
+      systemConfigTTL: 3600, // seconds - system config cache TTL
+      aiResponseTTL: 1800, // seconds - AI response cache TTL
+      userSessionTTL: 86400, // seconds - user session cache TTL
+      maxCacheSize: 1000, // number of items - maximum cache entries
+      evictionPolicy: 'LRU', // cache eviction policy
+      enableCompression: true, // compress cached data
+      cacheWarming: true, // enable cache warming on startup
+    },
+    dataType: 'json',
+    description: 'Caching strategy and TTL configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['performance', 'caching', 'ttl'],
+    validation: {
+      type: 'object',
+      properties: {
+        defaultTTL: { type: 'number', minimum: 60, maximum: 86400 },
+        systemConfigTTL: { type: 'number', minimum: 300, maximum: 86400 },
+        aiResponseTTL: { type: 'number', minimum: 300, maximum: 7200 },
+        userSessionTTL: { type: 'number', minimum: 3600, maximum: 604800 },
+        maxCacheSize: { type: 'number', minimum: 100, maximum: 10000 },
+        evictionPolicy: { type: 'string', enum: ['LRU', 'LFU', 'FIFO'] },
+        enableCompression: { type: 'boolean' },
+        cacheWarming: { type: 'boolean' },
+      },
+      required: ['defaultTTL', 'systemConfigTTL', 'aiResponseTTL', 'maxCacheSize'],
+    },
+  },
+  {
+    category: 'performance',
+    key: 'rate_limiting',
+    value: {
+      apiCallsPerMinute: 100, // requests per minute per user
+      apiCallsPerHour: 1000, // requests per hour per user
+      aiBurstLimit: 5, // concurrent AI requests per user
+      aiCooldownPeriod: 60000, // milliseconds - cooldown after burst limit
+      adminRateMultiplier: 5, // admin users get 5x the limits
+      enableRateLimiting: true, // global rate limiting toggle
+      blockDuration: 300000, // milliseconds - how long to block after limit exceeded
+    },
+    dataType: 'json',
+    description: 'API rate limiting and throttling configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['performance', 'rate-limiting', 'throttling'],
+    validation: {
+      type: 'object',
+      properties: {
+        apiCallsPerMinute: { type: 'number', minimum: 10, maximum: 1000 },
+        apiCallsPerHour: { type: 'number', minimum: 100, maximum: 10000 },
+        aiBurstLimit: { type: 'number', minimum: 1, maximum: 20 },
+        aiCooldownPeriod: { type: 'number', minimum: 30000, maximum: 300000 },
+        adminRateMultiplier: { type: 'number', minimum: 2, maximum: 10 },
+        enableRateLimiting: { type: 'boolean' },
+        blockDuration: { type: 'number', minimum: 60000, maximum: 3600000 },
+      },
+      required: ['apiCallsPerMinute', 'apiCallsPerHour', 'aiBurstLimit', 'enableRateLimiting'],
+    },
+  },
+  {
+    category: 'performance',
+    key: 'memory_management',
+    value: {
+      heapWarningThreshold: 80, // percentage - warn when heap usage exceeds
+      heapCriticalThreshold: 90, // percentage - critical when heap usage exceeds
+      garbageCollectionTrigger: 85, // percentage - trigger GC when heap usage exceeds
+      maxRequestSize: 10485760, // bytes - 10MB max request body size
+      maxResponseSize: 52428800, // bytes - 50MB max response size
+      enableMemoryProfiling: false, // enable memory profiling in development
+    },
+    dataType: 'json',
+    description: 'Memory usage monitoring and management configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['performance', 'memory', 'monitoring'],
+    validation: {
+      type: 'object',
+      properties: {
+        heapWarningThreshold: { type: 'number', minimum: 50, maximum: 95 },
+        heapCriticalThreshold: { type: 'number', minimum: 70, maximum: 98 },
+        garbageCollectionTrigger: { type: 'number', minimum: 60, maximum: 95 },
+        maxRequestSize: { type: 'number', minimum: 1048576, maximum: 104857600 },
+        maxResponseSize: { type: 'number', minimum: 1048576, maximum: 104857600 },
+        enableMemoryProfiling: { type: 'boolean' },
+      },
+      required: ['heapWarningThreshold', 'heapCriticalThreshold', 'maxRequestSize'],
+    },
+  },
 ];
 
 /**

@@ -1,13 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 
-const prisma = new PrismaClient();
-
-// Default System Configuration Seed Data (converted from TypeScript)
 const DEFAULT_SYSTEM_CONFIGURATIONS = [
-  // SCORING CONFIGURATION
+  // Scoring Configuration
   {
     category: 'scoring',
-    key: 'issue_priority_thresholds',
+    key: 'issue_thresholds',
     value: {
       critical: 80,
       high: 60,
@@ -15,46 +12,28 @@ const DEFAULT_SYSTEM_CONFIGURATIONS = [
       low: 0,
     },
     dataType: 'json',
-    description: 'Score thresholds for issue priority classification (Critical/High/Medium/Low)',
+    description: 'Issue heatmap score thresholds for priority classification',
     environment: 'all',
     scope: 'global',
-    tags: ['business-logic', 'user-facing', 'critical'],
-    validation: {
-      type: 'object',
-      properties: {
-        critical: { type: 'number', minimum: 60, maximum: 100 },
-        high: { type: 'number', minimum: 40, maximum: 99 },
-        medium: { type: 'number', minimum: 20, maximum: 79 },
-        low: { type: 'number', minimum: 0, maximum: 59 },
-      },
-      required: ['critical', 'high', 'medium', 'low'],
-    },
-    constraints: {
-      businessRules: [
-        'critical > high > medium > low',
-        'all values between 0-100',
-        'minimum 10 point spread between levels',
-      ],
-    },
+    tags: ['scoring', 'thresholds', 'priority'],
   },
   {
     category: 'scoring',
-    key: 'validation_score_thresholds',
+    key: 'validation_thresholds',
     value: {
       excellent: 80,
       good: 60,
       needsImprovement: 40,
-      poor: 0,
     },
     dataType: 'json',
-    description: 'Score thresholds for form validation quality assessment',
+    description: 'Form validation score thresholds for quality assessment',
     environment: 'all',
     scope: 'global',
-    tags: ['validation', 'form-quality', 'ux'],
+    tags: ['scoring', 'validation', 'quality'],
   },
   {
     category: 'scoring',
-    key: 'heatmap_color_mapping',
+    key: 'color_mapping',
     value: {
       critical: { color: 'bg-red-500', textColor: 'text-white' },
       high: { color: 'bg-orange-500', textColor: 'text-white' },
@@ -62,111 +41,30 @@ const DEFAULT_SYSTEM_CONFIGURATIONS = [
       low: { color: 'bg-green-500', textColor: 'text-white' },
     },
     dataType: 'json',
-    description: 'Color mappings for issue priority visualization',
+    description: 'Color scheme mapping for different priority levels',
     environment: 'all',
     scope: 'global',
-    tags: ['ui', 'colors', 'visualization'],
+    tags: ['ui', 'colors', 'priority'],
   },
 
-  // AI CONFIGURATION
+  // AI Configuration
   {
     category: 'ai',
     key: 'fallback_model',
     value: 'gpt-3.5-turbo',
     dataType: 'string',
-    description: 'Default AI model to use when primary configuration is unavailable',
+    description: 'Default AI model to use when specific operation config fails',
     environment: 'all',
     scope: 'global',
-    tags: ['ai', 'fallback', 'reliability'],
+    tags: ['ai', 'fallback', 'model'],
   },
-  {
-    category: 'ai',
-    key: 'token_limits',
-    value: {
-      categorization: 800,
-      analysis: 1500,
-      summary: 500,
-      default: 500,
-    },
-    dataType: 'json',
-    description: 'Token limits for different types of AI operations',
-    environment: 'all',
-    scope: 'global',
-    tags: ['ai', 'performance', 'limits'],
-  },
-  {
-    category: 'ai',
-    key: 'confidence_thresholds',
-    value: {
-      high: 85,
-      medium: 70,
-      low: 50,
-      minimum: 30,
-    },
-    dataType: 'json',
-    description: 'Confidence score thresholds for AI-generated content',
-    environment: 'all',
-    scope: 'global',
-    tags: ['ai', 'confidence', 'quality'],
-  },
-
-  // PERFORMANCE CONFIGURATION
-  {
-    category: 'performance',
-    key: 'timeout_values',
-    value: {
-      aiRequest: 30000, // 30 seconds
-      apiRequest: 10000, // 10 seconds
-      databaseQuery: 5000, // 5 seconds
-      fileUpload: 60000, // 60 seconds
-    },
-    dataType: 'json',
-    description: 'Timeout values in milliseconds for various operations',
-    environment: 'all',
-    scope: 'global',
-    tags: ['performance', 'timeout', 'reliability'],
-  },
-
-  // UX CONFIGURATION
-  {
-    category: 'ux',
-    key: 'interaction_timing',
-    value: {
-      debounceDelay: 1000, // 1 second for AI suggestions
-      navigationDelay: 1500, // 1.5 seconds for redirects
-      feedbackDelay: 3000, // 3 seconds for success messages
-      tooltipDelay: 500, // 0.5 seconds for tooltips
-    },
-    dataType: 'json',
-    description: 'Timing values in milliseconds for user interactions',
-    environment: 'all',
-    scope: 'global',
-    tags: ['ux', 'timing', 'interaction'],
-  },
-  {
-    category: 'ux',
-    key: 'form_validation',
-    value: {
-      minimumDescriptionLength: 20,
-      maximumDescriptionLength: 500,
-      requiredFieldsForAI: 3,
-      confidenceDisplayThreshold: 50,
-    },
-    dataType: 'json',
-    description: 'Form validation rules and thresholds',
-    environment: 'all',
-    scope: 'global',
-    tags: ['ux', 'validation', 'forms'],
-  },
-
-  // AI ADVANCED CONFIGURATION
   {
     category: 'ai',
     key: 'model_specific_configs',
     value: {
       'gpt-3.5-turbo': {
         maxTokens: 4096,
-        costPer1kInput: 0.0015,
+        costPer1kInput: 0.001,
         costPer1kOutput: 0.002,
         contextWindow: 4096,
         preferredFor: ['summaries', 'categorization', 'quick_analysis'],
@@ -232,10 +130,9 @@ const DEFAULT_SYSTEM_CONFIGURATIONS = [
     category: 'ai',
     key: 'service_health_monitoring',
     value: {
-      healthCheckInterval: 300000, // 5 minutes
+      healthCheckInterval: 300000,
       maxRetries: 3,
-      retryBackoffMultiplier: 2,
-      connectionTimeoutMs: 30000,
+      retryDelay: 1000,
       circuitBreakerThreshold: 5,
       circuitBreakerResetTimeout: 60000,
       enableMetricsCollection: true,
@@ -274,10 +171,151 @@ const DEFAULT_SYSTEM_CONFIGURATIONS = [
     scope: 'global',
     tags: ['ai', 'ab-testing', 'optimization', 'experimentation'],
   },
+
+  // Performance Configuration Settings
+  {
+    category: 'performance',
+    key: 'api_response_thresholds',
+    value: {
+      warning: 500,
+      critical: 2000,
+      timeout: 30000,
+      healthCheck: 100,
+    },
+    dataType: 'json',
+    description: 'API response time monitoring thresholds',
+    environment: 'all',
+    scope: 'global',
+    tags: ['performance', 'monitoring', 'api'],
+  },
+  {
+    category: 'performance',
+    key: 'database_configuration',
+    value: {
+      queryTimeout: 10000,
+      connectionPoolMin: 2,
+      connectionPoolMax: 10,
+      slowQueryThreshold: 1000,
+      retryAttempts: 3,
+      retryDelay: 1000,
+    },
+    dataType: 'json',
+    description: 'Database performance and connection configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['performance', 'database', 'connection-pool'],
+  },
+  {
+    category: 'performance',
+    key: 'caching_strategy',
+    value: {
+      defaultTTL: 300,
+      systemConfigTTL: 3600,
+      aiResponseTTL: 1800,
+      userSessionTTL: 86400,
+      maxCacheSize: 1000,
+      evictionPolicy: 'LRU',
+      enableCompression: true,
+      cacheWarming: true,
+    },
+    dataType: 'json',
+    description: 'Caching strategy and TTL configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['performance', 'caching', 'ttl'],
+  },
+  {
+    category: 'performance',
+    key: 'rate_limiting',
+    value: {
+      apiCallsPerMinute: 100,
+      apiCallsPerHour: 1000,
+      aiBurstLimit: 5,
+      aiCooldownPeriod: 60000,
+      adminRateMultiplier: 5,
+      enableRateLimiting: true,
+      blockDuration: 300000,
+    },
+    dataType: 'json',
+    description: 'API rate limiting and throttling configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['performance', 'rate-limiting', 'throttling'],
+  },
+  {
+    category: 'performance',
+    key: 'memory_management',
+    value: {
+      heapWarningThreshold: 80,
+      heapCriticalThreshold: 90,
+      garbageCollectionTrigger: 85,
+      maxRequestSize: 10485760,
+      maxResponseSize: 52428800,
+      enableMemoryProfiling: false,
+    },
+    dataType: 'json',
+    description: 'Memory usage monitoring and management configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['performance', 'memory', 'monitoring'],
+  },
+
+  // UX Configuration
+  {
+    category: 'ux',
+    key: 'animation_settings',
+    value: {
+      enableAnimations: true,
+      animationDuration: 200,
+      easeFunction: 'ease-in-out',
+    },
+    dataType: 'json',
+    description: 'User experience animation configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['ux', 'animations', 'performance'],
+  },
+  {
+    category: 'ux',
+    key: 'accessibility_settings',
+    value: {
+      enableHighContrast: false,
+      enableScreenReaderSupport: true,
+      keyboardNavigationEnabled: true,
+      focusIndicatorStyle: 'ring',
+    },
+    dataType: 'json',
+    description: 'Accessibility and inclusive design configuration',
+    environment: 'all',
+    scope: 'global',
+    tags: ['ux', 'accessibility', 'a11y'],
+  },
+
+  // Development Configuration
+  {
+    category: 'development',
+    key: 'debug_settings',
+    value: {
+      enableDebugMode: false,
+      logLevel: 'info',
+      enablePerformanceProfiling: false,
+      logAIInteractions: true,
+      trackPerformanceMetrics: true,
+      enableConfigurationChangeLogs: true,
+    },
+    dataType: 'json',
+    description: 'Development and debugging configuration settings',
+    environment: 'development',
+    scope: 'global',
+    tags: ['development', 'debugging', 'logging'],
+  },
 ];
 
 async function seedSystemConfiguration(adminUserId) {
-  console.log('🔧 Seeding default system configurations...');
+  const prisma = new PrismaClient();
+
+  console.log('🌱 Starting system configuration seeding...');
+  console.log(`📋 Total configurations to process: ${DEFAULT_SYSTEM_CONFIGURATIONS.length}`);
 
   let seedCount = 0;
   let updateCount = 0;
@@ -296,21 +334,26 @@ async function seedSystemConfiguration(adminUserId) {
       });
 
       if (existing) {
-        // Update existing configuration but preserve version and user changes
-        await prisma.systemConfiguration.update({
-          where: { id: existing.id },
-          data: {
-            description: config.description,
-            validation: config.validation,
-            constraints: config.constraints,
-            tags: config.tags,
-            updatedBy: adminUserId,
-          },
-        });
-        updateCount++;
-        console.log(`  ✅ Updated: ${config.category}.${config.key}`);
+        const hasChanges =
+          JSON.stringify(existing.value) !== JSON.stringify(config.value) ||
+          existing.description !== config.description;
+
+        if (hasChanges) {
+          await prisma.systemConfiguration.update({
+            where: { id: existing.id },
+            data: {
+              value: config.value,
+              description: config.description,
+              version: { increment: 1 },
+              updatedBy: adminUserId,
+            },
+          });
+          updateCount++;
+          console.log(`  🔄 Updated: ${config.category}.${config.key}`);
+        } else {
+          console.log(`  ✅ Unchanged: ${config.category}.${config.key}`);
+        }
       } else {
-        // Create new configuration
         await prisma.systemConfiguration.create({
           data: {
             ...config,
@@ -330,55 +373,16 @@ async function seedSystemConfiguration(adminUserId) {
   console.log(`  🔄 Updated: ${updateCount} existing configurations`);
   console.log(`  📈 Total configurations: ${DEFAULT_SYSTEM_CONFIGURATIONS.length}`);
 
-  return {
-    created: seedCount,
-    updated: updateCount,
-    total: DEFAULT_SYSTEM_CONFIGURATIONS.length,
-  };
+  await prisma.$disconnect();
 }
 
-async function main() {
-  try {
-    console.log('🚀 Starting system configuration seeding...\n');
-
-    // Find an admin user for attribution
-    let adminUser = await prisma.user.findFirst({
-      where: { role: 'ADMIN' },
+if (require.main === module) {
+  seedSystemConfiguration()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error('❌ Seeding failed:', error);
+      process.exit(1);
     });
-
-    if (!adminUser) {
-      console.log(
-        '⚠️  No admin user found, configurations will be created without user attribution'
-      );
-    }
-
-    // Seed the system configurations
-    const result = await seedSystemConfiguration(adminUser?.id);
-
-    console.log('\n📋 Seeding Summary:');
-    console.log(`  🆕 New configurations: ${result.created}`);
-    console.log(`  🔄 Updated configurations: ${result.updated}`);
-    console.log(`  📈 Total configurations: ${result.total}`);
-
-    // Verify the seeding worked
-    console.log('\n🔍 Verification:');
-    const configCount = await prisma.systemConfiguration.count();
-    console.log(`  💾 Total configurations in database: ${configCount}`);
-
-    const categories = await prisma.systemConfiguration.findMany({
-      select: { category: true },
-      distinct: ['category'],
-    });
-    console.log(`  📂 Categories created: ${categories.map((c) => c.category).join(', ')}`);
-
-    console.log('\n✅ System configuration seeding completed successfully!');
-    console.log('🎯 Ready for Story 3.2: Configuration Service Implementation');
-  } catch (error) {
-    console.error('❌ System configuration seeding failed:', error);
-    process.exit(1);
-  } finally {
-    await prisma.$disconnect();
-  }
 }
 
-main();
+module.exports = { seedSystemConfiguration, DEFAULT_SYSTEM_CONFIGURATIONS };
