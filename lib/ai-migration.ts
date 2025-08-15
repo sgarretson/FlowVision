@@ -250,6 +250,15 @@ export class AIMigration {
       optimizedOpenAIService.clearCache();
     }
   }
+
+  // New method for structured AI responses (JSON format)
+  static async generateStructuredResponse(prompt: string, userId?: string): Promise<string | null> {
+    if (this.isOptimizedEnabled(userId)) {
+      return optimizedOpenAIService.generateStructuredResponse(prompt);
+    } else {
+      return openAIService.generateStructuredResponse(prompt);
+    }
+  }
 }
 
 // Export default instance for easy import

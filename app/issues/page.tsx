@@ -44,6 +44,15 @@ export default function IssuesPage() {
   const [selectedIssues, setSelectedIssues] = useState<Set<string>>(new Set());
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
+  // AI Category Suggestions State
+  const [aiSuggestions, setAiSuggestions] = useState<any>(null);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState({
+    businessArea: '',
+    department: '',
+    impactType: '',
+  });
+
   useEffect(() => {
     if (!session) {
       router.push('/auth');
@@ -246,6 +255,60 @@ export default function IssuesPage() {
     if (score >= 40) return 'bg-yellow-500';
     return 'bg-green-500';
   }
+
+  // Generate AI category suggestions
+  async function generateAISuggestions(description: string) {
+    if (!description.trim() || description.length < 20) {
+      setAiSuggestions(null);
+      return;
+    }
+
+    setSuggestionsLoading(true);
+    try {
+      const response = await fetch('/api/ai/suggest-categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAiSuggestions(data);
+
+        // Auto-select the highest confidence suggestions
+        if (data.suggestions) {
+          const topBusinessArea = data.suggestions.businessAreas?.[0];
+          const topDepartment = data.suggestions.departments?.[0];
+          const topImpact = data.suggestions.impactTypes?.[0];
+
+          setSelectedCategories({
+            businessArea: topBusinessArea?.businessArea || '',
+            department: topDepartment?.department || '',
+            impactType: topImpact?.impactType || '',
+          });
+        }
+      } else {
+        console.error('Failed to get AI suggestions');
+      }
+    } catch (error) {
+      console.error('AI suggestions error:', error);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }
+
+  // Debounced AI suggestions
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (newIssue.trim().length >= 20) {
+        generateAISuggestions(newIssue);
+      }
+    }, 1000); // 1 second delay after user stops typing
+
+    return () => clearTimeout(timeoutId);
+  }, [newIssue]);
 
   function getHeatmapLabel(score: number): string {
     if (score >= 80) return 'Critical';
@@ -509,6 +572,165 @@ Example: 'Our project approval process takes 3-4 weeks due to unclear requiremen
                     </span>
                   </div>
                 </div>
+
+                {/* AI Category Suggestions */}
+                {newIssue.trim().length >= 20 && (
+                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm">🤖</span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-purple-900">
+                        AI Category Suggestions
+                      </h3>
+                      {suggestionsLoading && (
+                        <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                      )}
+                    </div>
+
+                    {suggestionsLoading ? (
+                      <div className="text-purple-700 text-sm">
+                        Analyzing your issue for smart categorization...
+                      </div>
+                    ) : aiSuggestions ? (
+                      <div className="space-y-4">
+                        {/* Duplicate Warning */}
+                        {aiSuggestions.duplicateCheck?.isDuplicate && (
+                          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                            <div className="flex items-center gap-2 text-yellow-800 text-sm font-medium mb-2">
+                              <span>⚠️</span>
+                              Similar issues found
+                            </div>
+                            <div className="text-yellow-700 text-xs">
+                              Consider reviewing existing issues before submitting
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Category Suggestions Grid */}
+                        <div className="grid md:grid-cols-3 gap-4">
+                          {/* Business Area */}
+                          <div>
+                            <label className="block text-sm font-medium text-purple-800 mb-2">
+                              Business Area
+                            </label>
+                            <div className="space-y-2">
+                              {aiSuggestions.suggestions?.businessAreas?.map(
+                                (suggestion: any, index: number) => (
+                                  <button
+                                    key={index}
+                                    type="button"
+                                    onClick={() =>
+                                      setSelectedCategories((prev) => ({
+                                        ...prev,
+                                        businessArea: suggestion.businessArea,
+                                      }))
+                                    }
+                                    className={`w-full text-left p-2 rounded-md text-sm transition-colors ${
+                                      selectedCategories.businessArea === suggestion.businessArea
+                                        ? 'bg-purple-600 text-white'
+                                        : 'bg-white border border-purple-200 hover:bg-purple-50'
+                                    }`}
+                                  >
+                                    <div className="font-medium">{suggestion.businessArea}</div>
+                                    <div className="text-xs opacity-75">
+                                      {suggestion.confidence}% confidence
+                                    </div>
+                                  </button>
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Department */}
+                          <div>
+                            <label className="block text-sm font-medium text-purple-800 mb-2">
+                              Department
+                            </label>
+                            <div className="space-y-2">
+                              {aiSuggestions.suggestions?.departments?.map(
+                                (suggestion: any, index: number) => (
+                                  <button
+                                    key={index}
+                                    type="button"
+                                    onClick={() =>
+                                      setSelectedCategories((prev) => ({
+                                        ...prev,
+                                        department: suggestion.department,
+                                      }))
+                                    }
+                                    className={`w-full text-left p-2 rounded-md text-sm transition-colors ${
+                                      selectedCategories.department === suggestion.department
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white border border-blue-200 hover:bg-blue-50'
+                                    }`}
+                                  >
+                                    <div className="font-medium">{suggestion.department}</div>
+                                    <div className="text-xs opacity-75">
+                                      {suggestion.confidence}% confidence
+                                    </div>
+                                  </button>
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Impact Type */}
+                          <div>
+                            <label className="block text-sm font-medium text-purple-800 mb-2">
+                              Impact Type
+                            </label>
+                            <div className="space-y-2">
+                              {aiSuggestions.suggestions?.impactTypes?.map(
+                                (suggestion: any, index: number) => (
+                                  <button
+                                    key={index}
+                                    type="button"
+                                    onClick={() =>
+                                      setSelectedCategories((prev) => ({
+                                        ...prev,
+                                        impactType: suggestion.impactType,
+                                      }))
+                                    }
+                                    className={`w-full text-left p-2 rounded-md text-sm transition-colors ${
+                                      selectedCategories.impactType === suggestion.impactType
+                                        ? 'bg-green-600 text-white'
+                                        : 'bg-white border border-green-200 hover:bg-green-50'
+                                    }`}
+                                  >
+                                    <div className="font-medium">{suggestion.impactType}</div>
+                                    <div className="text-xs opacity-75">
+                                      {suggestion.confidence}% confidence
+                                    </div>
+                                  </button>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* AI Confidence */}
+                        <div className="flex items-center justify-between pt-3 border-t border-purple-200">
+                          <div className="text-sm text-purple-700">
+                            AI Analysis Confidence:{' '}
+                            <span className="font-semibold">{aiSuggestions.aiConfidence}%</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => generateAISuggestions(newIssue)}
+                            className="text-xs text-purple-600 hover:text-purple-800 underline"
+                          >
+                            Regenerate
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-purple-700 text-sm">
+                        Keep typing for AI-powered categorization suggestions...
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <button

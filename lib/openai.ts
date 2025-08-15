@@ -779,6 +779,27 @@ RESPONSE FORMAT (JSON):
       };
     }
   }
+
+  // Generate structured JSON responses for categorization
+  public async generateStructuredResponse(prompt: string): Promise<string | null> {
+    if (!this.isConfigured() || !this.config?.enabled) {
+      return null;
+    }
+
+    try {
+      const response = await this.client!.chat.completions.create({
+        model: this.config.model || 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: this.config.maxTokens || 600,
+        temperature: 0.3, // Lower temperature for more consistent JSON output
+      });
+
+      return response.choices[0]?.message?.content || null;
+    } catch (error) {
+      console.error('OpenAI structured response error:', error);
+      return null;
+    }
+  }
 }
 
 // Export singleton instance

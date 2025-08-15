@@ -650,6 +650,55 @@ export class OptimizedOpenAIService {
       };
     }
   }
+
+  // Generate structured JSON responses for categorization with optimization
+  public async generateStructuredResponse(prompt: string): Promise<string | null> {
+    if (!this.isConfigured() || !this.config?.enabled) {
+      return null;
+    }
+
+    const startTime = Date.now();
+    const cacheKey = `structured:${this.hashString(prompt)}`;
+
+    try {
+      // Check cache first
+      const cached = this.cache.get(cacheKey);
+      if (cached) {
+        return cached;
+      }
+
+      const response = await this.client!.chat.completions.create({
+        model: this.config.model || 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: this.config.maxTokens || 600,
+        temperature: 0.3, // Lower temperature for consistent JSON
+      });
+
+      const result = response.choices[0]?.message?.content || null;
+      const latency = Date.now() - startTime;
+
+      // Cache the result
+      if (result) {
+        this.cache.set(cacheKey, result);
+      }
+
+      // Track performance metrics
+      this.trackMetrics({
+        operation: 'structured_response',
+        inputTokens: response.usage?.prompt_tokens || 0,
+        outputTokens: response.usage?.completion_tokens || 0,
+        totalTokens: response.usage?.total_tokens || 0,
+        latency,
+        cacheHit: false,
+        modelUsed: response.model || this.config.model || 'gpt-3.5-turbo',
+      });
+
+      return result;
+    } catch (error) {
+      console.error('Optimized structured response error:', error);
+      return null;
+    }
+  }
 }
 
 // Export singleton instance
