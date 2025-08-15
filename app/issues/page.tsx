@@ -134,11 +134,26 @@ export default function IssuesPage() {
       const res = await fetch('/api/issues', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description: newIssue }),
+        body: JSON.stringify({
+          description: newIssue,
+          selectedCategories,
+          validationResult,
+          aiSuggestions,
+        }),
       });
 
       if (res.ok) {
+        // Reset all form data
         setNewIssue('');
+        setSelectedCategories({
+          businessArea: '',
+          department: '',
+          impactType: '',
+        });
+        setAiSuggestions(null);
+        setValidationResult(null);
+        setShowValidation(false);
+
         fetchIssues(); // Refresh the list
         setMessage('Issue created successfully');
         trackEvent('issues_create_success');
@@ -821,7 +836,17 @@ Example: 'Our project approval process takes 3-4 weeks due to unclear requiremen
                   {newIssue.trim().length > 0 && !submitting && (
                     <button
                       type="button"
-                      onClick={() => setNewIssue('')}
+                      onClick={() => {
+                        setNewIssue('');
+                        setSelectedCategories({
+                          businessArea: '',
+                          department: '',
+                          impactType: '',
+                        });
+                        setAiSuggestions(null);
+                        setValidationResult(null);
+                        setShowValidation(false);
+                      }}
                       className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
                     >
                       Clear Form

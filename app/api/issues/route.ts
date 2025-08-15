@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { description } = body;
+    const { description, selectedCategories, validationResult, aiSuggestions } = body;
 
     if (!description || description.trim().length === 0) {
       return NextResponse.json({ error: 'Description is required' }, { status: 400 });
@@ -57,11 +57,87 @@ export async function POST(req: NextRequest) {
     // Calculate initial heatmap score based on description keywords
     const heatmapScore = calculateHeatmapScore(description);
 
+    // Find category IDs from names if provided
+    let businessAreaId: string | undefined;
+    let departmentId: string | undefined;
+    let impactTypeId: string | undefined;
+
+    if (selectedCategories) {
+      if (selectedCategories.businessArea) {
+        const businessArea = await prisma.systemCategory.findFirst({
+          where: {
+            name: selectedCategories.businessArea,
+            type: 'PROCESS',
+            tags: { has: 'business-area' },
+            isActive: true,
+          },
+        });
+        businessAreaId = businessArea?.id;
+      }
+
+      if (selectedCategories.department) {
+        const department = await prisma.systemCategory.findFirst({
+          where: {
+            name: selectedCategories.department,
+            type: 'PEOPLE',
+            tags: { has: 'department' },
+            isActive: true,
+          },
+        });
+        departmentId = department?.id;
+      }
+
+      if (selectedCategories.impactType) {
+        const impactType = await prisma.systemCategory.findFirst({
+          where: {
+            name: selectedCategories.impactType,
+            type: 'PROCESS',
+            tags: { has: 'impact-type' },
+            isActive: true,
+          },
+        });
+        impactTypeId = impactType?.id;
+      }
+    }
+
     const issue = await prisma.issue.create({
       data: {
         description: description.trim(),
         votes: 1, // Creator automatically votes
         heatmapScore,
+
+        // AI Classification Fields (Story 2.3)
+        businessAreaId,
+        departmentId,
+        impactTypeId,
+
+        // Smart Validation Fields (Story 2.2)
+        qualityScore: validationResult?.score,
+        completenessScore: validationResult?.completeness
+          ? Object.values(validationResult.completeness).filter(Boolean).length * 20
+          : undefined,
+        validationDetails: validationResult
+          ? {
+              feedback: validationResult.feedback,
+              completeness: validationResult.completeness,
+              isValid: validationResult.isValid,
+            }
+          : undefined,
+
+        // AI Suggestion Metadata
+        categoryConfidence: aiSuggestions?.aiConfidence,
+        suggestionMetadata: aiSuggestions
+          ? {
+              suggestions: aiSuggestions.suggestions,
+              duplicateCheck: aiSuggestions.duplicateCheck,
+              generatedAt: new Date().toISOString(),
+            }
+          : undefined,
+      },
+      include: {
+        businessArea: true,
+        departmentCategory: true,
+        impactType: true,
       },
     });
 

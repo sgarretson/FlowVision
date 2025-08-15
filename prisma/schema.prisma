@@ -192,6 +192,25 @@ model Issue {
   aiVersion     String?       // AI model version used
   // Enhanced AI Analysis Fields
   aiAnalysisDetails Json?     // Full detailed analysis (rootCauses, recommendations, impact, etc.)
+  
+  // AI-Driven Classification Fields (Story 2.3)
+  businessAreaId    String?        // References SystemCategory for business area
+  businessArea      SystemCategory? @relation("IssueBusinessArea", fields: [businessAreaId], references: [id])
+  departmentId      String?        // References SystemCategory for department  
+  departmentCategory SystemCategory? @relation("IssueDepartment", fields: [departmentId], references: [id])
+  impactTypeId      String?        // References SystemCategory for impact type
+  impactType        SystemCategory? @relation("IssueImpactType", fields: [impactTypeId], references: [id])
+  
+  // Smart Form Validation Fields (Story 2.2)
+  qualityScore      Int?           // Overall quality score (0-100) from form validation
+  completenessScore Int?           // Completeness score (0-100) from AI analysis
+  validationDetails Json?          // Detailed validation metrics and feedback
+  
+  // AI Category Suggestion Metadata
+  categorySuggestionId String?     // Track which AI suggestion was used
+  categoryConfidence   Int?        // Confidence score for selected categories
+  suggestionMetadata   Json?       // Store original AI suggestions for analysis
+  
   // System Impact Relationships
   systemImpacts IssueSystemImpact[] // System categories affected by this issue
   comments      Comment[]
@@ -664,6 +683,11 @@ model SystemCategory {
   
   // Relationships
   issueImpacts     IssueSystemImpact[]
+  
+  // AI Classification Relationships (Story 2.3)
+  issueBusinessAreas   Issue[] @relation("IssueBusinessArea")    // Issues classified with this business area
+  issueDepartments     Issue[] @relation("IssueDepartment")      // Issues classified with this department  
+  issueImpactTypes     Issue[] @relation("IssueImpactType")      // Issues classified with this impact type
   
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
