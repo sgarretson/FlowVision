@@ -4,6 +4,16 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import StrategicHealthCard from '@/components/StrategicHealthCard';
+import BusinessImpactCard from '@/components/BusinessImpactCard';
+import CriticalAlertsCard from '@/components/CriticalAlertsCard';
+import InitiativeProgressCard from '@/components/InitiativeProgressCard';
+import type {
+  StrategicHealthMetrics,
+  BusinessImpactSummary,
+  CriticalAlert,
+  InitiativeProgress,
+} from '@/lib/strategic-health';
 
 type Issue = {
   id: string;
@@ -20,12 +30,27 @@ type Initiative = {
   progress: number;
 };
 
+interface StrategicDashboardData {
+  strategicHealth: StrategicHealthMetrics;
+  businessImpact: BusinessImpactSummary;
+  criticalAlerts: CriticalAlert[];
+  initiativeProgress: InitiativeProgress;
+  executiveSummary: {
+    status: string;
+    keyMetric: number;
+    trendDirection: string;
+    urgentActions: number;
+  };
+}
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);
+  const [strategicData, setStrategicData] = useState<StrategicDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [strategicLoading, setStrategicLoading] = useState(true);
 
   useEffect(() => {
     if (!session) {
@@ -33,6 +58,7 @@ export default function DashboardPage() {
       return;
     }
     loadDashboardData();
+    loadStrategicData();
   }, [session, router]);
 
   async function loadDashboardData() {
@@ -55,6 +81,20 @@ export default function DashboardPage() {
       console.error('Failed to load dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadStrategicData() {
+    try {
+      const response = await fetch('/api/dashboard/strategic');
+      if (response.ok) {
+        const result = await response.json();
+        setStrategicData(result.data);
+      }
+    } catch (error) {
+      console.error('Failed to load strategic dashboard data:', error);
+    } finally {
+      setStrategicLoading(false);
     }
   }
 
@@ -140,70 +180,39 @@ export default function DashboardPage() {
 
   return (
     <main className="space-y-8 animate-fade-in">
-      {/* Hero Section */}
-      <div className="text-center py-8">
-        <h1 className="text-h1 mb-4">Welcome to FlowVision</h1>
+      {/* Executive Hero Section */}
+      <div className="text-center py-6">
+        <h1 className="text-h1 mb-4">Strategic Command Center</h1>
         <p className="text-body max-w-2xl mx-auto">
-          Transform friction into flow. Detect operational issues, categorize improvement ideas, and
-          create strategic roadmaps to efficiency.
+          Executive dashboard providing real-time strategic insights, business impact metrics, and
+          actionable intelligence for organizational excellence.
         </p>
       </div>
 
-      {/* Hero Metric */}
-      <div className="text-center">
-        <div className="card-elevated p-8 max-w-md mx-auto group hover:shadow-card-elevated-hover transition-all duration-300">
-          <div className="text-6xl font-bold text-primary mb-3 group-hover:scale-105 transition-transform duration-200">
-            {initiatives.filter((i) => i.status === 'ACTIVE' || i.status === 'In Progress').length}
-          </div>
-          <div className="text-h3 text-gray-700 mb-4 font-semibold">Active Initiatives</div>
-          <div className="text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg">
-            {initiatives.length > 0
-              ? `${Math.round((initiatives.filter((i) => i.status === 'ACTIVE' || i.status === 'In Progress').length / initiatives.length) * 100)}% of total initiatives`
-              : 'Start by identifying issues or creating your first initiative'}
-          </div>
-        </div>
+      {/* Tier 1: Executive Summary - Always Visible */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+        {/* Strategic Health Score */}
+        <StrategicHealthCard metrics={strategicData?.strategicHealth} loading={strategicLoading} />
+
+        {/* Business Impact */}
+        <BusinessImpactCard impact={strategicData?.businessImpact} loading={strategicLoading} />
+
+        {/* Critical Alerts */}
+        <CriticalAlertsCard
+          alerts={strategicData?.criticalAlerts || []}
+          loading={strategicLoading}
+        />
+
+        {/* Initiative Progress */}
+        <InitiativeProgressCard
+          progress={strategicData?.initiativeProgress}
+          loading={strategicLoading}
+        />
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="card-interactive group">
-          <div className="p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <div className="w-6 h-6 bg-blue-600 rounded-lg"></div>
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-2">{initiatives.length}</div>
-            <div className="text-sm font-medium text-gray-600">Total Initiatives</div>
-          </div>
-        </div>
-        <div className="card-interactive group">
-          <div className="p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                <div className="w-6 h-6 bg-orange-600 rounded-lg"></div>
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-2">{issueStats.total}</div>
-            <div className="text-sm font-medium text-gray-600">Issues Identified</div>
-          </div>
-        </div>
-        <div className="card-interactive group">
-          <div className="p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                <div className="w-6 h-6 bg-red-600 rounded-lg"></div>
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-2">{issueStats.critical}</div>
-            <div className="text-sm font-medium text-gray-600">Critical Issues</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
+      {/* Strategic Actions */}
       <div className="text-center">
-        <h2 className="text-h2 mb-6">Get Started</h2>
+        <h2 className="text-h2 mb-6">Strategic Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 max-w-6xl mx-auto">
           <Link
             href="/issues"
@@ -224,12 +233,14 @@ export default function DashboardPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-h3 mb-2">Identify Issues</h3>
-            <p className="text-caption">Report and vote on problems that need attention</p>
+            <h3 className="text-h3 mb-2">Analyze Issues</h3>
+            <p className="text-caption">
+              Review organizational challenges and strategic opportunities
+            </p>
           </Link>
 
           <Link
-            href="/ideas"
+            href="/insights"
             className="card-tertiary p-6 hover:shadow-card-secondary transition-shadow duration-200 group"
           >
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-yellow-200 transition-colors">
@@ -247,8 +258,10 @@ export default function DashboardPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-h3 mb-2">Capture Ideas</h3>
-            <p className="text-caption">Brainstorm and collaborate on strategic opportunities</p>
+            <h3 className="text-h3 mb-2">Strategic Insights</h3>
+            <p className="text-caption">
+              Access AI-powered analysis and organizational intelligence
+            </p>
           </Link>
 
           <Link
@@ -270,8 +283,8 @@ export default function DashboardPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-h3 mb-2">Plan Initiatives</h3>
-            <p className="text-caption">Create and prioritize solutions to move forward</p>
+            <h3 className="text-h3 mb-2">Strategic Initiatives</h3>
+            <p className="text-caption">Review and guide high-impact organizational projects</p>
           </Link>
 
           <Link
@@ -293,8 +306,10 @@ export default function DashboardPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-h3 mb-2">Execute & Track</h3>
-            <p className="text-caption">Monitor progress and keep initiatives on track</p>
+            <h3 className="text-h3 mb-2">Performance Tracking</h3>
+            <p className="text-caption">
+              Monitor organizational performance and initiative outcomes
+            </p>
           </Link>
         </div>
       </div>
