@@ -82,6 +82,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       );
     }
 
+    // Get current AI configuration for accurate model tracking
+    const aiConfig = await prisma.aIConfiguration.findUnique({
+      where: { key: 'openai_config' },
+    });
+    const currentModel = aiConfig?.value?.model || 'gpt-3.5-turbo';
+
     // Store AI summary and detailed analysis in database
     const updatedIssue = await prisma.issue.update({
       where: { id: params.id },
@@ -89,7 +95,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         aiSummary: aiAnalysis.summary,
         aiConfidence: aiAnalysis.confidence,
         aiGeneratedAt: new Date(),
-        aiVersion: 'gpt-3.5-turbo', // Could be made dynamic based on config
+        aiVersion: currentModel, // Now dynamic based on current config
         aiAnalysisDetails: {
           summary: aiAnalysis.summary,
           rootCauses: aiAnalysis.rootCauses,
@@ -97,7 +103,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           recommendations: aiAnalysis.recommendations,
           confidence: aiAnalysis.confidence,
           generatedAt: new Date().toISOString(),
-          model: 'gpt-3.5-turbo',
+          model: currentModel,
         },
       },
     });
@@ -110,7 +116,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         details: {
           issueId: params.id,
           confidence: aiAnalysis.confidence,
-          model: 'gpt-3.5-turbo',
+          model: currentModel,
         },
       },
     });

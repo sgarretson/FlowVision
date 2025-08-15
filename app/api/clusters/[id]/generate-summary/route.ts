@@ -101,6 +101,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       );
     }
 
+    // Get current AI configuration for accurate model tracking
+    const aiConfig = await prisma.aIConfiguration.findUnique({
+      where: { key: 'openai_config' },
+    });
+    const currentModel = aiConfig?.value?.model || 'gpt-3.5-turbo';
+
     // Store AI summary and detailed analysis in database
     const updatedCluster = await prisma.issueCluster.update({
       where: { id: params.id },
@@ -115,7 +121,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         },
         aiConfidence: aiAnalysis.confidence,
         aiGeneratedAt: new Date(),
-        aiVersion: 'gpt-3.5-turbo',
+        aiVersion: currentModel,
         aiAnalysisDetails: {
           consolidatedSummary: aiAnalysis.consolidatedSummary,
           crossIssuePatterns: aiAnalysis.crossIssuePatterns,
@@ -123,7 +129,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           initiativeRecommendations: aiAnalysis.initiativeRecommendations,
           confidence: aiAnalysis.confidence,
           generatedAt: new Date().toISOString(),
-          model: 'gpt-3.5-turbo',
+          model: currentModel,
           issueCount: cluster.issues.length,
         },
       },
@@ -138,7 +144,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           clusterId: params.id,
           issueCount: cluster.issues.length,
           confidence: aiAnalysis.confidence,
-          model: 'gpt-3.5-turbo',
+          model: currentModel,
         },
       },
     });
