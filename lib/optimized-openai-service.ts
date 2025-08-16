@@ -228,12 +228,40 @@ export class OptimizedOpenAIService {
   private cache: SimpleCache;
   private usageTracker: UsageTracker;
   private qualityValidator: QualityValidator;
+  private metrics = {
+    totalOperations: 0,
+    totalTokens: 0,
+    averageResponseTime: 0,
+  };
 
   constructor() {
     this.cache = new SimpleCache();
     this.usageTracker = new UsageTracker();
     this.qualityValidator = new QualityValidator();
     this.initializeFromEnv();
+  }
+
+  // Helper method for hashing strings
+  private hashString(input: string): string {
+    // Simple hash function for cache keys
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      const char = input.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(36);
+  }
+
+  // Helper method for tracking metrics
+  private trackMetrics(metrics: { operation: string; tokens: number; responseTime: number }) {
+    // Update internal metrics tracking
+    this.metrics.totalOperations++;
+    this.metrics.totalTokens += metrics.tokens;
+    this.metrics.averageResponseTime =
+      (this.metrics.averageResponseTime * (this.metrics.totalOperations - 1) +
+        metrics.responseTime) /
+      this.metrics.totalOperations;
   }
 
   private initializeFromEnv(): void {

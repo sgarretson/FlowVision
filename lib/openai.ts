@@ -27,6 +27,11 @@ class OpenAIService {
     // Don't initialize in constructor - do it lazily when needed
   }
 
+  // Public getter for client access
+  public getClient(): OpenAI | null {
+    return this.client;
+  }
+
   private async ensureInitialized(): Promise<boolean> {
     if (this.config && this.client) {
       return true; // Already initialized

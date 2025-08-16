@@ -142,7 +142,7 @@ export async function seedTaxonomy(): Promise<void> {
           name_type_organizationId: {
             name: area.name,
             type: area.type,
-            organizationId: null,
+            organizationId: null as string | null,
           },
         },
         update: {
@@ -168,7 +168,7 @@ export async function seedTaxonomy(): Promise<void> {
           name_type_organizationId: {
             name: dept.name,
             type: dept.type,
-            organizationId: null,
+            organizationId: null as string | null,
           },
         },
         update: {
@@ -194,7 +194,7 @@ export async function seedTaxonomy(): Promise<void> {
           name_type_organizationId: {
             name: impact.name,
             type: impact.type,
-            organizationId: null,
+            organizationId: null as string | null,
           },
         },
         update: {

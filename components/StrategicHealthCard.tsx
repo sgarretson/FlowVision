@@ -11,12 +11,12 @@ import {
 import type { StrategicHealthMetrics } from '@/lib/strategic-health';
 
 interface StrategicHealthCardProps {
-  metrics: StrategicHealthMetrics;
+  metrics?: StrategicHealthMetrics;
   loading?: boolean;
 }
 
 export default function StrategicHealthCard({ metrics, loading }: StrategicHealthCardProps) {
-  if (loading) {
+  if (loading || !metrics) {
     return (
       <div className="card-primary p-6 animate-pulse">
         <div className="flex items-center justify-between mb-4">

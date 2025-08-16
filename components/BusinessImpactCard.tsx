@@ -11,12 +11,12 @@ import {
 import type { BusinessImpactSummary } from '@/lib/strategic-health';
 
 interface BusinessImpactCardProps {
-  impact: BusinessImpactSummary;
+  impact?: BusinessImpactSummary;
   loading?: boolean;
 }
 
 export default function BusinessImpactCard({ impact, loading }: BusinessImpactCardProps) {
-  if (loading) {
+  if (loading || !impact) {
     return (
       <div className="card-primary p-6 animate-pulse">
         <div className="flex items-center gap-2 mb-4">

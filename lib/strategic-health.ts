@@ -73,7 +73,7 @@ export async function calculateStrategicHealth(): Promise<StrategicHealthMetrics
       }),
       prisma.issue.findMany({
         include: {
-          addressedIssues: { select: { id: true, status: true } },
+          initiatives: { select: { id: true, status: true } },
         },
       }),
       prisma.auditLog.findMany({
@@ -130,8 +130,10 @@ export async function calculateStrategicHealth(): Promise<StrategicHealthMetrics
     });
 
     // Calculate trends (simplified for MVP)
+    const direction: 'up' | 'down' | 'stable' =
+      overallScore >= 75 ? 'up' : overallScore >= 60 ? 'stable' : 'down';
     const trends = {
-      direction: overallScore >= 75 ? 'up' : overallScore >= 60 ? 'stable' : ('down' as const),
+      direction,
       changePercent: Math.round((overallScore - 70) * 0.1), // Simulated trend
       timeframe: '30 days',
     };
@@ -222,7 +224,7 @@ export async function getCriticalAlerts(): Promise<CriticalAlert[]> {
         title: `Critical Issue: ${issue.department || 'Unknown Department'}`,
         description: issue.description.substring(0, 100) + '...',
         actionRequired: 'Review and assign to initiative',
-        department: issue.department,
+        department: issue.department || undefined,
         estimatedImpact: 'High organizational impact',
       });
     });

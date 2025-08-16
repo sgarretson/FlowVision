@@ -11,12 +11,12 @@ import {
 import type { InitiativeProgress } from '@/lib/strategic-health';
 
 interface InitiativeProgressCardProps {
-  progress: InitiativeProgress;
+  progress?: InitiativeProgress;
   loading?: boolean;
 }
 
 export default function InitiativeProgressCard({ progress, loading }: InitiativeProgressCardProps) {
-  if (loading) {
+  if (loading || !progress) {
     return (
       <div className="card-primary p-6 animate-pulse">
         <div className="flex items-center gap-2 mb-4">

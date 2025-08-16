@@ -135,7 +135,12 @@ Focus on strategic business value, executive decision-making, and actionable ins
       const aiConfig = await systemConfig.getAIOperationConfig('categorization');
 
       // Generate AI analysis using configurable parameters
-      const response = await openAIService.client!.chat.completions.create({
+      const client = openAIService.getClient();
+      if (!client) {
+        throw new Error('OpenAI client not initialized');
+      }
+
+      const response = await client.chat.completions.create({
         model: aiConfig.model,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: aiConfig.maxTokens,
@@ -250,16 +255,12 @@ Focus on strategic business value, executive decision-making, and actionable ins
       };
 
       // Record successful operation
-      await aiServiceMonitor.recordOperation(
-        'category_analysis',
-        'success',
-        Date.now() - startTime
-      );
+      await aiServiceMonitor.recordOperation(true, Date.now() - startTime);
 
       return NextResponse.json(responseData);
     } catch (aiError) {
       console.error('AI service error:', aiError);
-      await aiServiceMonitor.recordOperation('category_analysis', 'error', Date.now() - startTime);
+      await aiServiceMonitor.recordOperation(false, Date.now() - startTime, 'ai_analysis_error');
 
       return NextResponse.json(
         {

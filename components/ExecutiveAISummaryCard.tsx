@@ -12,14 +12,14 @@ import {
 import type { ExecutiveAISummary } from '@/lib/predictive-analytics';
 
 interface ExecutiveAISummaryCardProps {
-  summary: ExecutiveAISummary;
+  summary?: ExecutiveAISummary;
   loading?: boolean;
 }
 
 export default function ExecutiveAISummaryCard({ summary, loading }: ExecutiveAISummaryCardProps) {
   const [expandedSection, setExpandedSection] = useState<string | null>('insights');
 
-  if (loading) {
+  if (loading || !summary) {
     return (
       <div className="card-primary p-6 animate-pulse">
         <div className="flex items-center gap-2 mb-4">
