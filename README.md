@@ -94,20 +94,42 @@ FlowVision is a comprehensive efficiency intelligence platform designed for SMB 
 ### Project Structure
 
 ```
-flowvision/
-├── app/                    # Next.js 13+ app directory
-│   ├── api/               # API routes
-│   ├── auth/              # Authentication pages
-│   ├── admin/             # Admin dashboard
-│   ├── initiatives/       # Initiative management
-│   ├── issues/            # Issue tracking
-│   ├── ideas/             # Idea collaboration
-│   └── profile/           # User profiles
-├── components/            # Reusable React components
-├── lib/                   # Utility libraries
-├── prisma/                # Database schema and migrations
-├── tests/                 # Test suites
-└── types/                 # TypeScript definitions
+FlowVision/
+├── 📚 docs/                       # All Documentation (organized by category)
+│   ├── architecture/              # System design & technical guides
+│   ├── development/               # Developer setup & best practices
+│   ├── security/                  # Security documentation & audits
+│   ├── project-management/        # Sprint plans, reviews & processes
+│   ├── design/                    # UI/UX design systems & guidelines
+│   ├── quality-assurance/         # QA reports & testing documentation
+│   ├── production/                # Production deployment & operations
+│   ├── analysis-reports/          # Analysis results & strategic assessments
+│   ├── user-guides/               # End-user documentation & help
+│   └── templates/                 # Document templates for consistency
+│
+├── ⚙️ config/                     # Configuration Management
+│   ├── docker/                    # Docker & containerization configs
+│   ├── environment/               # Environment variable templates
+│   ├── nginx/                     # Web server configurations
+│   └── monitoring/                # Monitoring & observability configs
+│
+├── 🏗️ app/                       # Next.js 13+ app directory
+│   ├── api/                       # API routes
+│   ├── auth/                      # Authentication pages
+│   ├── admin/                     # Admin dashboard
+│   ├── initiatives/               # Initiative management
+│   ├── issues/                    # Issue tracking
+│   ├── ideas/                     # Idea collaboration
+│   └── profile/                   # User profiles
+│
+├── 🧩 components/                 # Reusable React components
+├── 📚 lib/                       # Utility libraries & services
+├── 🗄️ prisma/                    # Database schema & migrations
+├── 🧪 tests/                     # Test suites
+├── 🔧 scripts/                   # Utility & deployment scripts
+├── 🛠️ tools/                     # Development tools & utilities
+├── 📁 archive/                   # Archived/legacy files
+└── 📝 types/                     # TypeScript definitions
 ```
 
 ## 👥 User Roles & Permissions

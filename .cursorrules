@@ -8,22 +8,30 @@ You are an expert development assistant for the FlowVision project. Always follo
 
 ### Branch Management
 - **NEVER commit directly to main branch**
-- **ALWAYS create feature branches** with descriptive names: `feature/description-of-work`
+- **ALWAYS create feature branches** with enhanced naming: `type/epic-id-story-id-description`
+  - Examples: `feature/epic-2-story-15-ai-response-caching`, `bugfix/sprint-5-auth-session-timeout`
 - **ALWAYS verify branch protection** is enabled before making changes
 - **ALWAYS keep feature branches small and focused** (single feature/fix per branch)
 - **ALWAYS delete merged feature branches** both locally and remotely
 
-### Commit Standards
-- **ALWAYS use conventional commit format**: `type(scope): description`
+### Enhanced Commit Standards
+- **ALWAYS use enhanced commit format**: `type(scope): description [story: ID] [points: X] [learns: insight]`
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-  - Examples: `feat(clusters): add view details modal`, `fix(auth): resolve login redirect issue`
+  - Examples: `feat(ai): implement response caching [story: SYS-15] [points: 5] [learns: 70% cost reduction with Redis]`
+- **ALWAYS include learning annotations** for significant changes or discoveries
+- **ALWAYS reference story ID** when working on sprint tasks
+- **ALWAYS document story point impact** for estimation accuracy tracking
 - **ALWAYS test locally before committing**
 - **ALWAYS run `npm test` and ensure it passes**
 - **ALWAYS clear build cache** (`rm -rf .next`) if encountering React/build errors
 
-### Pull Request Process
+### Enhanced Pull Request Process
 - **ALWAYS create PR for any code changes**
-- **ALWAYS include descriptive PR title and description**
+- **ALWAYS use enhanced PR template** with learning capture sections
+- **ALWAYS include story context** (ID, points, epic, sprint)
+- **ALWAYS document technical learnings** and process insights
+- **ALWAYS assess story point accuracy** and variance factors
+- **ALWAYS update relevant documentation** when making architectural changes
 - **ALWAYS request review before merging**
 - **ALWAYS ensure CI/CD checks pass before requesting review**
 - **ALWAYS resolve merge conflicts locally, never in GitHub UI**
@@ -76,11 +84,20 @@ If you encounter:
 - **ALWAYS commit**: Lock files (`package-lock.json`, `yarn.lock`)
 - **ALWAYS use absolute paths** in tool configurations when possible
 
-### Documentation
+### Documentation Organization
+- **ALWAYS categorize documentation** in appropriate `/docs/` subfolder
+- **NEVER place documentation** in project root except README.md, CONTRIBUTING.md, LICENSE
+- **ALWAYS update category README.md** when adding new documentation
+- **ALWAYS use relative links** for cross-document references
+- **MAXIMUM 10 files per folder** without creating subfolders
+- **ALWAYS follow naming conventions**: UPPERCASE_DOCUMENT.md for main docs, README.md for indexes
+
+### Documentation Standards
 - **ALWAYS update README.md** for significant feature additions
 - **ALWAYS document API changes** in relevant files
 - **ALWAYS add JSDoc comments** for complex functions
 - **ALWAYS update CHANGELOG.md** for releases
+- **ALWAYS place documents** in correct category: architecture, development, security, project-management, design, quality-assurance, production, analysis-reports, user-guides, templates
 
 ## Error Prevention Rules
 
@@ -139,8 +156,23 @@ npx prisma generate
 - Use `gh pr checks` to verify CI/CD status
 - Use `gh issue list` to track open issues
 
-## Memory Management
+## Sprint & Process Awareness
 
+### Current Sprint Context
+- **ALWAYS reference** current sprint goals when implementing features: docs/project-management/sprint-plans/
+- **ALWAYS check** SYSTEMS_ENHANCEMENT_EXECUTION_PLAN.md for current sprint status
+- **ALWAYS align** work with current epic objectives and business value
+- **ALWAYS consider** sprint capacity and velocity when estimating work
+- **ALWAYS update** story status when making related code changes
+
+### Learning Integration Requirements
+- **ALWAYS capture** performance insights in commit messages using [learns: ] annotation
+- **ALWAYS document** architectural decisions with ADRs in docs/architecture/
+- **ALWAYS update** relevant documentation when process changes
+- **ALWAYS track** time estimates vs. actual implementation time for velocity improvement
+- **ALWAYS follow** Continuous Learning Framework: docs/project-management/processes/CONTINUOUS_LEARNING_FRAMEWORK.md
+
+### Memory Management
 Remember these key project facts:
 - Project uses Docker for development environment
 - Prefer no icons/emojis in user-facing content
@@ -150,11 +182,11 @@ Remember these key project facts:
 - Systems Enhancement is major release - use proper GitHub project management
 - Always include addressedIssues in initiative queries to prevent undefined errors
 - Use proper null checking for all optional array fields in frontend components
-- Current sprint details are in SYSTEMS_ENHANCEMENT_EXECUTION_PLAN.md
 - Team capacity is ~60 story points per 2-week sprint with 10% buffer
 - Sprint naming follows: Sprint X (dates) with clear goals and deliverables
 - Expert profiles available in EXPERT_PROFILES_SYSTEM.md for consistent decision-making
 - Background automation workflows defined in CURSOR_BACKGROUND_AUTOMATION.md
+- Source code management framework: docs/development/SOURCE_CODE_MANAGEMENT_FRAMEWORK.md
 
 ## Conflict Resolution Best Practices
 

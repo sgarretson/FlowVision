@@ -713,12 +713,8 @@ export class OptimizedOpenAIService {
       // Track performance metrics
       this.trackMetrics({
         operation: 'structured_response',
-        inputTokens: response.usage?.prompt_tokens || 0,
-        outputTokens: response.usage?.completion_tokens || 0,
-        totalTokens: response.usage?.total_tokens || 0,
-        latency,
-        cacheHit: false,
-        modelUsed: response.model || this.config.model || 'gpt-3.5-turbo',
+        tokens: response.usage?.total_tokens || 0,
+        responseTime: latency,
       });
 
       return result;
