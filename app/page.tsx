@@ -8,12 +8,22 @@ import StrategicHealthCard from '@/components/StrategicHealthCard';
 import BusinessImpactCard from '@/components/BusinessImpactCard';
 import CriticalAlertsCard from '@/components/CriticalAlertsCard';
 import InitiativeProgressCard from '@/components/InitiativeProgressCard';
+import PredictiveTrendsCard from '@/components/PredictiveTrendsCard';
+import AnomalyDetectionCard from '@/components/AnomalyDetectionCard';
+import SmartRecommendationsCard from '@/components/SmartRecommendationsCard';
+import ExecutiveAISummaryCard from '@/components/ExecutiveAISummaryCard';
 import type {
   StrategicHealthMetrics,
   BusinessImpactSummary,
   CriticalAlert,
   InitiativeProgress,
 } from '@/lib/strategic-health';
+import type {
+  PredictiveTrend,
+  AnomalyDetection,
+  SmartRecommendation,
+  ExecutiveAISummary,
+} from '@/lib/predictive-analytics';
 
 type Issue = {
   id: string;
@@ -43,14 +53,28 @@ interface StrategicDashboardData {
   };
 }
 
+interface AIIntelligenceData {
+  predictiveTrends: PredictiveTrend[];
+  anomalies: AnomalyDetection[];
+  smartRecommendations: SmartRecommendation[];
+  executiveSummary: ExecutiveAISummary;
+  aiIntelligence: {
+    trendsAnalysis: any;
+    anomalyDetection: any;
+    recommendationEngine: any;
+  };
+}
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);
   const [strategicData, setStrategicData] = useState<StrategicDashboardData | null>(null);
+  const [aiIntelligenceData, setAIIntelligenceData] = useState<AIIntelligenceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [strategicLoading, setStrategicLoading] = useState(true);
+  const [aiIntelligenceLoading, setAIIntelligenceLoading] = useState(true);
 
   useEffect(() => {
     if (!session) {
@@ -59,6 +83,7 @@ export default function DashboardPage() {
     }
     loadDashboardData();
     loadStrategicData();
+    loadAIIntelligenceData();
   }, [session, router]);
 
   async function loadDashboardData() {
@@ -95,6 +120,20 @@ export default function DashboardPage() {
       console.error('Failed to load strategic dashboard data:', error);
     } finally {
       setStrategicLoading(false);
+    }
+  }
+
+  async function loadAIIntelligenceData() {
+    try {
+      const response = await fetch('/api/dashboard/ai-intelligence');
+      if (response.ok) {
+        const result = await response.json();
+        setAIIntelligenceData(result.data);
+      }
+    } catch (error) {
+      console.error('Failed to load AI intelligence data:', error);
+    } finally {
+      setAIIntelligenceLoading(false);
     }
   }
 
@@ -208,6 +247,47 @@ export default function DashboardPage() {
           progress={strategicData?.initiativeProgress}
           loading={strategicLoading}
         />
+      </div>
+
+      {/* Tier 2: AI Intelligence Layer - Expandable */}
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-h2 mb-2">AI Intelligence Insights</h2>
+          <p className="text-body max-w-2xl mx-auto text-gray-600">
+            Predictive analytics, anomaly detection, and smart recommendations powered by artificial
+            intelligence
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Executive AI Summary - Full Width on Mobile */}
+          <div className="lg:col-span-2">
+            <ExecutiveAISummaryCard
+              summary={aiIntelligenceData?.executiveSummary}
+              loading={aiIntelligenceLoading}
+            />
+          </div>
+
+          {/* Predictive Trends */}
+          <PredictiveTrendsCard
+            trends={aiIntelligenceData?.predictiveTrends || []}
+            loading={aiIntelligenceLoading}
+          />
+
+          {/* Anomaly Detection */}
+          <AnomalyDetectionCard
+            anomalies={aiIntelligenceData?.anomalies || []}
+            loading={aiIntelligenceLoading}
+          />
+
+          {/* Smart Recommendations - Full Width */}
+          <div className="lg:col-span-2">
+            <SmartRecommendationsCard
+              recommendations={aiIntelligenceData?.smartRecommendations || []}
+              loading={aiIntelligenceLoading}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Strategic Actions */}
