@@ -26,6 +26,12 @@ This section contains all developer guides, setup instructions, best practices, 
   - Pull request processes
   - Code review guidelines
 
+- **[Code Review Checklist](./CODE_REVIEW_CHECKLIST.md)** - Comprehensive review standards
+  - Naming convention validation
+  - Code quality assessment
+  - Security and performance checks
+  - Testing and documentation requirements
+
 - **[Cursor Background Automation](./CURSOR_BACKGROUND_AUTOMATION.md)** - AI-assisted development
   - Background agent configuration
   - Automated quality checks
@@ -67,6 +73,17 @@ This section contains all developer guides, setup instructions, best practices, 
 - **Prettier**: Consistent code formatting
 - **Jest**: 80%+ test coverage requirement
 - **Security**: Automated vulnerability scanning
+- **Naming Conventions**: Professional, functional naming (no subjective qualifiers)
+
+### Naming Convention Standards
+
+- **NEVER use subjective qualifiers**: enhanced, optimized, improved, advanced, better, new, custom, special
+- **ALWAYS use functional descriptors**: service, manager, handler, engine, processor, validator, factory
+- **ALWAYS use domain-driven naming**: `{domain}-{function}.ts` (e.g., `ai-service.ts`, `user-authentication.ts`)
+- **ALWAYS name for what code does**, not how well it does it
+- **ALWAYS use clear, descriptive names** that remain relevant as system evolves
+- **ALWAYS follow patterns**: Class names should be `NounFunction` (e.g., `UserService`, `DataValidator`)
+- **ALWAYS use consistent casing**: kebab-case for files, PascalCase for types/classes, camelCase for variables/functions
 
 ---
 
@@ -90,6 +107,8 @@ This section contains all developer guides, setup instructions, best practices, 
 - [ ] Security scan shows no high/critical issues
 - [ ] Performance benchmarks meet requirements
 - [ ] Documentation updated for new features
+- [ ] Naming conventions followed (no subjective qualifiers)
+- [ ] Code review checklist completed
 
 ### Environment Management
 

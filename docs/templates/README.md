@@ -4,6 +4,20 @@ This section contains standardized templates for consistent documentation across
 
 ## 📋 Available Templates
 
+### **GitHub Workflow Templates** ⭐ NEW
+
+- **[Sprint Story Issue Template](./GITHUB_ISSUE_TEMPLATE_SPRINT_STORY.md)** - Comprehensive sprint story tracking
+  - User story format with acceptance criteria
+  - Implementation task breakdown
+  - Definition of done checklist
+  - Business value assessment
+
+- **[Pull Request Template](./PULL_REQUEST_TEMPLATE.md)** - Professional PR standards
+  - Code review checklist integration
+  - Naming convention validation
+  - Testing and security verification
+  - Impact assessment framework
+
 ### Decision Records
 
 - **ADR Template** - Architecture Decision Record template
