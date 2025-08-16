@@ -1,6 +1,6 @@
 // AI Migration utility for gradual rollout of optimized service
 import { openAIService } from '@/lib/openai';
-import { optimizedOpenAIService } from '@/lib/optimized-openai-service';
+import { aiService } from '@/lib/ai-service';
 import { aiConfigLoader } from '@/lib/ai-config-loader';
 import { executeAIOperation, AIServiceError } from '@/lib/ai-error-handler';
 
@@ -62,7 +62,7 @@ export class AIMigration {
       return await executeAIOperation(async () => {
         // Temporarily force original service until optimized service is fixed
         if (false && this.isOptimizedEnabled(userId)) {
-          return optimizedOpenAIService.generateIssueSummary(
+          return aiService.generateIssueSummary(
             description,
             department,
             category,
@@ -101,7 +101,7 @@ export class AIMigration {
     userId?: string
   ): Promise<any> {
     if (this.isOptimizedEnabled(userId)) {
-      return optimizedOpenAIService.generateClusterSummary(
+      return aiService.generateClusterSummary(
         clusterName,
         clusterDescription,
         issues,
@@ -127,7 +127,7 @@ export class AIMigration {
     userId?: string
   ): Promise<any> {
     if (this.isOptimizedEnabled(userId)) {
-      return optimizedOpenAIService.generateRequirementsFromSummary(
+      return aiService.generateRequirementsFromSummary(
         summary,
         initiativeTitle,
         initiativeGoal,
@@ -152,10 +152,7 @@ export class AIMigration {
     userId?: string
   ): Promise<{ insights: string; model: string } | null> {
     if (this.isOptimizedEnabled(userId)) {
-      const result = await optimizedOpenAIService.generateIssueInsights(
-        description,
-        businessContext
-      );
+      const result = await aiService.generateIssueInsights(description, businessContext);
       return result ? { insights: result, model: 'optimized-service' } : null;
     } else {
       return openAIService.generateIssueInsights(description, businessContext);
@@ -169,11 +166,7 @@ export class AIMigration {
     userId?: string
   ): Promise<any> {
     if (this.isOptimizedEnabled(userId)) {
-      return optimizedOpenAIService.generateInitiativeRecommendations(
-        title,
-        problem,
-        businessContext
-      );
+      return aiService.generateInitiativeRecommendations(title, problem, businessContext);
     } else {
       return openAIService.generateInitiativeRecommendations(title, problem, businessContext);
     }
@@ -184,7 +177,7 @@ export class AIMigration {
     userId?: string
   ): Promise<any> {
     if (this.isOptimizedEnabled(userId)) {
-      return optimizedOpenAIService.generateRequirementsFromDescription(description);
+      return aiService.generateRequirementsFromDescription(description);
     } else {
       return openAIService.generateRequirementsFromDescription(description);
     }
@@ -198,7 +191,7 @@ export class AIMigration {
     userId?: string
   ): Promise<any> {
     if (this.isOptimizedEnabled(userId)) {
-      return optimizedOpenAIService.generateRequirementCards(title, problem, goal, businessContext);
+      return aiService.generateRequirementCards(title, problem, goal, businessContext);
     } else {
       return openAIService.generateRequirementCards(title, problem, goal, businessContext);
     }
@@ -215,8 +208,8 @@ export class AIMigration {
     await aiConfigLoader.loadConfig();
 
     // Test both services and return the active one
-    if (optimizedOpenAIService.isConfigured()) {
-      return optimizedOpenAIService.testConnection();
+    if (aiService.isConfigured()) {
+      return aiService.testConnection();
     }
     return openAIService.testConnection();
   }
@@ -231,7 +224,7 @@ export class AIMigration {
     } else {
       // Fallback to direct service configuration (temporary)
       openAIService.configure(config);
-      optimizedOpenAIService.configure(config);
+      aiService.configure(config);
       return true;
     }
   }
@@ -243,22 +236,22 @@ export class AIMigration {
 
   // Performance monitoring
   static async getPerformanceMetrics(): Promise<any> {
-    if (optimizedOpenAIService.isConfigured()) {
-      return optimizedOpenAIService.getPerformanceMetrics();
+    if (aiService.isConfigured()) {
+      return aiService.getPerformanceMetrics();
     }
     return null;
   }
 
   static clearCache(): void {
-    if (optimizedOpenAIService.isConfigured()) {
-      optimizedOpenAIService.clearCache();
+    if (aiService.isConfigured()) {
+      aiService.clearCache();
     }
   }
 
   // New method for structured AI responses (JSON format)
   static async generateStructuredResponse(prompt: string, userId?: string): Promise<string | null> {
     if (this.isOptimizedEnabled(userId)) {
-      return optimizedOpenAIService.generateStructuredResponse(prompt);
+      return aiService.generateStructuredResponse(prompt);
     } else {
       return openAIService.generateStructuredResponse(prompt);
     }

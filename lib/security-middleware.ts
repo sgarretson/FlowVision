@@ -74,6 +74,8 @@ export function createSecurityMiddleware(
     req: NextRequest,
     handler: (req: NextRequest, context: SecurityContext) => Promise<NextResponse>
   ): Promise<NextResponse> {
+    let securityContext: SecurityContext | null = null;
+
     try {
       // 1. Rate limiting
       if (options.rateLimitKey) {
@@ -96,7 +98,6 @@ export function createSecurityMiddleware(
       }
 
       // 3. Authentication
-      let securityContext: SecurityContext | null = null;
       if (options.requireAuth !== false) {
         const authResult = await validateAuthentication(req);
         if (!authResult.success) {
@@ -145,9 +146,9 @@ export function createSecurityMiddleware(
       console.error('Security middleware error:', error);
 
       // Log security incidents
-      if (context?.user) {
+      if (securityContext?.user) {
         await logSecurityIncident({
-          userId: context.user.id,
+          userId: securityContext.user.id,
           action: 'SECURITY_ERROR',
           details: {
             error: error instanceof Error ? error.message : 'Unknown error',

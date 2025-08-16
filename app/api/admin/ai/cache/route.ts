@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { optimizedOpenAIService } from '@/lib/optimized-openai-service';
+import { aiService } from '@/lib/ai-service';
 
 export async function GET() {
   try {
@@ -20,7 +20,7 @@ export async function GET() {
     }
 
     // Get cache statistics
-    const metrics = await optimizedOpenAIService.getPerformanceMetrics();
+    const metrics = await aiService.getPerformanceMetrics();
 
     return NextResponse.json({
       cache: metrics.cache,
@@ -48,7 +48,7 @@ export async function DELETE() {
     }
 
     // Clear the cache
-    optimizedOpenAIService.clearCache();
+    aiService.clearCache();
 
     // Log the cache clear action
     await prisma.auditLog.create({

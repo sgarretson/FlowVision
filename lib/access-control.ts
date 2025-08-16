@@ -1,6 +1,6 @@
 /**
- * Enhanced Role-Based Access Control (RBAC) System
- * Extends the existing RBAC with comprehensive permission management
+ * Role-Based Access Control (RBAC) System
+ * Comprehensive permission management for FlowVision
  */
 
 import { NextRequest } from 'next/server';
@@ -8,7 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export type EnhancedPermission =
+export type Permission =
   // Data access permissions
   | 'issues:read'
   | 'issues:write'
@@ -43,26 +43,27 @@ export type EnhancedPermission =
   | 'roles:manage'
   | 'permissions:manage';
 
-export type EnhancedRole = 'ADMIN' | 'LEADER' | 'VIEWER' | 'ANALYST';
+export type Role = 'ADMIN' | 'LEADER' | 'VIEWER' | 'ANALYST';
 
-export interface EnhancedUser {
+export interface AuthenticatedUser {
   id: string;
   email: string;
-  role: EnhancedRole;
-  permissions: EnhancedPermission[];
+  role: Role;
+  permissions: Permission[];
   organizationId?: string;
   departmentId?: string;
   isActive: boolean;
 }
 
 export interface ResourceOwnership {
+  [key: string]: string | undefined;
   userId?: string;
   organizationId?: string;
   departmentId?: string;
 }
 
 export interface AccessContext {
-  user: EnhancedUser;
+  user: AuthenticatedUser;
   resource?: {
     type: string;
     id: string;
@@ -77,9 +78,9 @@ export interface AccessContext {
 }
 
 /**
- * Enhanced role-permission mapping
+ * Role-permission mapping
  */
-const ROLE_PERMISSIONS: Record<EnhancedRole, EnhancedPermission[]> = {
+const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ADMIN: [
     // Full system access
     'issues:read',
@@ -139,9 +140,9 @@ const ROLE_PERMISSIONS: Record<EnhancedRole, EnhancedPermission[]> = {
 };
 
 /**
- * Get current user with enhanced permissions
+ * Get current user with permissions
  */
-export async function getEnhancedCurrentUser(req?: NextRequest): Promise<EnhancedUser | null> {
+export async function getCurrentUser(req?: NextRequest): Promise<AuthenticatedUser | null> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -165,21 +166,21 @@ export async function getEnhancedCurrentUser(req?: NextRequest): Promise<Enhance
       return null;
     }
 
-    // Map existing roles to enhanced roles
-    const enhancedRole: EnhancedRole = user.role === 'ADMIN' ? 'ADMIN' : 'LEADER';
+    // Map existing roles to access control roles
+    const userRole: Role = user.role === 'ADMIN' ? 'ADMIN' : 'LEADER';
 
     return {
       id: user.id,
       email: user.email,
-      role: enhancedRole,
-      permissions: ROLE_PERMISSIONS[enhancedRole],
+      role: userRole,
+      permissions: ROLE_PERMISSIONS[userRole],
       isActive: true,
       // TODO: Add when multi-tenancy is implemented
       // organizationId: user.organizationId,
       // departmentId: user.departmentId,
     };
   } catch (error) {
-    console.error('Failed to get enhanced user:', error);
+    console.error('Failed to get authenticated user:', error);
     return null;
   }
 }
@@ -187,11 +188,8 @@ export async function getEnhancedCurrentUser(req?: NextRequest): Promise<Enhance
 /**
  * Check if user has specific permission
  */
-export async function hasEnhancedPermission(
-  permission: EnhancedPermission,
-  req?: NextRequest
-): Promise<boolean> {
-  const user = await getEnhancedCurrentUser(req);
+export async function hasPermission(permission: Permission, req?: NextRequest): Promise<boolean> {
+  const user = await getCurrentUser(req);
   if (!user || !user.isActive) {
     return false;
   }
@@ -203,10 +201,10 @@ export async function hasEnhancedPermission(
  * Check multiple permissions (user must have ALL)
  */
 export async function hasAllPermissions(
-  permissions: EnhancedPermission[],
+  permissions: Permission[],
   req?: NextRequest
 ): Promise<boolean> {
-  const user = await getEnhancedCurrentUser(req);
+  const user = await getCurrentUser(req);
   if (!user || !user.isActive) {
     return false;
   }
@@ -218,10 +216,10 @@ export async function hasAllPermissions(
  * Check if user has any of the specified permissions
  */
 export async function hasAnyPermission(
-  permissions: EnhancedPermission[],
+  permissions: Permission[],
   req?: NextRequest
 ): Promise<boolean> {
-  const user = await getEnhancedCurrentUser(req);
+  const user = await getCurrentUser(req);
   if (!user || !user.isActive) {
     return false;
   }
@@ -230,7 +228,7 @@ export async function hasAnyPermission(
 }
 
 /**
- * Enhanced resource-based access control
+ * Resource-based access control
  */
 export async function canAccessResource(
   resourceType: string,
@@ -238,7 +236,7 @@ export async function canAccessResource(
   action: 'read' | 'write' | 'delete',
   req?: NextRequest
 ): Promise<boolean> {
-  const user = await getEnhancedCurrentUser(req);
+  const user = await getCurrentUser(req);
   if (!user || !user.isActive) {
     return false;
   }
@@ -249,7 +247,7 @@ export async function canAccessResource(
   }
 
   // Check permission for resource type and action
-  const permission = `${resourceType}:${action}` as EnhancedPermission;
+  const permission = `${resourceType}:${action}` as Permission;
   if (!user.permissions.includes(permission)) {
     return false;
   }
@@ -266,7 +264,7 @@ export async function canAccessResource(
  * Check if user owns or has access to a resource
  */
 async function isResourceOwner(
-  user: EnhancedUser,
+  user: AuthenticatedUser,
   resourceType: string,
   resourceId: string
 ): Promise<boolean> {
@@ -345,7 +343,7 @@ export async function auditAccess(context: AccessContext, granted: boolean): Pro
 /**
  * Data visibility filters based on user role and permissions
  */
-export function getDataVisibilityFilter(user: EnhancedUser) {
+export function getDataVisibilityFilter(user: AuthenticatedUser) {
   // Admin sees everything
   if (user.role === 'ADMIN') {
     return {};
@@ -371,7 +369,7 @@ export function getDataVisibilityFilter(user: EnhancedUser) {
 /**
  * Permission validation decorator/middleware
  */
-export function requirePermissions(permissions: EnhancedPermission[]) {
+export function requirePermissions(permissions: Permission[]) {
   return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
 
@@ -391,8 +389,8 @@ export function requirePermissions(permissions: EnhancedPermission[]) {
 /**
  * Role validation
  */
-export async function requireRole(requiredRole: EnhancedRole, req?: NextRequest): Promise<boolean> {
-  const user = await getEnhancedCurrentUser(req);
+export async function requireRole(requiredRole: Role, req?: NextRequest): Promise<boolean> {
+  const user = await getCurrentUser(req);
   if (!user || !user.isActive) {
     return false;
   }
@@ -419,7 +417,7 @@ export async function requireRole(requiredRole: EnhancedRole, req?: NextRequest)
  * Create access context for auditing
  */
 export function createAccessContext(
-  user: EnhancedUser,
+  user: AuthenticatedUser,
   action: string,
   req: NextRequest,
   resource?: { type: string; id: string; ownership?: ResourceOwnership }
@@ -439,7 +437,7 @@ export function createAccessContext(
 /**
  * Rate limiting per user role
  */
-export function getRoleLimits(role: EnhancedRole): {
+export function getRoleLimits(role: Role): {
   requestsPerMinute: number;
   requestsPerHour: number;
   maxRequestSize: number;
@@ -475,7 +473,7 @@ export function getRoleLimits(role: EnhancedRole): {
  */
 export async function validateSensitiveOperation(
   operation: string,
-  user: EnhancedUser,
+  user: AuthenticatedUser,
   req: NextRequest
 ): Promise<{ allowed: boolean; reason?: string }> {
   // Check if user has required permissions for sensitive operations
@@ -490,7 +488,7 @@ export async function validateSensitiveOperation(
   const requiredPerms = sensitiveOperations[operation as keyof typeof sensitiveOperations];
   if (requiredPerms) {
     const hasPermission = requiredPerms.every((perm) =>
-      user.permissions.includes(perm as EnhancedPermission)
+      user.permissions.includes(perm as Permission)
     );
 
     if (!hasPermission) {

@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { openAIService } from '@/lib/openai';
-import { optimizedOpenAIService } from '@/lib/optimized-openai-service';
+import { aiService } from '@/lib/ai-service';
 
 const prisma = new PrismaClient();
 
@@ -250,7 +250,7 @@ export class AIConfigLoader {
         enabled: config.enabled,
       });
 
-      optimizedOpenAIService.configure({
+      aiService.configure({
         apiKey: config.apiKey,
         model: config.model,
         maxTokens: config.maxTokens,

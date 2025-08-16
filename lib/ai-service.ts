@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
 
-// Optimized configuration interface
-export interface OptimizedAIConfig {
+// AI configuration interface
+export interface AIServiceConfig {
   apiKey: string;
   model?: string;
   maxTokens?: number;
@@ -27,7 +27,7 @@ export interface AIUsageMetrics {
 }
 
 // Compressed prompt templates for 40% token reduction
-const OPTIMIZED_PROMPTS = {
+const AI_PROMPTS = {
   issueSummary: {
     template: `Analyze A&E issue: "{description}"
 Context: {industry}, {size} staff, Dept: {department}
@@ -61,7 +61,7 @@ const MODEL_COSTS = {
 };
 
 // In-memory cache for immediate performance gains
-class SimpleCache {
+class ResponseCache {
   private cache = new Map<
     string,
     {
@@ -185,7 +185,7 @@ class UsageTracker {
 }
 
 // Quality validator for response validation
-class QualityValidator {
+class ResponseValidator {
   validateJSONResponse(
     response: string,
     expectedFields: string[]
@@ -221,13 +221,13 @@ class QualityValidator {
   }
 }
 
-// Main optimized OpenAI service
-export class OptimizedOpenAIService {
+// Main AI service
+export class AIService {
   private client: OpenAI | null = null;
-  private config: OptimizedAIConfig | null = null;
-  private cache: SimpleCache;
+  private config: AIServiceConfig | null = null;
+  private cache: ResponseCache;
   private usageTracker: UsageTracker;
-  private qualityValidator: QualityValidator;
+  private responseValidator: ResponseValidator;
   private metrics = {
     totalOperations: 0,
     totalTokens: 0,
@@ -235,9 +235,9 @@ export class OptimizedOpenAIService {
   };
 
   constructor() {
-    this.cache = new SimpleCache();
+    this.cache = new ResponseCache();
     this.usageTracker = new UsageTracker();
-    this.qualityValidator = new QualityValidator();
+    this.responseValidator = new ResponseValidator();
     this.initializeFromEnv();
   }
 
@@ -290,8 +290,8 @@ export class OptimizedOpenAIService {
     return (inputTokens * costs.inputCost + outputTokens * costs.outputCost) / 1000;
   }
 
-  // Core optimized generation method
-  private async generateOptimized<T>(
+  // Core AI generation method
+  private async generateResponse<T>(
     prompt: string,
     options: {
       operation: string;
@@ -347,7 +347,7 @@ export class OptimizedOpenAIService {
       let parsed = result;
 
       if (options.expectedFields) {
-        const validation = this.qualityValidator.validateJSONResponse(
+        const validation = this.responseValidator.validateJSONResponse(
           result,
           options.expectedFields
         );
@@ -391,7 +391,7 @@ export class OptimizedOpenAIService {
     }
   }
 
-  // Optimized issue summary generation
+  // Issue summary generation
   public async generateIssueSummary(
     description: string,
     department?: string,
@@ -405,14 +405,14 @@ export class OptimizedOpenAIService {
     recommendations: string[];
     confidence: number;
   } | null> {
-    const template = OPTIMIZED_PROMPTS.issueSummary;
+    const template = AI_PROMPTS.issueSummary;
     const prompt = template.template
       .replace('{description}', description.substring(0, 500)) // Limit input size
       .replace('{industry}', businessContext?.industry || 'A&E')
       .replace('{size}', businessContext?.size?.toString() || 'unknown')
       .replace('{department}', department || 'Unknown');
 
-    const result = await this.generateOptimized(prompt, {
+    const result = await this.generateResponse(prompt, {
       operation: 'issue_summary',
       userId,
       expectedFields: ['summary', 'rootCauses', 'impact', 'recommendations', 'confidence'],
@@ -435,7 +435,7 @@ export class OptimizedOpenAIService {
     return null;
   }
 
-  // Optimized cluster summary generation
+  // Cluster summary generation
   public async generateClusterSummary(
     clusterName: string,
     clusterDescription: string,
@@ -455,7 +455,7 @@ export class OptimizedOpenAIService {
     initiativeRecommendations: string[];
     confidence: number;
   } | null> {
-    const template = OPTIMIZED_PROMPTS.clusterAnalysis;
+    const template = AI_PROMPTS.clusterAnalysis;
     const issuesList = issues
       .slice(0, 5) // Limit for efficiency
       .map((i) => `${i.description.substring(0, 100)}...(${i.heatmapScore})`)
@@ -467,7 +467,7 @@ export class OptimizedOpenAIService {
       .replace('{count}', issues.length.toString())
       .replace('{issueList}', issuesList);
 
-    const result = await this.generateOptimized(prompt, {
+    const result = await this.generateResponse(prompt, {
       operation: 'cluster_summary',
       userId,
       expectedFields: [
@@ -497,7 +497,7 @@ export class OptimizedOpenAIService {
     return null;
   }
 
-  // Optimized requirements generation
+  // Requirements generation
   public async generateRequirementsFromSummary(
     summary: string,
     initiativeTitle: string,
@@ -514,14 +514,14 @@ export class OptimizedOpenAIService {
     }>;
     confidence: number;
   } | null> {
-    const template = OPTIMIZED_PROMPTS.requirementGeneration;
+    const template = AI_PROMPTS.requirementGeneration;
     const prompt = template.template
       .replace('{title}', initiativeTitle.substring(0, 100))
       .replace('{goal}', initiativeGoal.substring(0, 200))
       .replace('{summary}', summary.substring(0, 300))
       .replace('{industry}', businessContext?.industry || 'A&E');
 
-    const result = await this.generateOptimized(prompt, {
+    const result = await this.generateResponse(prompt, {
       operation: 'requirements_generation',
       userId,
       expectedFields: ['cards', 'confidence'],
@@ -616,7 +616,7 @@ export class OptimizedOpenAIService {
     // Simple implementation for backwards compatibility
     const prompt = `For initiative "${title}" addressing "${problem.substring(0, 200)}", provide implementation recommendations in 200 words or less.`;
 
-    const result = await this.generateOptimized(prompt, {
+    const result = await this.generateResponse(prompt, {
       operation: 'initiative_recommendations',
       userId: 'system',
     });
@@ -628,7 +628,7 @@ export class OptimizedOpenAIService {
     // Simple implementation for backwards compatibility
     const prompt = `Convert this description into structured requirements: "${description.substring(0, 300)}"`;
 
-    return this.generateOptimized(prompt, {
+    return this.generateResponse(prompt, {
       operation: 'requirements_from_description',
       userId: 'system',
     });
@@ -646,12 +646,12 @@ export class OptimizedOpenAIService {
   }
 
   // Configuration methods
-  public configure(config: OptimizedAIConfig): void {
+  public configure(config: AIServiceConfig): void {
     this.config = config;
     this.client = new OpenAI({ apiKey: config.apiKey });
   }
 
-  public getConfig(): OptimizedAIConfig | null {
+  public getConfig(): AIServiceConfig | null {
     return this.config;
   }
 
@@ -679,7 +679,7 @@ export class OptimizedOpenAIService {
     }
   }
 
-  // Generate structured JSON responses for categorization with optimization
+  // Generate structured JSON responses for categorization
   public async generateStructuredResponse(prompt: string): Promise<string | null> {
     if (!this.isConfigured() || !this.config?.enabled) {
       return null;
@@ -719,12 +719,12 @@ export class OptimizedOpenAIService {
 
       return result;
     } catch (error) {
-      console.error('Optimized structured response error:', error);
+      console.error('AI structured response error:', error);
       return null;
     }
   }
 }
 
 // Export singleton instance
-export const optimizedOpenAIService = new OptimizedOpenAIService();
-export default optimizedOpenAIService;
+export const aiService = new AIService();
+export default aiService;
