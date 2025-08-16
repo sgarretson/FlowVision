@@ -3,8 +3,8 @@
 import React from 'react';
 import {
   ChartBarIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   MinusIcon,
   InformationCircleIcon,
 } from '@heroicons/react/24/outline';
@@ -47,9 +47,9 @@ export default function StrategicHealthCard({ metrics, loading }: StrategicHealt
   const getTrendIcon = () => {
     switch (metrics.trends.direction) {
       case 'up':
-        return <TrendingUpIcon className="w-5 h-5 text-green-600" />;
+        return <ArrowTrendingUpIcon className="w-5 h-5 text-green-600" />;
       case 'down':
-        return <TrendingDownIcon className="w-5 h-5 text-red-600" />;
+        return <ArrowTrendingDownIcon className="w-5 h-5 text-red-600" />;
       default:
         return <MinusIcon className="w-5 h-5 text-gray-600" />;
     }
