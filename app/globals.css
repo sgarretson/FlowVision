@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 /* FlowVision Design System */
+@import './design-tokens.css';
+
+/* FlowVision Design System */
 
 /* Typography Scale */
 @layer utilities {

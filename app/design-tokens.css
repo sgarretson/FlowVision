@@ -1,0 +1,469 @@
+/* FlowVision Design System - Standardized Design Tokens */
+
+/* =================================== */
+/*            ICON SIZING              */
+/* =================================== */
+
+/* Standard icon sizes following 4px grid system */
+.icon-xs {
+  @apply w-3 h-3; /* 12px - Extra small icons */
+}
+
+.icon-sm {
+  @apply w-4 h-4; /* 16px - Small icons */
+}
+
+.icon-md {
+  @apply w-5 h-5; /* 20px - Default icons */
+}
+
+.icon-lg {
+  @apply w-6 h-6; /* 24px - Large icons */
+}
+
+.icon-xl {
+  @apply w-8 h-8; /* 32px - Hero icons */
+}
+
+.icon-2xl {
+  @apply w-10 h-10; /* 40px - Feature icons */
+}
+
+/* Icon color standards */
+.icon-primary {
+  @apply text-blue-600;
+}
+
+.icon-secondary {
+  @apply text-gray-600;
+}
+
+.icon-success {
+  @apply text-green-600;
+}
+
+.icon-warning {
+  @apply text-orange-600;
+}
+
+.icon-danger {
+  @apply text-red-600;
+}
+
+.icon-muted {
+  @apply text-gray-400;
+}
+
+/* =================================== */
+/*         ANIMATION TIMING            */
+/* =================================== */
+
+/* Standardized transition durations */
+.transition-instant {
+  transition-duration: 0ms;
+}
+
+.transition-fast {
+  transition-duration: 150ms;
+}
+
+.transition-normal {
+  transition-duration: 200ms;
+}
+
+.transition-slow {
+  transition-duration: 300ms;
+}
+
+.transition-slower {
+  transition-duration: 500ms;
+}
+
+/* Standardized easing functions */
+.transition-ease {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); /* Tailwind default */
+}
+
+.transition-ease-in {
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
+.transition-ease-out {
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+
+.transition-ease-in-out {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-bounce {
+  transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Combined transition classes for common patterns */
+.transition-standard {
+  @apply transition-normal transition-ease;
+}
+
+.transition-button {
+  @apply transition-fast transition-ease;
+  transition-property: background-color, border-color, color, box-shadow, transform;
+}
+
+.transition-modal {
+  @apply transition-slow transition-ease-in-out;
+  transition-property: opacity, transform;
+}
+
+.transition-slide {
+  @apply transition-normal transition-ease;
+  transition-property: transform, opacity;
+}
+
+/* =================================== */
+/*          LOADING STATES             */
+/* =================================== */
+
+/* Standardized loading animations */
+.loading-pulse {
+  @apply animate-pulse bg-gray-200;
+}
+
+.loading-spin {
+  @apply animate-spin;
+}
+
+.loading-bounce {
+  @apply animate-bounce;
+}
+
+.loading-ping {
+  @apply animate-ping;
+}
+
+/* Loading skeleton patterns */
+.skeleton-text {
+  @apply loading-pulse rounded h-4 w-full;
+}
+
+.skeleton-text-sm {
+  @apply loading-pulse rounded h-3 w-3/4;
+}
+
+.skeleton-text-lg {
+  @apply loading-pulse rounded h-6 w-full;
+}
+
+.skeleton-avatar {
+  @apply loading-pulse rounded-full w-10 h-10;
+}
+
+.skeleton-card {
+  @apply loading-pulse rounded-lg h-32 w-full;
+}
+
+.skeleton-button {
+  @apply loading-pulse rounded h-10 w-24;
+}
+
+/* =================================== */
+/*           ERROR STATES              */
+/* =================================== */
+
+/* Enhanced error state components */
+.error-message {
+  @apply text-red-700 text-sm font-medium bg-red-50 border border-red-200 rounded-lg p-3;
+}
+
+.error-message-inline {
+  @apply text-red-600 text-sm mt-1;
+}
+
+.error-icon {
+  @apply text-red-500 w-5 h-5 flex-shrink-0;
+}
+
+.error-input {
+  @apply border-red-300 focus:border-red-500 focus:ring-red-500;
+}
+
+.error-state-container {
+  @apply flex flex-col items-center justify-center p-8 text-center;
+}
+
+.error-state-icon {
+  @apply w-12 h-12 text-red-500 mb-4;
+}
+
+.error-state-title {
+  @apply text-lg font-semibold text-gray-900 mb-2;
+}
+
+.error-state-description {
+  @apply text-gray-600 mb-4 max-w-md;
+}
+
+.error-retry-button {
+  @apply px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-button;
+}
+
+/* =================================== */
+/*          SUCCESS STATES             */
+/* =================================== */
+
+.success-message {
+  @apply text-green-700 text-sm font-medium bg-green-50 border border-green-200 rounded-lg p-3;
+}
+
+.success-message-inline {
+  @apply text-green-600 text-sm mt-1;
+}
+
+.success-icon {
+  @apply text-green-500 w-5 h-5 flex-shrink-0;
+}
+
+.success-input {
+  @apply border-green-300 focus:border-green-500 focus:ring-green-500;
+}
+
+/* =================================== */
+/*          WARNING STATES             */
+/* =================================== */
+
+.warning-message {
+  @apply text-orange-700 text-sm font-medium bg-orange-50 border border-orange-200 rounded-lg p-3;
+}
+
+.warning-message-inline {
+  @apply text-orange-600 text-sm mt-1;
+}
+
+.warning-icon {
+  @apply text-orange-500 w-5 h-5 flex-shrink-0;
+}
+
+/* =================================== */
+/*            INFO STATES              */
+/* =================================== */
+
+.info-message {
+  @apply text-blue-700 text-sm font-medium bg-blue-50 border border-blue-200 rounded-lg p-3;
+}
+
+.info-message-inline {
+  @apply text-blue-600 text-sm mt-1;
+}
+
+.info-icon {
+  @apply text-blue-500 w-5 h-5 flex-shrink-0;
+}
+
+/* =================================== */
+/*         INTERACTION STATES          */
+/* =================================== */
+
+/* Enhanced focus states */
+.focus-standard {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+.focus-error {
+  @apply focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+}
+
+.focus-success {
+  @apply focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2;
+}
+
+/* Enhanced hover states */
+.hover-lift {
+  @apply hover:transform hover:scale-105 transition-button;
+}
+
+.hover-shadow {
+  @apply hover:shadow-lg transition-button;
+}
+
+.hover-glow {
+  @apply hover:shadow-lg hover:shadow-blue-500/25 transition-button;
+}
+
+/* Active states */
+.active-press {
+  @apply active:transform active:scale-95 transition-fast;
+}
+
+.active-glow {
+  @apply active:shadow-inner transition-fast;
+}
+
+/* =================================== */
+/*           CARD COMPONENTS           */
+/* =================================== */
+
+.card-base {
+  @apply bg-white rounded-lg border border-gray-200 shadow-sm;
+}
+
+.card-elevated {
+  @apply bg-white rounded-lg border border-gray-200 shadow-md;
+}
+
+.card-floating {
+  @apply bg-white rounded-lg border border-gray-200 shadow-lg;
+}
+
+.card-interactive {
+  @apply card-base hover:shadow-md hover:border-gray-300 transition-standard cursor-pointer;
+}
+
+.card-header {
+  @apply px-6 py-4 border-b border-gray-200;
+}
+
+.card-body {
+  @apply px-6 py-4;
+}
+
+.card-footer {
+  @apply px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg;
+}
+
+/* =================================== */
+/*          BUTTON VARIANTS            */
+/* =================================== */
+
+.button-base {
+  @apply font-medium rounded-lg transition-button focus-standard active-press;
+}
+
+.button-primary {
+  @apply button-base bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800;
+}
+
+.button-secondary {
+  @apply button-base bg-gray-600 text-white hover:bg-gray-700 active:bg-gray-800;
+}
+
+.button-success {
+  @apply button-base bg-green-600 text-white hover:bg-green-700 active:bg-green-800;
+}
+
+.button-danger {
+  @apply button-base bg-red-600 text-white hover:bg-red-700 active:bg-red-800;
+}
+
+.button-outline {
+  @apply button-base border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50;
+}
+
+.button-ghost {
+  @apply button-base text-gray-700 hover:bg-gray-100 active:bg-gray-200;
+}
+
+/* Button sizes */
+.button-xs {
+  @apply px-2 py-1 text-xs;
+}
+
+.button-sm {
+  @apply px-3 py-2 text-sm;
+}
+
+.button-md {
+  @apply px-4 py-2 text-base;
+}
+
+.button-lg {
+  @apply px-6 py-3 text-lg;
+}
+
+.button-xl {
+  @apply px-8 py-4 text-xl;
+}
+
+/* =================================== */
+/*         FORM COMPONENTS             */
+/* =================================== */
+
+.form-input {
+  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-standard;
+}
+
+.form-select {
+  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-standard;
+}
+
+.form-textarea {
+  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-standard;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.form-help {
+  @apply text-sm text-gray-500 mt-1;
+}
+
+.form-group {
+  @apply mb-4;
+}
+
+/* =================================== */
+/*        SPACING UTILITIES            */
+/* =================================== */
+
+/* Consistent component spacing */
+.spacing-component {
+  @apply mb-6;
+}
+
+.spacing-section {
+  @apply mb-8;
+}
+
+.spacing-page {
+  @apply mb-12;
+}
+
+/* =================================== */
+/*      ACCESSIBILITY HELPERS          */
+/* =================================== */
+
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+}
+
+.skip-link {
+  @apply sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-blue-600 text-white p-2 z-50;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .icon-primary {
+    @apply text-blue-800;
+  }
+
+  .button-primary {
+    @apply border-2 border-blue-800;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .transition-standard,
+  .transition-button,
+  .transition-modal,
+  .transition-slide {
+    transition-duration: 0.01ms !important;
+  }
+
+  .loading-pulse,
+  .loading-spin,
+  .loading-bounce,
+  .loading-ping {
+    animation: none !important;
+  }
+}
