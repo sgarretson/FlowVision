@@ -99,6 +99,15 @@ If you encounter:
 - **ALWAYS update CHANGELOG.md** for releases
 - **ALWAYS place documents** in correct category: architecture, development, security, project-management, design, quality-assurance, production, analysis-reports, user-guides, templates
 
+### Naming Convention Standards
+- **NEVER use subjective qualifiers**: enhanced, optimized, improved, advanced, better, new, custom, special
+- **ALWAYS use functional descriptors**: service, manager, handler, engine, processor, validator, factory
+- **ALWAYS use domain-driven naming**: `{domain}-{function}.ts` (e.g., `ai-service.ts`, `user-authentication.ts`)
+- **ALWAYS name for what code does**, not how well it does it
+- **ALWAYS use clear, descriptive names** that remain relevant as system evolves
+- **ALWAYS follow patterns**: Class names should be `NounFunction` (e.g., `UserService`, `DataValidator`)
+- **ALWAYS use consistent casing**: kebab-case for files, PascalCase for types/classes, camelCase for variables/functions
+
 ## Error Prevention Rules
 
 ### React/Next.js Specific
